@@ -1,0 +1,9 @@
+{
+  "name": "projectcalc",
+  "private": true,
+  "description": "Static DIY calculator site",
+  "scripts": {
+    "build": "python scripts/build_pages.py",
+    "test": "node --test tests/engine.test.js && python -m unittest tests.test_site"
+  }
+}
