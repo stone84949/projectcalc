@@ -222,8 +222,8 @@ class SiteContract(unittest.TestCase):
 
     def test_404_uses_absolute_urls(self) -> None:
         html = (ROOT / "404.html").read_text(encoding="utf-8")
-        self.assertIn("https://stone84949.github.io/projectcalc/assets/site.css", html)
-        self.assertIn("https://stone84949.github.io/projectcalc/", html)
+        self.assertIn("https://projectcalc-tools.pages.dev/assets/site.css", html)
+        self.assertIn("https://projectcalc-tools.pages.dev/", html)
         self.assertNotIn('href="index.html"', html)
 
     def test_paypal_markup_starts_hidden(self) -> None:

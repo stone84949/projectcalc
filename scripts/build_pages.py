@@ -7,7 +7,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SITE_NAME = "ProjectCalc"
-BASE = "https://stone84949.github.io/projectcalc"
+BASE = "https://projectcalc-tools.pages.dev"
 
 TOOLS = [
     ("paint", "Paint calculator", "How much paint for a room — gallons, coats, and a shopping number."),

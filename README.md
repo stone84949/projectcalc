@@ -2,7 +2,7 @@
 
 Free DIY material calculators. First site on the shared static engine (PetCalc and SourDough Math next).
 
-Live (after Pages is on): https://stone84949.github.io/projectcalc/
+Live (after Pages is on): https://projectcalc-tools.pages.dev/
 
 ## Local
 
