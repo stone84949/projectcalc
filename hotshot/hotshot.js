@@ -2,28 +2,72 @@
 
 (function () {
   var form = document.getElementById('load-form');
-  var verdict = document.getElementById('verdict');
-  var lines = document.getElementById('printed-lines');
-  var stamp = document.getElementById('stamp');
-  var stampWord = document.getElementById('stamp-word');
-  var stampSub = document.getElementById('stamp-sub');
+  var flag = document.getElementById('flag');
+  var flagWord = document.getElementById('flag-word');
+  var flagSub = document.getElementById('flag-sub');
   var verdictNote = document.getElementById('verdict-note');
+  var netNeedle = document.getElementById('net-needle');
+  var netReadout = document.getElementById('net-readout');
+  var netState = document.getElementById('net-state');
 
-  function money(n) {
-    return '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  // Dial geometry: -90deg (empty) to +90deg (full sweep), 180deg total.
+  function needleRotation(fraction) {
+    var f = Math.max(0, Math.min(1, fraction));
+    return -90 + f * 180;
   }
 
-  function row(label, value, cls) {
-    var p = document.createElement('p');
-    if (cls) p.className = cls;
-    var l = document.createElement('span');
-    l.textContent = label;
-    var v = document.createElement('span');
-    v.textContent = value;
-    p.appendChild(l);
-    p.appendChild(v);
-    return p;
+  function setNeedle(line, fraction) {
+    line.style.transform = 'rotate(' + needleRotation(fraction) + 'deg)';
   }
+
+  function setGaugeReadout(line, value) {
+    var svg = line.parentNode;
+    var readout = svg.querySelector('.readout');
+    if (readout) readout.textContent = value;
+  }
+
+  function setGauge(name, fraction, value) {
+    var line = form.querySelector('[data-gauge="' + name + '"]');
+    if (!line) return;
+    setNeedle(line, fraction);
+    setGaugeReadout(line, value);
+  }
+
+  // NET bands share the needle pivot (100,105) at radius 85.
+  // The amber/green junction sits at the operator's minimum.
+  function bandPoint(fraction) {
+    var f = Math.max(0.02, Math.min(0.98, fraction));
+    var a = (-90 + f * 180) * Math.PI / 180;
+    return (100 + 85 * Math.sin(a)).toFixed(1) + ' ' + (105 - 85 * Math.cos(a)).toFixed(1);
+  }
+
+  function setBands(minFraction) {
+    var amber = document.getElementById('amber-band');
+    var green = document.getElementById('green-band');
+    if (!amber || !green) return;
+    var p = bandPoint(minFraction);
+    amber.setAttribute('d', 'M 15 105 A 85 85 0 0 1 ' + p);
+    green.setAttribute('d', 'M ' + p + ' A 85 85 0 0 1 185 105');
+  }
+
+  var TICKS = 7; // across the sweep
+
+  function drawTicks(group, sweepOnly) {
+    if (!group) return;
+    var html = '';
+    for (var i = 0; i < TICKS; i++) {
+      var angle = (-90 + (i / (TICKS - 1)) * 180) * Math.PI / 180;
+      var cx = 100, cy = 105, r1 = 71, r2 = 80;
+      if (sweepOnly && i === 0) continue; // peg start tick shared with rim
+      var x1 = cx + r1 * Math.sin(angle), y1 = cy - r1 * Math.cos(angle);
+      var x2 = cx + r2 * Math.sin(angle), y2 = cy - r2 * Math.cos(angle);
+      html += '<line x1="' + x1.toFixed(1) + '" y1="' + y1.toFixed(1) + '" x2="' + x2.toFixed(1) + '" y2="' + y2.toFixed(1) + '"></line>';
+    }
+    group.innerHTML = html;
+  }
+
+  var groups = form.querySelectorAll('.ticks');
+  Array.prototype.forEach.call(groups, function (g) { drawTicks(g, false); });
 
   form.addEventListener('submit', function (event) {
     event.preventDefault();
@@ -39,45 +83,39 @@
       minNetPerMile: form.minNetPerMile.value,
     });
 
-    lines.innerHTML = '';
-    stamp.hidden = true;
-
     if (!result.ok) {
-      verdict.hidden = false;
       verdictNote.textContent = result.error;
       return;
     }
 
     var v = result.values;
-    lines.appendChild(row('Gross linehaul', money(v.grossPay)));
-    lines.appendChild(row('Total miles - ' + v.loadedMiles + ' loaded + ' + v.deadheadMiles + ' deadhead', v.totalMiles + ' mi'));
-    lines.appendChild(row('Fuel - ' + v.fuelGallons + ' gal', '-' + money(v.fuelCost), 'neg'));
-    if (v.tolls > 0) lines.appendChild(row('Tolls', '-' + money(v.tolls), 'neg'));
-    if (v.factoringFee > 0) lines.appendChild(row('Factoring', '-' + money(v.factoringFee), 'neg'));
-    lines.appendChild(row('Net to truck', money(v.netToTruck), 'net'));
-    lines.appendChild(row('Net per total mile', '$' + v.netPerTotalMile.toFixed(2) + '/mi', 'net'));
+    setGauge('rate', v.effectiveRatePerMile / 5, v.effectiveRatePerMile.toFixed(2));
+    setGauge('fuel', v.fuelCost / 500, '$' + Math.round(v.fuelCost));
+    setGauge('deadhead', v.deadheadMiles / 500, String(v.deadheadMiles));
+    setGauge('tolls', v.tolls / 500, '$' + Math.round(v.tolls));
+    setGauge('factoring', v.factoringPct / 15, v.factoringPct.toFixed(1) + '%');
+    setGauge('miles', v.loadedMiles / 5000, String(v.loadedMiles));
+
+    var min = v.minNetPerMile || 0;
+    var netFraction = Math.max(0, Math.min(1, v.netPerTotalMile / 4));
+    if (min > 0) setBands(min / 4);
+    setNeedle(netNeedle, netFraction);
+    netReadout.textContent = '$' + v.netPerTotalMile.toFixed(2);
 
     if (v.verdict) {
-      stamp.hidden = false;
-      stamp.classList.toggle('pass', v.verdict === 'pass');
-      stampWord.textContent = v.verdict === 'take' ? 'TAKE IT' : 'PASS';
-      stampSub.textContent = '$' + v.netPerTotalMile.toFixed(2) + '/MI NET';
+      flag.hidden = false;
+      flag.classList.toggle('pass', v.verdict === 'pass');
+      flagWord.textContent = v.verdict === 'take' ? 'TAKE IT' : 'PASS';
+      flagSub.textContent = '$' + v.netPerTotalMile.toFixed(2) + '/MI NET';
+      netState.textContent = v.verdict === 'take' ? 'IN THE GREEN' : 'IN THE AMBER';
       verdictNote.textContent = v.verdict === 'take'
-        ? 'Clears your $' + v.minNetPerMile.toFixed(2) + '/mi minimum by $' + (v.netPerTotalMile - v.minNetPerMile).toFixed(2) + '.'
-        : 'Under your $' + v.minNetPerMile.toFixed(2) + '/mi minimum by $' + (v.minNetPerMile - v.netPerTotalMile).toFixed(2) + '. Counter or pass.';
+        ? 'Clears your $' + min.toFixed(2) + '/mi minimum by $' + (v.netPerTotalMile - min).toFixed(2) + '.'
+        : 'Under your $' + min.toFixed(2) + '/mi minimum by $' + (min - v.netPerTotalMile).toFixed(2) + '. Counter or pass.';
     } else {
-      verdictNote.textContent = 'Set your minimum $/mi to get a take-it-or-pass stamp.';
+      flag.hidden = true;
+      netState.textContent = 'NO MIN SET';
+      verdictNote.textContent = 'Set MIN $/MI NET to get a take-it-or-pass flag.';
     }
-
-    verdict.hidden = false;
-    var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    verdict.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'nearest' });
-
-    // reprint animation: lines appear in order
-    var rows = lines.querySelectorAll('p');
-    Array.prototype.forEach.call(rows, function (p, i) {
-      p.style.animationDelay = i * 0.12 + 's';
-    });
   });
 
   // activate the kit capture only when a real endpoint exists

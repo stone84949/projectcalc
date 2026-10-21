@@ -618,6 +618,7 @@
         fuelGallons: round(gallonsExact, 1),
         fuelCost: money(fuelCost),
         tolls: money(tolls),
+        factoringPct: round(factoringPct, 2),
         factoringFee: money(factoringFee),
         totalDeductions: money(deductions),
         netToTruck: money(net),

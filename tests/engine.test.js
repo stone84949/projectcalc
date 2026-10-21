@@ -280,6 +280,7 @@ test('hotshot-load: strong load clears the operator minimum', () => {
   assert.equal(result.values.fuelGallons, 73.8);
   assert.equal(result.values.fuelCost, 269.4);
   assert.equal(result.values.factoringFee, 46.17);
+  assert.equal(result.values.factoringPct, 3);
   assert.equal(result.values.totalDeductions, 360.57);
   assert.equal(result.values.netToTruck, 1178.43);
   assert.equal(result.values.netPerLoadedMile, 2.18);
@@ -319,6 +320,7 @@ test('hotshot-load: flat rate converts to an effective per-mile rate', () => {
   assert.equal(result.ok, true);
   assert.equal(result.values.effectiveRatePerMile, 2.85);
   assert.equal(result.values.grossPay, 1539);
+  assert.equal(result.values.factoringPct, 0);
   assert.equal(result.values.netToTruck, 1304.36);
   assert.equal(result.values.verdict, '');
 });

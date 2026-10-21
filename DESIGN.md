@@ -1,147 +1,171 @@
 ---
 name: Hotshot Math
-description: The load decision printed on a canary scale-house weigh ticket - dot-matrix math, rubber-stamp verdict.
+description: The load decision as a night instrument panel - six cost gauges, luminous needles, one verdict flag.
 colors:
-  primary: "#ab2b16"
-  canary: "#ebcb44"
-  canary-deep: "#cea736"
-  ink: "#1f1e10"
-  ink-soft: "#5f571d"
-  stamp-red-deep: "#8a1f12"
-  legal-green: "#2e6b3a"
-  paper-edge: "#d9b52c"
-  desk: "#1c1a12"
-  paper-field: "#fdf9e8"
-  band-text: "#f2f6ee"
-  band-note: "#dbe8d4"
+  primary: "#e0a52e"
+  panel: "#0c0f12"
+  face: "#11151a"
+  face-field: "#151a20"
+  face-edge: "#2a323c"
+  rule-dotted: "#3a434e"
+  kit-strip: "#101418"
+  white: "#e8ecef"
+  dim: "#aab6bf"
+  placeholder: "#8a98a3"
+  needle: "#57d98a"
+  green: "#2f9e5c"
+  amber-deep: "#b97f14"
 typography:
   display:
     fontFamily: "Courier New, ui-monospace, SFMono-Regular, Menlo, monospace"
-    fontSize: "clamp(30px, 9vw, 42px)"
+    fontSize: "clamp(30px, 8.5vw, 42px)"
     fontWeight: 800
     lineHeight: 1.05
     letterSpacing: "0.04em"
+  verdict:
+    fontFamily: "Courier New, ui-monospace, SFMono-Regular, Menlo, monospace"
+    fontSize: "clamp(26px, 7vw, 34px)"
+    fontWeight: 800
+    lineHeight: 1.1
+    letterSpacing: "0.14em"
+  readout:
+    fontFamily: "Courier New, ui-monospace, SFMono-Regular, Menlo, monospace"
+    fontSize: "20px"
+    fontWeight: 700
+  readout-lg:
+    fontFamily: "Courier New, ui-monospace, SFMono-Regular, Menlo, monospace"
+    fontSize: "26px"
+    fontWeight: 700
   body:
     fontFamily: "Courier New, ui-monospace, SFMono-Regular, Menlo, monospace"
     fontSize: "14px"
     fontWeight: 400
     lineHeight: 1.5
+  body-lg:
+    fontFamily: "Courier New, ui-monospace, SFMono-Regular, Menlo, monospace"
+    fontSize: "16px"
+    fontWeight: 400
   label:
     fontFamily: "Courier New, ui-monospace, SFMono-Regular, Menlo, monospace"
     fontSize: "13px"
-    fontWeight: 400
-    letterSpacing: "0.06em"
+    fontWeight: 800
+    letterSpacing: "0.16em"
+  label-sm:
+    fontFamily: "Courier New, ui-monospace, SFMono-Regular, Menlo, monospace"
+    fontSize: "12px"
+    fontWeight: 800
+    letterSpacing: "0.12em"
 components:
   button-primary:
-    backgroundColor: "{colors.ink}"
-    textColor: "{colors.canary}"
+    backgroundColor: "{colors.primary}"
+    textColor: "{colors.panel}"
     padding: "16px"
   button-primary-hover:
-    backgroundColor: "{colors.primary}"
-    textColor: "{colors.canary}"
-  stamp:
-    textColor: "{colors.primary}"
-  verdict-pass:
-    textColor: "{colors.ink}"
-  kit-input:
-    backgroundColor: "{colors.paper-field}"
-    textColor: "{colors.ink}"
+    backgroundColor: "{colors.needle}"
+    textColor: "{colors.panel}"
+  gauge-card:
+    backgroundColor: "{colors.face}"
+    textColor: "{colors.white}"
+  input:
+    backgroundColor: "{colors.face-field}"
+    textColor: "{colors.white}"
+  flag:
+    textColor: "{colors.needle}"
+  flag-pass:
+    textColor: "{colors.white}"
 ---
 
 # Design System: Hotshot Math
 
 ## Overview
 
-**Creative North Star: "The Scale House Verdict"**
+**Creative North Star: "The Night Six-Pack"**
 
-Hotshot Math is one tall canary weigh ticket lying on a dark desk. Everything on the page is printed matter: dot-matrix numerals (Courier New committed knowingly - closest installed dot-matrix-adjacent mono while the repo ships no webfonts), perforated tear edges top and bottom, faint red form numbering down the left margin, and one red rubber stamp that carries the verdict. The visitor recognizes the artifact before the brand. Nothing is glass, nothing glows, nothing gradients - ink and paper only.
-
-The page's single authored moment is the stamp slam: results print line by line, then TAKE IT or PASS lands at -7 degrees in multiply-blended red. Every other element holds still.
+Hotshot Math is a night instrument panel: matte black ground, six round gauge faces with white tick scales, luminous green needles, and white placard caps in trucking terms. The operator reads a cockpit, not a form. Each gauge placard carries its own input - the panel IS the form, edited in place. One authored moment: RUN THE NUMBERS settles every needle with a damped sweep and lights the verdict flag on the NET gauge. Instrument luminance lives in the needle and its soft drop-shadow only; the rest of the panel is matte.
 
 **Key Characteristics:**
-- One ticket, full-bleed on mobile (max 480px, centered on a dark desk at >=700px)
-- All numerals mono, tabular; stamps in 800-weight tracked caps
-- Ink-on-paper palette; red is the verdict color and spends itself on the stamp
-- The green LEGAL band is the only full-bleed color block - the tear-off email stub
+- Mobile: 2-column gauge grid, NET full-width on top; >=700px: 4-column grid, NET centered
+- All numerals mono, tabular (Courier New committed knowingly - instrument readout mono, repo ships no webfonts)
+- Amber is caution (band + CTA + focus rings); green is operating (needle, band, verdict)
+- Sections below the panel are ruled placards on the same matte ground - no cards afloat, no glow
 
 ## Colors
 
-Printed-ticket palette measured from the approved direction comp.
+Cockpit palette: near-blacks for surfaces, luminous hues reserved for instrument meaning.
 
 ### Primary
-- **Verdict Red** (#ab2b16): the stamp word/border and the stamp-head headline. Large text only (>=30px); 4.26:1 on canary passes large-text WCAG.
+- **Panel Amber** (#e0a52e): the run button, caution band, focus rings, section accents. The operator's act color.
 
 ### Secondary
-- **Verdict Red Deep** (#8a1f12): the same red at body sizes - stamp sub-line, negative deduction values, red form numbering, section heading accents. 5.76:1 on canary.
-- **Legal Green** (#2e6b3a): the full-bleed tear-off band at the ticket's end.
+- **Needle Green** (#57d98a): needles, the green operating band, the TAKE IT flag. Meaning: good to go.
+- **Band Green / Amber Deep** (#2f9e5c / #b97f14): the NET gauge's arc bands (green = clears minimum, amber = below).
 
 ### Neutral
-- **Ink** (#1f1e10): body text, rules, primary button.
-- **Ink Soft** (#5f571d): secondary/fine text on canary, solid tone (no opacity dimming).
-- **Canary** (#ebcb44): the ticket stock itself - the page ground.
-- **Canary Deep / Paper Edge** (#cea736 / #d9b52c): perforation dashes and aged-paper edge.
-- **Desk** (#1c1a12): the world behind the ticket at wide viewports.
-- **Paper Field** (#fdf9e8): input surfaces inside the green band.
+- **Panel** (#0c0f12): page ground. **Face** (#11151a): gauge cards. **Face Field** (#151a20): inputs. **Kit Strip** (#101418): the operator-kit band.
+- **Face Edge / Rule Dotted** (#2a323c / #3a434e): hairlines and dotted leader rules.
+- **Instrument White** (#e8ecef): primary text, dial ticks, hub.
+- **Dim** (#aab6bf): secondary text, units, fine print (10:1 on panel - never lower).
+- **Placeholder** (#8a98a3): input hints (4.5:1+ on face field).
 
 ### Named Rules
-**The One Stamp Rule.** Red at full strength appears exactly once per verdict - the stamp. Everything else red is the deep tone. No second flourish competes with it.
+**The One Luminance Rule.** Glow belongs to the needle's drop-shadow alone. Text never glows; surfaces never glow; flags read by color and weight.
 
 ## Typography
 
-**Display / Body / Label Font:** Courier New, ui-monospace, SFMono-Regular, Menlo, monospace (one family; the world's printing device - dot-matrix output is monospace by physics).
+**Display / Body / Label Font:** Courier New, ui-monospace, SFMono-Regular, Menlo, monospace (one family - the instrument readout; dot-matrix/avionics digits are monospace by physics).
 
-**Character:** Machine-printed numerals with stamp-weight caps. The pairing is not a costume: every number on the page is measurement output.
+**Character:** Machine digits under placard caps. Numbers are measurements, not prose.
 
 ### Hierarchy
-- **Display** (800, clamp(30px, 9vw, 42px), 1.05): the stamp-headline question and the stamp word.
-- **Title** (800, 15-17px, tracked 0.12-0.2em caps): section headings, stamp sub-line, LEGAL tag.
-- **Body** (400, 13-16px, 1.5): copy, worked-math lines, form rows.
-- **Label** (400, 13px, 0.06em, uppercase): ticket form-row labels with soft-ink unit hints.
+- **Display** (800, clamp(30px, 8.5vw, 42px), 1.05): the headline question.
+- **Verdict** (800, clamp(26px, 7vw, 34px)): the flag word TAKE IT / PASS.
+- **Title** (800, 13-14px, tracked 0.14-0.24em caps): placard labels (RATE, FUEL, TOLLS, FACTORING, DEADHEAD, NET), section headings, button text.
+- **Body** (400, 13-16px, 1.5): copy, worked math, notes.
+- **Readout** (700, 20px; NET 26px): in-dial digital values, tabular.
 
 ### Named Rules
-**The Printed Line Rule.** Numbers are always mono, tabular (`font-variant-numeric: tabular-nums`), ASCII minus/hyphen - the same glyph everywhere a value prints.
+**The Readout Rule.** Every number is mono, tabular, ASCII-signed, centered in its instrument.
 
 ## Layout
 
-A single ticket column: `max-width: 480px`, `padding: 0 26px`, centered. On mobile it fills the viewport edge to edge; at >=700px it sits on the dark desk with an offset shadow. No grid, no cards - vertical ticket flow: perforation, headline, form rows (label left, dotted rule, input right, inputs shrink to 84px floor then labels wrap), printed verdict lines, the stamp, worked example, promise/instruction section, LEGAL band, footer, perforation. Spacing rhythm: sections separated by 2px solid rules with more space above a heading than below.
+Single panel column, max 760px, centered. Nameplate chrome bar at top (wordmark left, LOAD DECISION PANEL right - chrome, never a kicker above the H1). Then: centered headline + lede, the gauge grid (NET full-width first, then five gauges), the mini-placard row (LOADED MI, TRUCK MPG, FLAT $, MIN $/MI NET - set numbers without dials), full-width RUN THE NUMBERS, verdict note. Below: worked-math placard, operator section, kit strip (full-bleed at the bottom edge), footer. Mobile 2-col; >=700px 4-col gauges + 4-col minis. Spacing: 14px gauge gaps, ruled section tops with more space above headings than below.
 
 ## Elevation & Depth
 
-One shadow only, and it is the world: the ticket lying on the desk (`box-shadow: 10px 24px 60px rgba(0,0,0,0.55)` - offset, soft). No other elevation exists; depth inside the ticket is perforation, rules, and ink weight. Focus states use 3px solid outlines (verdict red on canary surfaces, canary on the green band), never glow.
-
-### Shadow Vocabulary
-- **desk** (`10px 24px 60px rgba(0,0,0,0.55)`): the `.tix` container only.
+No shadows on the panel - depth is face-vs-panel tonal layering and hairline edges. The single luminous exception: the needle's `drop-shadow(0 0 4px rgba(87,217,138,0.6))`, the instrument's light. Focus states are 3px solid amber (white on the amber button), never glow.
 
 ## Shapes
 
-Square corners everywhere (`border-radius: 0`), except a 6px radius on the stamp plate. Edges are perforation (repeating punched-circle mask on tear strips, dashed `--paper-edge` rule), dotted leader rules between label and value, and 3px double rules for totals (printed-accounting idiom). The LEGAL band breaks the ticket's margins full-bleed.
+Gauge cards: 8px radius, 1px face-edge border. Inputs and mini-placards: 4-6px radius. The verdict flag: 6px radius, 3px needle-green border, rotated -2deg (PASS: white border). Dial arcs are SVG: 3px scale stroke, 8px band arcs, 4px round-capped needles. Everything else stays rectangular and quiet.
 
 ## Components
 
+### Gauges (signature)
+SVG dial (200x120 viewBox): scale arc, 7 ticks, colored NET bands, needle pivoting at (100,105) via CSS transform rotate(-90..90deg) with 0.9s cubic-bezier(0.16,1,0.3,1) damped sweep (no motion under prefers-reduced-motion). Digital readout centered in the dial. Placard cap below: tracked caps label + unit hint; input under it, centered 16px numerals.
+
 ### Buttons
-- **Stamp-btn (primary):** ink block, canary tracked caps text (0.3em), 3px ink border, full-width. Hover: verdict red. Focus-visible: 3px red outline. Active: 1px settle.
-- **Kit-btn:** canary block, ink text, ink border; disabled at 0.55 until the kit endpoint is configured.
+- **Run-btn (primary):** amber block, panel-black tracked caps (0.24em), full-width, 6px radius. Hover: needle green. Focus-visible: 3px white outline.
+- **Kit-btn:** amber, disabled 0.5 until the kit endpoint is configured.
 
 ### Inputs
-- **Ticket rows:** transparent on canary, 2px ink underline, right-aligned 16px numerals, placeholders in ink-soft. Focus: 3px verdict-red outline + faint red field tint.
-- **Kit input (green band):** paper-field background, 16px (no iOS zoom), canary focus outline.
+Face-field background, 1px face-edge border, white 16px centered numerals, #8a98a3 placeholders, 3px amber focus outline + amber border.
 
-### The Stamp (signature component)
-Double 6px border in verdict red (ink for PASS), rotated -7deg, `mix-blend-mode: multiply`, opacity 0.92, slam animation `cubic-bezier(0.16, 1, 0.3, 1)` 0.35s from scale 1.7. Word: 800 caps up to 46px; sub-line in verdict-red-deep. `prefers-reduced-motion`: no animation, full opacity.
+### Verdict Flag
+Inline-block on the NET gauge: 3px border (needle green / white for PASS), -2deg rotation, verdict word 800 caps in green (white for PASS), sub-line with the $/mi figure in dim. No text-shadow.
 
 ### Cards / Containers
-None. The ticket is the only container; sections are ruled bands of it, never floating panels.
+Gauge cards and mini-placards only - instrument housings, not content cards. Content sections are ruled bands of the panel itself.
 
 ## Do's and Don'ts
 
 ### Do:
-- **Do** keep every numeral mono, tabular, ASCII-signed.
-- **Do** spend verdict red once per result (the stamp); use verdict-red-deep elsewhere.
-- **Do** render deduction lines in print order with the stagger; the stamp lands last.
+- **Do** keep every numeral mono, tabular, ASCII-signed, centered in its instrument.
+- **Do** reserve green for operating/verdict meaning and amber for action/caution.
+- **Do** settle needles damped (ease-out expo), never bounce.
 - **Do** gate the kit capture on config; the honest stub reads "The list opens at launch."
 
 ### Don't:
-- **Don't** add gradients, glass, glow, hard offset shadows, or rounded panels - the world is ink on paper.
-- **Don't** dim text with opacity; use solid ink-soft (contrast is a daylight requirement).
-- **Don't** wrap the ticket in a card or float it over imagery; it lies on the desk, or fills the phone.
+- **Don't** add glow beyond the needle's single drop-shadow - no text-shadow, no box-shadow halos.
+- **Don't** float white cards or glass panels on the matte ground; instruments are housed in face-tone cards with hairline edges.
+- **Don't** dim text below dim (#aab6bf); night instruments stay high-contrast.
 - **Don't** invent proof: no testimonials, no customer counts, no prices until the kit is real.
