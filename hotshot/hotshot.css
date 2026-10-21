@@ -1,0 +1,352 @@
+/* Hotshot Math - canary weigh-ticket world.
+   Ink on paper: canary stock, dot-matrix numerals, rubber-stamp verdict.
+   Palette measured from the approved direction comp. */
+
+:root {
+  --canary: #ebcb44;
+  --canary-deep: #cea736;
+  --ink: #1f1e10;
+  --stamp-red: #ab2b16;
+  --legal-green: #2e6b3a;
+  --ink-soft: #5f571d;
+  --stamp-red-deep: #8a1f12;
+  --paper-edge: #d9b52c;
+  /* Courier New committed knowingly: closest installed dot-matrix-adjacent
+     mono. No webfont while the repo ships HTML/CSS/JS only. */
+  --mono: "Courier New", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: #1c1a12;
+  color: var(--ink);
+  font-family: var(--mono);
+  line-height: 1.5;
+}
+
+.skip {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  background: var(--ink);
+  color: var(--canary);
+  padding: 8px 14px;
+  z-index: 10;
+}
+
+/* browser surfaces carry the ticket: selection, caret, tabular numerals */
+::selection { background: var(--ink); color: var(--canary); }
+.row input, .kit-row input { caret-color: var(--ink); }
+.printed p, .worked p, .row input, .stamp-sub { font-variant-numeric: tabular-nums; }
+.skip:focus { left: 8px; top: 8px; }
+
+/* ---- the ticket ---- */
+
+.tix {
+  position: relative;
+  max-width: 480px;
+  margin: 0 auto;
+  background: var(--canary);
+  padding: 0 26px;
+  box-shadow: 10px 24px 60px rgba(0, 0, 0, 0.55);
+}
+
+/* perforated tear edges */
+.perf {
+  height: 18px;
+  margin: 0 -26px;
+  background:
+    radial-gradient(circle at 9px 9px, #1c1a12 5px, transparent 5.5px) 0 0 / 18px 18px repeat-x,
+    var(--canary);
+  border-top: 2px dashed var(--paper-edge);
+}
+.perf:last-child { border-top: 0; border-bottom: 2px dashed var(--paper-edge); }
+
+/* red form numbering down the left margin */
+.form-no {
+  position: absolute;
+  top: 40px;
+  left: 6px;
+  writing-mode: vertical-rl;
+  font-size: 9px;
+  letter-spacing: 4px;
+  color: var(--stamp-red-deep);
+  margin: 0;
+  user-select: none;
+}
+
+/* ---- header ---- */
+
+.tix-head { padding: 26px 6px 8px; text-align: center; }
+
+.stamp-head {
+  font-size: clamp(30px, 9vw, 42px);
+  line-height: 1.05;
+  margin: 0 0 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 800;
+  color: var(--stamp-red);
+  -webkit-text-stroke: 0.5px var(--stamp-red);
+}
+
+.lede {
+  font-size: 14px;
+  margin: 0 auto;
+  max-width: 34ch;
+  color: var(--ink-soft);
+}
+
+/* ---- the form on the ticket ---- */
+
+.tix-form { padding: 10px 2px 4px; }
+
+.row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 7px 0;
+  border-bottom: 1px dotted rgba(31, 30, 16, 0.45);
+}
+
+.row label {
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  flex: 1 1 auto;
+}
+
+.unit { color: var(--ink-soft); text-transform: none; letter-spacing: 0; }
+
+.row input {
+  flex: 0 1 110px;
+  min-width: 84px;
+  width: 110px;
+  font: inherit;
+  font-size: 16px;
+  text-align: right;
+  color: var(--ink);
+  background: transparent;
+  border: 0;
+  border-bottom: 2px solid var(--ink);
+  padding: 2px 4px;
+  border-radius: 0;
+}
+.row input::placeholder { color: #5f571d; }
+.row input:focus {
+  outline: 3px solid var(--stamp-red);
+  outline-offset: 2px;
+  background: rgba(171, 43, 22, 0.06);
+}
+
+.stamp-btn {
+  display: block;
+  width: 100%;
+  margin: 18px 0 8px;
+  padding: 16px;
+  font: inherit;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--canary);
+  background: var(--ink);
+  border: 3px solid var(--ink);
+  cursor: pointer;
+}
+.stamp-btn:hover { background: var(--stamp-red); border-color: var(--stamp-red); }
+.stamp-btn:focus-visible { outline: 3px solid var(--stamp-red); outline-offset: 3px; }
+.stamp-btn:active { transform: translateY(1px); }
+
+/* ---- verdict: printed lines + the stamp ---- */
+
+.verdict { padding: 14px 2px 4px; }
+
+.printed p {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0;
+  padding: 5px 0;
+  font-size: 15px;
+  border-bottom: 1px dotted rgba(31, 30, 16, 0.45);
+  opacity: 0;
+  animation: printline 0.25s ease-out forwards;
+}
+.printed p span:last-child { font-weight: 700; }
+.printed p.neg span:last-child { color: var(--stamp-red-deep); }
+.printed p.net {
+  border-bottom: 3px double var(--ink);
+  font-weight: 800;
+  font-size: 17px;
+}
+
+@keyframes printline { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: none; } }
+
+.stamp {
+  margin: 26px auto 10px;
+  width: min(320px, 86%);
+  padding: 18px 10px;
+  text-align: center;
+  color: var(--stamp-red);
+  border: 6px double var(--stamp-red);
+  border-radius: 6px;
+  transform: rotate(-7deg);
+  mix-blend-mode: multiply;
+  opacity: 0.92;
+  animation: stampin 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.stamp.pass { color: var(--ink); border-color: var(--ink); }
+
+.stamp-word {
+  display: block;
+  font-size: clamp(34px, 11vw, 46px);
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+.stamp-sub {
+  display: block;
+  margin-top: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--stamp-red-deep);
+}
+.stamp.pass .stamp-sub { color: inherit; }
+
+@keyframes stampin {
+  0% { opacity: 0; transform: rotate(-7deg) scale(1.7); }
+  100% { opacity: 0.92; transform: rotate(-7deg) scale(1); }
+}
+
+.verdict-note {
+  font-size: 13px;
+  text-align: center;
+  margin: 6px auto 10px;
+  max-width: 40ch;
+  color: var(--ink-soft);
+}
+
+/* ---- sections below the fold ---- */
+
+.how, .who { padding: 18px 2px 10px; border-top: 2px solid rgba(31, 30, 16, 0.35); }
+
+.how h2, .who h2, .legal-band h2 {
+  font-size: 15px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin: 0 0 10px;
+}
+
+.example-label { font-size: 12px; color: var(--ink-soft); margin: 0 0 8px; }
+
+.worked p {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0;
+  padding: 4px 0;
+  font-size: 14px;
+  border-bottom: 1px dotted rgba(31, 30, 16, 0.45);
+}
+.worked-net { font-weight: 800; font-size: 16px; }
+
+.fine { font-size: 12.5px; color: var(--ink-soft); margin: 12px 0 0; }
+
+/* promise front / instruction back */
+.who-front h2 { color: var(--stamp-red-deep); }
+.who-front p { font-size: 15px; margin: 0 0 10px; }
+.who-back {
+  background: rgba(31, 30, 16, 0.08);
+  border: 1px solid var(--ink);
+  border-top: 3px double var(--ink);
+  padding: 10px 12px;
+}
+.who-back p { font-size: 13px; margin: 0; }
+
+/* ---- LEGAL band + kit stub ---- */
+
+.legal-band {
+  margin: 20px -26px 0;
+  padding: 20px 26px 24px;
+  background: var(--legal-green);
+  color: #f2f6ee;
+}
+
+.legal-tag {
+  float: right;
+  margin: 0 0 6px 10px;
+  border: 3px double #f2f6ee;
+  padding: 2px 10px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.25em;
+  transform: rotate(4deg);
+}
+
+.kit-lede { font-size: 13.5px; margin: 0 0 14px; max-width: 42ch; }
+
+.kit-label {
+  display: block;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  margin-bottom: 8px;
+}
+
+.kit-row { display: flex; gap: 10px; flex-wrap: wrap; }
+
+.kit-row input {
+  flex: 1 1 180px;
+  font: inherit;
+  font-size: 16px;
+  padding: 10px 12px;
+  color: var(--ink);
+  background: #fdf9e8;
+  border: 2px solid #fdf9e8;
+  border-radius: 0;
+}
+.kit-row input::placeholder { color: #5f571d; }
+.kit-row input:focus { outline: 3px solid var(--canary); }
+.kit-btn:focus-visible { outline: 3px solid var(--canary); outline-offset: 2px; }
+
+.kit-btn {
+  font: inherit;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  padding: 10px 18px;
+  background: var(--canary);
+  color: var(--ink);
+  border: 2px solid var(--ink);
+  cursor: pointer;
+}
+.kit-btn:disabled { opacity: 0.55; cursor: default; }
+
+.kit-note { font-size: 12.5px; color: #dbe8d4; margin: 10px 0 0; }
+
+/* ---- footer ---- */
+
+.tix-foot {
+  border-top: 2px solid rgba(31, 30, 16, 0.35);
+  margin-top: 18px;
+  padding: 14px 0 18px;
+}
+.tix-foot p { font-size: 12.5px; color: var(--ink-soft); margin: 0 0 10px; }
+.tix-foot ul { list-style: none; display: flex; gap: 14px; flex-wrap: wrap; margin: 0; padding: 0; font-size: 12px; }
+.tix-foot a { color: var(--ink); text-decoration: underline; }
+
+/* reduced motion: no animation, content visible */
+@media (prefers-reduced-motion: reduce) {
+  .printed p, .stamp { animation: none; opacity: 1; }
+}
+
+/* wider screens: ticket sits on the desk */
+@media (min-width: 700px) {
+  .tix { margin: 28px auto; }
+}

@@ -560,6 +560,85 @@
     );
   }
 
+  // Hotshot load decision math: fuel, tolls, and factoring only.
+  // Truck payment, insurance, and maintenance stay in the operator's own
+  // minimum $/mi threshold (minNetPerMile). Documented in SOURCES.md.
+  function hotshotLoad(input) {
+    const miles = readNumber(input.miles, 'loaded miles', { min: 1, max: 5000 });
+    const flatRate = readNumber(input.flatRate, 'flat rate', {
+      min: 0,
+      max: 100000,
+      required: false,
+      fallback: 0,
+    });
+    const rate = flatRate > 0
+      ? flatRate / miles
+      : readNumber(input.ratePerMile, 'rate per mile', { min: 0.01, max: 30 });
+    const deadhead = readNumber(input.deadheadMiles, 'deadhead miles', {
+      min: 0,
+      max: 2000,
+      required: false,
+    });
+    const fuelPrice = readNumber(input.fuelPrice, 'fuel price', { min: 0.01, max: 15 });
+    const mpg = readNumber(input.truckMpg, 'truck MPG', { min: 1, max: 30 });
+    const tolls = readNumber(input.tolls, 'tolls', {
+      min: 0,
+      max: 5000,
+      required: false,
+    });
+    const factoringPct = readNumber(input.factoringPct, 'factoring percent', {
+      min: 0,
+      max: 15,
+      required: false,
+    });
+    const minNet = readNumber(input.minNetPerMile, 'minimum net per mile', {
+      min: 0,
+      max: 10,
+      required: false,
+    });
+
+    const gross = rate * miles;
+    const totalMi = miles + deadhead;
+    const gallonsExact = totalMi / mpg;
+    const fuelCost = gallonsExact * fuelPrice;
+    const factoringFee = gross * (factoringPct / 100);
+    const deductions = fuelCost + tolls + factoringFee;
+    const net = gross - deductions;
+    const netPerLoaded = net / miles;
+    const netPerTotal = net / totalMi;
+    const verdict = minNet > 0 ? (netPerTotal >= minNet ? 'take' : 'pass') : '';
+
+    return ok(
+      {
+        grossPay: money(gross),
+        effectiveRatePerMile: round(rate, 2),
+        loadedMiles: miles,
+        deadheadMiles: deadhead,
+        totalMiles: totalMi,
+        fuelGallons: round(gallonsExact, 1),
+        fuelCost: money(fuelCost),
+        tolls: money(tolls),
+        factoringFee: money(factoringFee),
+        totalDeductions: money(deductions),
+        netToTruck: money(net),
+        netPerLoadedMile: round(netPerLoaded, 2),
+        netPerTotalMile: round(netPerTotal, 2),
+        minNetPerMile: round(minNet, 2),
+        verdict: verdict,
+      },
+      [
+        { label: 'Gross linehaul', value: money(gross), unit: 'USD', money: true },
+        { label: 'Total miles (loaded + deadhead)', value: totalMi, unit: 'mi' },
+        { label: 'Fuel', value: money(fuelCost), unit: 'USD', money: true },
+        tolls > 0 ? { label: 'Tolls', value: money(tolls), unit: 'USD', money: true } : null,
+        factoringFee > 0 ? { label: 'Factoring', value: money(factoringFee), unit: 'USD', money: true } : null,
+        { label: 'Net to truck', value: money(net), unit: 'USD', money: true },
+        { label: 'Net per total mile', value: round(netPerTotal, 2), unit: 'USD/mi', money: true },
+        minNet > 0 ? { label: 'Verdict', value: verdict === 'take' ? 'TAKE IT' : 'PASS', unit: '' } : null,
+      ].filter(Boolean),
+    );
+  }
+
   const TOOLS = {
     paint: paint,
     'square-footage': squareFootage,
@@ -571,6 +650,7 @@
     wallpaper: wallpaper,
     'moving-boxes': movingBoxes,
     'room-cost': roomCost,
+    'hotshot-load': hotshotLoad,
   };
 
   function compute(tool, input) {

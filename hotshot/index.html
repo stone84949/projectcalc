@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Should you take this load? - Hotshot Math</title>
+  <meta name="description" content="Free hotshot load calculator: rate, deadhead, fuel, tolls, and factoring worked line by line, then a stamped take-it-or-pass verdict.">
+  <link rel="canonical" href="https://projectcalc-tools.pages.dev/hotshot/">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="hotshot.css">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <main id="main" class="tix">
+    <div class="perf" aria-hidden="true"></div>
+    <p class="form-no" aria-hidden="true">HS-1 &nbsp;·&nbsp; 01 &nbsp;·&nbsp; 02 &nbsp;·&nbsp; 03 &nbsp;·&nbsp; 04 &nbsp;·&nbsp; 05 &nbsp;·&nbsp; 06 &nbsp;·&nbsp; 07 &nbsp;·&nbsp; 08 &nbsp;·&nbsp; 09 &nbsp;·&nbsp; 10</p>
+
+    <header class="tix-head">
+
+      <h1 class="stamp-head">Should you take<br>this load?</h1>
+      <p class="lede">Run the broker's numbers the way the scale house runs axle weights: line by line, then a verdict. Free, no signup, nothing to install.</p>
+    </header>
+
+    <form class="tix-form" id="load-form" autocomplete="off">
+      <div class="row">
+        <label for="ratePerMile">Rate <span class="unit">$/mi</span></label>
+        <input id="ratePerMile" name="ratePerMile" type="number" inputmode="decimal" step="0.01" min="0" placeholder="2.85">
+      </div>
+      <div class="row">
+        <label for="flatRate">Flat rate <span class="unit">$ - 0 uses $/mi</span></label>
+        <input id="flatRate" name="flatRate" type="number" inputmode="decimal" step="1" min="0" placeholder="0">
+      </div>
+      <div class="row">
+        <label for="miles">Loaded miles</label>
+        <input id="miles" name="miles" type="number" inputmode="numeric" step="1" min="1" placeholder="540" required>
+      </div>
+      <div class="row">
+        <label for="deadheadMiles">Deadhead <span class="unit">empty mi</span></label>
+        <input id="deadheadMiles" name="deadheadMiles" type="number" inputmode="numeric" step="1" min="0" placeholder="80">
+      </div>
+      <div class="row">
+        <label for="fuelPrice">Fuel <span class="unit">$/gal</span></label>
+        <input id="fuelPrice" name="fuelPrice" type="number" inputmode="decimal" step="0.01" min="0" placeholder="3.65" required>
+      </div>
+      <div class="row">
+        <label for="truckMpg">Truck <span class="unit">mpg</span></label>
+        <input id="truckMpg" name="truckMpg" type="number" inputmode="decimal" step="0.1" min="1" placeholder="8.4" required>
+      </div>
+      <div class="row">
+        <label for="tolls">Tolls <span class="unit">$</span></label>
+        <input id="tolls" name="tolls" type="number" inputmode="decimal" step="0.01" min="0" placeholder="45">
+      </div>
+      <div class="row">
+        <label for="factoringPct">Factoring <span class="unit">%</span></label>
+        <input id="factoringPct" name="factoringPct" type="number" inputmode="decimal" step="0.1" min="0" max="15" placeholder="3">
+      </div>
+      <div class="row">
+        <label for="minNetPerMile">Your minimum <span class="unit">$/mi net</span></label>
+        <input id="minNetPerMile" name="minNetPerMile" type="number" inputmode="decimal" step="0.05" min="0" placeholder="1.25">
+      </div>
+      <button class="stamp-btn" type="submit">STAMP IT</button>
+    </form>
+
+    <section class="verdict" id="verdict" aria-live="polite" hidden>
+      <div class="printed" id="printed-lines"></div>
+      <div class="stamp" id="stamp" hidden>
+        <span class="stamp-word" id="stamp-word">TAKE IT</span>
+        <span class="stamp-sub" id="stamp-sub">$0.94/MI NET</span>
+      </div>
+      <p class="verdict-note" id="verdict-note"></p>
+    </section>
+
+    <section class="how">
+      <h2>The math, worked</h2>
+      <p class="example-label">EXAMPLE - 540 mi at $2.85/mi, 80 mi deadhead, $3.65 fuel, 8.4 mpg, $45 tolls, 3% factoring:</p>
+      <div class="worked">
+        <p><span>Gross linehaul</span><span>$1,539.00</span></p>
+        <p><span>Fuel - 620 mi ÷ 8.4 mpg × $3.65</span><span>-$269.40</span></p>
+        <p><span>Tolls</span><span>-$45.00</span></p>
+        <p><span>Factoring - 3% of gross</span><span>-$46.17</span></p>
+        <p class="worked-net"><span>Net to truck</span><span>$1,178.43</span></p>
+        <p><span>Net per total mile</span><span>$1.90/mi</span></p>
+      </div>
+      <p class="fine">This counts fuel, tolls, and factoring - the costs that change with the load. Truck payment, insurance, and maintenance live in your minimum $/mi. Set it once and the stamp tells you the rest.</p>
+    </section>
+
+    <section class="who">
+      <div class="who-front">
+        <h2>Weighed by an operator, not a content farm</h2>
+        <p>Built from the driver's seat of a running hotshot. The template shops selling trucking spreadsheets have never pulled a rate confirmation.</p>
+      </div>
+      <div class="who-back">
+        <p>Every formula on this ticket is printed above. No black box, no "premium unlock", no selling your email. If the math is wrong, it gets fixed in the open.</p>
+      </div>
+    </section>
+
+    <section class="legal-band" id="legal-band">
+      <p class="legal-tag">LEGAL</p>
+      <h2>Operator kit - tear here</h2>
+      <p class="kit-lede">The full load-math kit is in the works: rate-con walk-through, deadhead rules of thumb, factoring math, and quarterly IFTA sheets.</p>
+      <form class="kit-form" id="kit-form" data-kit-form>
+        <label class="kit-label" for="kit-email">OPERATOR KIT - where to send it</label>
+        <div class="kit-row">
+          <input id="kit-email" name="email" type="email" placeholder="you@dispatch.com" autocomplete="email" disabled>
+          <button class="kit-btn" type="submit" disabled>STAMP ME IN</button>
+        </div>
+        <p class="kit-note" data-kit-note>The calculator works today. The list opens at launch.</p>
+      </form>
+    </section>
+
+    <footer class="tix-foot">
+      <p>Hotshot Math is a planning tool, not tax or legal advice. Numbers are estimates; verify against your own rate confirmation.</p>
+      <nav aria-label="Footer">
+        <ul>
+          <li><a href="../about.html">About</a></li>
+          <li><a href="../disclaimer.html">Disclaimer</a></li>
+          <li><a href="../privacy.html">Privacy</a></li>
+          <li><a href="../sources.html">Sources</a></li>
+        </ul>
+      </nav>
+    </footer>
+
+    <div class="perf" aria-hidden="true"></div>
+  </main>
+
+  <script src="config.js"></script>
+  <script src="../engine/calc-engine.js"></script>
+  <script src="hotshot.js"></script>
+</body>
+</html>
