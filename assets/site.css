@@ -250,3 +250,8 @@ button, .btn {
   body { background: #fff; }
   .calc-card, .layout { box-shadow: none; border: 0; }
 }
+
+/* Guide tables: readable on phones, scroll sideways instead of breaking the page. */
+.prose table { display: block; max-width: 100%; overflow-x: auto; border-collapse: collapse; margin: 12px 0 18px; font-variant-numeric: tabular-nums; }
+.prose th, .prose td { text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.prose thead th { font-weight: 700; }

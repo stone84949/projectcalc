@@ -2,6 +2,8 @@
 """Generate ProjectCalc public HTML. Run from repo root: python scripts/build_pages.py"""
 from __future__ import annotations
 
+import html
+import json
 from pathlib import Path
 
 
@@ -42,7 +44,7 @@ def nav(rel_path: str, current: str) -> str:
         <nav aria-label="Primary">
           <ul>
             {item("index.html", "Calculators", "home")}
-            {item("guides/how-much-paint-for-a-12x12-room.html", "Guides", "guides")}
+            {item("guides/index.html", "Guides", "guides")}
             {item("pack/index.html", "Job pack", "pack")}
             {item("sources.html", "Sources", "sources")}
           </ul>
@@ -124,7 +126,7 @@ def nav_absolute() -> str:
         <nav aria-label="Primary">
           <ul>
             <li><a href="{BASE}/">Calculators</a></li>
-            <li><a href="{BASE}/guides/how-much-paint-for-a-12x12-room.html">Guides</a></li>
+            <li><a href="{BASE}/guides/">Guides</a></li>
             <li><a href="{BASE}/pack/">Job pack</a></li>
             <li><a href="{BASE}/sources.html">Sources</a></li>
           </ul>
@@ -153,8 +155,34 @@ def footer_absolute() -> str:
     """
 
 
-def calc_mount(slug: str) -> str:
-    return f'<section class="calc-card" data-tool="{slug}" aria-label="Live calculator"></section>'
+def calc_mount(slug: str, preset: dict | None = None) -> str:
+    attr = ""
+    if preset:
+        attr = f' data-preset="{html.escape(json.dumps(preset, separators=(",", ":")), quote=True)}"'
+    return f'<section class="calc-card" data-tool="{slug}"{attr} aria-label="Live calculator"></section>'
+
+
+# Which calculator to open next from a guide or calculator (plan section 2d).
+NEXT_TOOLS = {
+    "paint": ["drywall", "wallpaper"],
+    "square-footage": ["flooring", "tile", "room-cost"],
+    "tile": ["room-cost", "flooring"],
+    "flooring": ["square-footage", "tile"],
+    "mulch": ["concrete"],
+    "concrete": ["mulch"],
+    "drywall": ["paint", "wallpaper"],
+    "wallpaper": ["paint"],
+    "moving-boxes": ["square-footage"],
+    "room-cost": ["tile", "square-footage"],
+}
+
+
+def tool_name(slug: str) -> str:
+    return next(name for s, name, _ in TOOLS if s == slug)
+
+
+def guides_for(tool: str) -> list[dict]:
+    return [g for g in GUIDE_PAGES if g["tool"] == tool]
 
 
 def write(rel_path: str, html: str) -> None:
@@ -168,6 +196,7 @@ def homepage() -> None:
         f'<a class="tool-card" href="calculators/{slug}.html"><strong>{name}</strong><span>{blurb}</span></a>'
         for slug, name, blurb in TOOLS
     )
+    popular = "".join(f'<li><a href="guides/{g["slug"]}.html">{g["title"]}</a></li>' for g in GUIDE_PAGES)
     body = f"""
     <div class="wrap hero">
       <div class="kicker">Home DIY materials</div>
@@ -183,6 +212,9 @@ def homepage() -> None:
       <aside>
         <h2>All calculators</h2>
         <div class="grid-tools">{cards}</div>
+        <h2>Popular questions</h2>
+        <ul>{popular}</ul>
+        <p><a href="guides/index.html">All guides</a></p>
       </aside>
     </div>
     """
@@ -291,6 +323,11 @@ def tool_page(slug: str, name: str, blurb: str) -> None:
         for other, other_name, _ in TOOLS
         if other != slug
     )
+    own = guides_for(slug)
+    guide_links = ""
+    if own:
+        items = "".join(f'<li><a href="../guides/{g["slug"]}.html">{g["title"]}</a></li>' for g in own)
+        guide_links = f"<h2>Guides for this calculator</h2><ul>{items}</ul>"
     body = f"""
     <div class="wrap hero">
       <div class="kicker">Free calculator</div>
@@ -310,7 +347,8 @@ def tool_page(slug: str, name: str, blurb: str) -> None:
         <div class="faq"><h2>FAQ</h2>{faqs}</div>
         <h2>Related calculators</h2>
         <ul>{others}</ul>
-        <p><a href="../sources.html">See the coverage sources</a> · <a href="../guides/how-much-paint-for-a-12x12-room.html">Read the guides</a></p>
+        {guide_links}
+        <p><a href="../sources.html">See the coverage sources</a> · <a href="../guides/index.html">All guides</a></p>
       </div>
     </div>
     """
@@ -382,10 +420,232 @@ GUIDE_PAGES = [
         <p>Do not use bagged mix for a structural footing unless a local code official and the product data both say you can. This page is for pads, walks, and similar pours.</p>
         """,
     },
+    {
+        "slug": "how-much-paint-for-a-10x10-room",
+        "title": "How much paint for a 10×10 room?",
+        "desc": "Two gallons for two coats on the walls of a 10×10 room with 8 ft ceilings. One gallon for a single coat.",
+        "tool": "paint",
+        "preset": {"lengthFt": 10, "widthFt": 10, "heightFt": 8, "doors": 1, "windows": 2, "coats": "2", "coverageSqFtPerGal": 375, "includeCeiling": False},
+        "body": """
+        <p><strong>Buy 2 gallons</strong> for two coats on the walls of a 10×10 room with 8 ft ceilings, one door and two windows. A single refresh coat in the same color fits in <strong>1 gallon</strong>.</p>
+        <p>The walls are 2 × (10 + 10) × 8 = 320 sq ft. Take off one 3×7 door (21 sq ft) and two 3×5 windows (30 sq ft) and 269 sq ft is left. Two coats is 538 sq ft. At 375 sq ft per gallon, the middle of Sherwin-Williams’ 350–400 range, that is 1.43 gallons, so you buy 2. One coat is 269 sq ft, or 0.72 gallons, so 1 gallon covers it.</p>
+        <p>Adding the ceiling puts 100 sq ft more on every coat. Two coats on walls and ceiling is 738 sq ft, which is 1.97 gallons at 375. That still rounds to 2, but only just. If your paint lists 350 sq ft per gallon, the same job is 2.11 gallons and you need 3. Check the can, then type its number into the coverage box.</p>
+        <p>Primer covers less. Sherwin-Williams lists about 200–300 sq ft per gallon, so enter 250 and one coat for a primer coat on the walls.</p>
+        """,
+    },
+    {
+        "slug": "how-much-paint-for-a-bedroom",
+        "title": "How much paint for a bedroom?",
+        "desc": "Most bedrooms take 2 gallons for the walls at two coats. A 12×14 bedroom takes 3 gallons once you add the ceiling.",
+        "tool": "paint",
+        "preset": {"lengthFt": 12, "widthFt": 14, "heightFt": 8, "doors": 1, "windows": 2, "coats": "2", "coverageSqFtPerGal": 375, "includeCeiling": True},
+        "body": """
+        <p><strong>Most bedrooms need 2 gallons</strong> for two coats on the walls. A 12×14 bedroom with 8 ft ceilings, one door and two windows needs <strong>3 gallons</strong> if you paint the ceiling too (1,066 sq ft of paint work).</p>
+        <p>Every row below uses 8 ft ceilings, one door, two windows, two coats and 375 sq ft per gallon. Those are the calculator defaults. Change any of them in the calculator.</p>
+        <table>
+          <thead><tr><th>Bedroom</th><th>Walls only</th><th>Walls + ceiling</th></tr></thead>
+          <tbody>
+            <tr><td>10×10</td><td>2 gallons (538 sq ft)</td><td>2 gallons (738 sq ft)</td></tr>
+            <tr><td>10×12</td><td>2 gallons (602 sq ft)</td><td>3 gallons (842 sq ft)</td></tr>
+            <tr><td>12×12</td><td>2 gallons (666 sq ft)</td><td>3 gallons (954 sq ft)</td></tr>
+            <tr><td>12×14</td><td>2 gallons (730 sq ft)</td><td>3 gallons (1,066 sq ft)</td></tr>
+            <tr><td>14×16</td><td>3 gallons (858 sq ft)</td><td>4 gallons (1,306 sq ft)</td></tr>
+          </tbody>
+        </table>
+        <p>The square footage in each row is the area times the number of coats. For the 12×14 room: walls are 2 × (12 + 14) × 8 = 416 sq ft, minus 51 sq ft of door and windows is 365, plus the 168 sq ft ceiling is 533, and two coats is 1,066. Divided by 375 that is 2.84 gallons, so you buy 3.</p>
+        <p>Many people paint the ceiling with a separate ceiling paint. If you do, run the walls and the ceiling as two separate calculations.</p>
+        """,
+    },
+    {
+        "slug": "mulch-by-square-feet",
+        "title": "How much mulch for 200, 300, 500 or 1,000 sq ft?",
+        "desc": "Bags and cubic yards of mulch for 200 to 1,000 sq ft at 2 and 3 inches deep.",
+        "tool": "mulch",
+        "preset": {"lengthFt": 10, "widthFt": 20, "depthIn": 3, "bagCuFt": 2},
+        "body": """
+        <p><strong>At 3 inches deep, 200 sq ft takes 25 bags</strong> (2 cu ft) or 2 cubic yards. 1,000 sq ft takes 125 bags or 10 cubic yards.</p>
+        <table>
+          <thead><tr><th>Bed area</th><th>2 in deep</th><th>3 in deep</th></tr></thead>
+          <tbody>
+            <tr><td>200 sq ft (10×20)</td><td>17 bags or 2 cu yd (1.23 exact)</td><td>25 bags or 2 cu yd (1.85 exact)</td></tr>
+            <tr><td>300 sq ft (10×30)</td><td>25 bags or 2 cu yd (1.85 exact)</td><td>38 bags or 3 cu yd (2.78 exact)</td></tr>
+            <tr><td>500 sq ft (10×50)</td><td>42 bags or 4 cu yd (3.09 exact)</td><td>63 bags or 5 cu yd (4.63 exact)</td></tr>
+            <tr><td>1,000 sq ft (20×50)</td><td>84 bags or 7 cu yd (6.17 exact)</td><td>125 bags or 10 cu yd (9.26 exact)</td></tr>
+          </tbody>
+        </table>
+        <p>The formula is square feet × depth in inches ÷ 12 = cubic feet. Divide cubic feet by 27 for cubic yards, or by 2 for 2 cu ft bags. The calculator rounds both up, because a partial bag is still a full bag at the register.</p>
+        <p>Bag sizes vary. With 1.5 cu ft bags, 200 sq ft at 3 inches is 34 bags instead of 25. Enter the size printed on your bag.</p>
+        <p>Most beds want 2–3 inches. Keep mulch pulled back from stems and trunks.</p>
+        """,
+    },
+    {
+        "slug": "concrete-bags-per-yard",
+        "title": "How many bags of concrete in a yard?",
+        "desc": "45 bags of 80 lb, 60 bags of 60 lb or 90 bags of 40 lb make one cubic yard, before waste.",
+        "tool": "concrete",
+        "preset": {"lengthFt": 9, "widthFt": 9, "thicknessIn": 4, "bagLb": "80", "wastePct": 0},
+        "body": """
+        <p><strong>One cubic yard takes 45 bags of 80 lb concrete</strong>, 60 bags of 60 lb or 90 bags of 40 lb, before any waste.</p>
+        <p>A cubic yard is 27 cubic feet. Quikrete’s data sheet for Concrete Mix 1101 lists about 0.60 cu ft per 80 lb bag and 0.45 cu ft per 60 lb bag. 27 ÷ 0.60 = 45 and 27 ÷ 0.45 = 60. The calculator scales the 40, 50 and 90 lb sizes from the same yield per pound.</p>
+        <table>
+          <thead><tr><th>Bag size</th><th>Yield per bag</th><th>Bags per cubic yard</th><th>With 5% waste</th></tr></thead>
+          <tbody>
+            <tr><td>40 lb</td><td>0.30 cu ft</td><td>90</td><td>95</td></tr>
+            <tr><td>50 lb</td><td>0.375 cu ft</td><td>72</td><td>76</td></tr>
+            <tr><td>60 lb</td><td>0.45 cu ft</td><td>60</td><td>63</td></tr>
+            <tr><td>80 lb</td><td>0.60 cu ft</td><td>45</td><td>48</td></tr>
+            <tr><td>90 lb</td><td>0.675 cu ft</td><td>40</td><td>42</td></tr>
+          </tbody>
+        </table>
+        <p>A 9×9 pad 4 inches thick is exactly 27 cu ft, one yard. That is the example loaded in the calculator, with waste set to 0. The default is 5% waste, which covers spillage and an uneven base.</p>
+        <p>45 bags of 80 lb is 3,600 lb of dry mix. At a yard or more, compare the price of a short-load ready-mix delivery before you mix by hand. Do not use bagged mix for a structural footing unless the product data and your local code official allow it.</p>
+        """,
+    },
+    {
+        "slug": "drywall-sheets-for-a-12x12-room",
+        "title": "How many sheets of drywall for a 12×12 room?",
+        "desc": "18 sheets of 4×8 drywall for the walls and ceiling of a 12×12 room with one door and two windows, including 15% waste.",
+        "tool": "drywall",
+        "preset": {"lengthFt": 12, "widthFt": 12, "heightFt": 8, "doors": 1, "windows": 2, "wastePct": 15, "includeCeiling": True},
+        "body": """
+        <p><strong>Buy 18 sheets of 4×8 drywall</strong> for the walls and ceiling of a 12×12 room with 8 ft ceilings, one door and two windows. That includes 15% waste.</p>
+        <p>The walls are 2 × (12 + 12) × 8 = 384 sq ft. Take off the door (21) and two windows (30) and add the 144 sq ft ceiling: 477 sq ft. Fifteen percent waste brings it to 548.55 sq ft. A 4×8 sheet is 32 sq ft, so that is 17.1 sheets, rounded up to 18.</p>
+        <table>
+          <thead><tr><th>Change</th><th>Sheets</th></tr></thead>
+          <tbody>
+            <tr><td>Walls only, no ceiling</td><td>12 sheets of 4×8</td></tr>
+            <tr><td>One door, no windows (the calculator’s default room)</td><td>19 sheets of 4×8</td></tr>
+            <tr><td>9 ft ceilings</td><td>19 sheets of 4×8</td></tr>
+            <tr><td>4×12 sheets instead of 4×8</td><td>12 sheets of 4×12</td></tr>
+          </tbody>
+        </table>
+        <p>The calculator also gives planning counts for the 18-sheet job: 576 screws (32 per sheet) and 540 ft of tape (30 ft per sheet). Those are rough planning numbers, not a fastening schedule.</p>
+        <p>CertainTeed’s public calculator does not subtract openings and does not add waste. Ours does both, so the two often land close together.</p>
+        """,
+    },
+    {
+        "slug": "wallpaper-rolls-for-a-12x12-room",
+        "title": "How many rolls of wallpaper for a 12×12 room?",
+        "desc": "8 double rolls for a 12×12 room with 8 ft walls, one door and two windows, at 44.8 usable sq ft per roll.",
+        "tool": "wallpaper",
+        "preset": {"lengthFt": 12, "widthFt": 12, "heightFt": 8, "doors": 1, "windows": 2, "rollSqFt": 56, "usableFactor": 0.8},
+        "body": """
+        <p><strong>Buy 8 double rolls</strong> for a 12×12 room with 8 ft walls, one door and two windows.</p>
+        <p>The walls are 384 sq ft. Take off 51 sq ft of door and windows and 333 sq ft is left. A US double roll commonly lists about 56 sq ft. After trimming and pattern matching, the calculator counts 80% of that as usable: 44.8 sq ft. 333 ÷ 44.8 = 7.43, so you buy 8.</p>
+        <table>
+          <thead><tr><th>Change</th><th>Double rolls</th></tr></thead>
+          <tbody>
+            <tr><td>Large pattern repeat (65% usable, 36.4 sq ft per roll)</td><td>10</td></tr>
+            <tr><td>9 ft walls (381 sq ft)</td><td>9</td></tr>
+          </tbody>
+        </table>
+        <p>Read the label. Use the square footage printed on your roll, not a European single-roll figure, and lower the usable factor if the repeat is large. Buy every roll from the same batch number.</p>
+        """,
+    },
+    {
+        "slug": "flooring-for-a-12x12-room",
+        "title": "How much flooring for a 12×12 room?",
+        "desc": "8 boxes of flooring at 20 sq ft per box for a 12×12 room laid straight, or 9 boxes laid diagonally.",
+        "tool": "flooring",
+        "preset": {"lengthFt": 12, "widthFt": 12, "pattern": "straight", "boxCoverageSqFt": 20},
+        "body": """
+        <p><strong>Buy 8 boxes</strong> at 20 sq ft per box for a 12×12 room laid straight. A diagonal or herringbone layout needs <strong>9 boxes</strong>.</p>
+        <p>12 × 12 is 144 sq ft. A straight layout adds 10% waste: 158.4 sq ft. 158.4 ÷ 20 = 7.92 boxes, so 8.</p>
+        <table>
+          <thead><tr><th>Layout</th><th>Waste</th><th>Sq ft to buy</th><th>Boxes (20 sq ft)</th></tr></thead>
+          <tbody>
+            <tr><td>Straight</td><td>10%</td><td>158.4</td><td>8</td></tr>
+            <tr><td>Diagonal</td><td>15%</td><td>165.6</td><td>9</td></tr>
+            <tr><td>Herringbone</td><td>20%</td><td>172.8</td><td>9</td></tr>
+          </tbody>
+        </table>
+        <p>Boxes are often 18 to 24 sq ft, not a round 20. For the straight layout, 18 sq ft boxes means 9 boxes and 24 sq ft boxes means 7. Type the number on your box into the calculator.</p>
+        <p>Closets and doorways count. Add them as extra area in the square footage calculator first.</p>
+        """,
+    },
+    {
+        "slug": "tile-for-a-shower-floor",
+        "title": "How many boxes of tile for a shower floor?",
+        "desc": "A 3×5 shower floor needs 16.5 sq ft of tile with 10% waste, which is 2 boxes of 10 sq ft.",
+        "tool": "tile",
+        "preset": {"lengthFt": 3, "widthFt": 5, "tileIn": 2, "pattern": "straight", "boxCoverageSqFt": 10},
+        "body": """
+        <p><strong>A 3×5 shower floor needs 2 boxes</strong> of 10 sq ft tile. That is 15 sq ft plus 10% waste, or 16.5 sq ft.</p>
+        <table>
+          <thead><tr><th>Shower floor</th><th>Straight (10%)</th><th>Diagonal (20%)</th></tr></thead>
+          <tbody>
+            <tr><td>3×3 ft</td><td>9.9 sq ft, 1 box</td><td>10.8 sq ft, 2 boxes</td></tr>
+            <tr><td>3×4 ft</td><td>13.2 sq ft, 2 boxes</td><td>14.4 sq ft, 2 boxes</td></tr>
+            <tr><td>3×5 ft</td><td>16.5 sq ft, 2 boxes</td><td>18 sq ft, 2 boxes</td></tr>
+            <tr><td>4×4 ft</td><td>17.6 sq ft, 2 boxes</td><td>19.2 sq ft, 2 boxes</td></tr>
+          </tbody>
+        </table>
+        <p>Box counts assume 10 sq ft per box. Shower floors slope to the drain, so small mosaic tile is common, and mosaics are sold in sheets with their own coverage. Enter the coverage printed on your box. The calculator loads a 3×5 floor with 2-inch tile, which is 594 tiles.</p>
+        <p>A 3×3 floor laid straight fits in one 10 sq ft box with almost nothing left over. Buy a second box anyway. Small floors leave no room for a cracked tile or a bad cut.</p>
+        <p>Walls are a separate job. Run each wall as its own rectangle and add the totals.</p>
+        """,
+    },
+    {
+        "slug": "how-many-moving-boxes",
+        "title": "How many moving boxes do I need? Studio to 3-bedroom",
+        "desc": "About 34 boxes for a studio, 54 for a 1-bedroom, 64 for a 2-bedroom and 77 for a 3-bedroom, 2-bath home.",
+        "tool": "moving-boxes",
+        "preset": {"kitchen": 1, "living": 1, "master": 1, "bedroom": 1, "bathroom": 1, "dining": 0, "garage": 0, "clutter": "typical"},
+        "body": """
+        <p><strong>A typical 2-bedroom takes about 64 boxes.</strong> A studio takes about 34, a 1-bedroom 54, and a 3-bedroom, 2-bath home 77, or 98 with a dining room and a garage.</p>
+        <table>
+          <thead><tr><th>Home (typical amount of stuff)</th><th>Small</th><th>Medium</th><th>Large</th><th>XL</th><th>Wardrobe</th><th>Dish pack</th><th>Total</th></tr></thead>
+          <tbody>
+            <tr><td>Studio: kitchen, living area, bath</td><td>8</td><td>10</td><td>7</td><td>4</td><td>0</td><td>5</td><td>34</td></tr>
+            <tr><td>1-bedroom: + primary bedroom</td><td>10</td><td>16</td><td>14</td><td>4</td><td>5</td><td>5</td><td>54</td></tr>
+            <tr><td>2-bedroom: + 1 more bedroom</td><td>12</td><td>20</td><td>15</td><td>4</td><td>8</td><td>5</td><td>64</td></tr>
+            <tr><td>3-bedroom, 2 bath</td><td>15</td><td>25</td><td>17</td><td>4</td><td>11</td><td>5</td><td>77</td></tr>
+            <tr><td>3-bedroom, 2 bath + dining + garage</td><td>19</td><td>31</td><td>23</td><td>7</td><td>11</td><td>7</td><td>98</td></tr>
+          </tbody>
+        </table>
+        <p>Each room adds a fixed mix of box sizes, taken from the midpoints of published per-room ranges. The calculator adds the rooms, then rounds each size up. How much stuff you have matters as much as the room count: the same 2-bedroom is about 49 boxes if it is sparse (0.75×) and about 87 if it is packed (1.35×).</p>
+        <p>Books and canned goods go in small boxes so they stay liftable. Linens and pillows go in large ones. Dish packs have thicker walls for the kitchen.</p>
+        """,
+    },
+    {
+        "slug": "cost-to-remodel-a-small-bathroom",
+        "title": "2026 cost to remodel a small bathroom",
+        "desc": "Published 2026 estimates for a 5×8 bathroom remodel, next to ProjectCalc’s planning bands and the math behind them.",
+        "tool": "room-cost",
+        "preset": {"lengthFt": 5, "widthFt": 8, "roomType": "bathroom", "finish": "mid"},
+        "body": """
+        <p><strong>This Old House puts a 5×8 bathroom remodel at $15,900–$20,100</strong> in its small-bathroom cost guide, updated June 8, 2026. It bases that on Homewyse costs for value-grade materials and medium-cost labor. The same guide lists $3,000–$8,000 for a basic refresh and $8,000–$18,000 for a mid-range update. (<a href="https://www.thisoldhouse.com/bathrooms/reviews/small-bathroom-remodel-cost">This Old House</a>)</p>
+        <h2>ProjectCalc’s planning bands</h2>
+        <p>The room cost calculator multiplies floor area by a per-square-foot band, then by 2.2 for a bathroom, because water, tile and ventilation cost more than a bedroom. The bands are our own planning numbers, not quotes.</p>
+        <table>
+          <thead><tr><th>Finish band</th><th>Math (40 sq ft × band × 2.2)</th><th>5×8 range</th></tr></thead>
+          <tbody>
+            <tr><td>Cosmetic ($15–$30 / sq ft)</td><td>40 × $15–$30 × 2.2</td><td>$1,320–$2,640</td></tr>
+            <tr><td>Mid remodel ($40–$80 / sq ft)</td><td>40 × $40–$80 × 2.2</td><td>$3,520–$7,040</td></tr>
+            <tr><td>Full gut ($100–$200 / sq ft)</td><td>40 × $100–$200 × 2.2</td><td>$8,800–$17,600</td></tr>
+          </tbody>
+        </table>
+        <p>Read them side by side. Our “mid” band lands inside what This Old House calls a basic refresh. Our “full gut” band ends below its full 5×8 estimate. Treat the calculator as a low starting budget, and expect a real bid to come in higher if the job moves plumbing or replaces the tub or shower.</p>
+        <p>Other small sizes on the same bands: a 5×7 bath (35 sq ft) is $3,080–$6,160 mid and $7,700–$15,400 full gut. A 6×8 bath (48 sq ft) is $4,224–$8,448 mid and $10,560–$21,120 full gut.</p>
+        <p>Use the tile calculator for the box count and this one for a budget envelope. Then get a local bid.</p>
+        """,
+    },
 ]
 
 
 def guide_page(guide: dict) -> None:
+    tool = guide["tool"]
+    next_tools = "".join(
+        f'<li><a href="../calculators/{t}.html">{tool_name(t)}</a></li>' for t in NEXT_TOOLS.get(tool, [])
+    )
+    siblings = "".join(
+        f'<li><a href="{g["slug"]}.html">{g["title"]}</a></li>'
+        for g in GUIDE_PAGES
+        if g["slug"] != guide["slug"] and (g["tool"] == tool or g["tool"] in NEXT_TOOLS.get(tool, []))
+    )
+    related = f"<h2>Next calculators</h2><ul>{next_tools}</ul>" if next_tools else ""
+    if siblings:
+        related += f"<h2>Related questions</h2><ul>{siblings}</ul>"
     body = f"""
     <div class="wrap hero">
       <div class="kicker">Guide</div>
@@ -394,9 +654,11 @@ def guide_page(guide: dict) -> None:
     </div>
     <div class="wrap layout">
       <div class="prose">{guide["body"]}
-        <p><a href="../calculators/{guide["tool"]}.html">Open the full {guide["tool"].replace("-", " ")} calculator</a></p>
+        <p><a href="../calculators/{tool}.html">Open the full {tool.replace("-", " ")} calculator</a></p>
+        {related}
+        <p><a href="index.html">All guides</a> · <a href="../sources.html">Sources</a></p>
       </div>
-      <div>{calc_mount(guide["tool"])}</div>
+      <div>{calc_mount(tool, guide.get("preset"))}</div>
     </div>
     """
     write(
@@ -409,6 +671,25 @@ def guide_page(guide: dict) -> None:
             "guides",
         ),
     )
+
+
+def guides_index() -> None:
+    groups = []
+    for slug, name, _ in TOOLS:
+        own = guides_for(slug)
+        if not own:
+            continue
+        items = "".join(f'<li><a href="{g["slug"]}.html">{g["title"]}</a> {g["desc"]}</li>' for g in own)
+        groups.append(f'<h2><a href="../calculators/{slug}.html">{name}</a></h2><ul>{items}</ul>')
+    body = f"""
+    <div class="wrap hero">
+      <div class="kicker">Guides</div>
+      <h1>DIY materials guides</h1>
+      <p class="lede">Each guide answers one question in the first line, shows the math, and runs the live calculator with the same numbers. Estimates only.</p>
+    </div>
+    <div class="wrap prose">{"".join(groups)}</div>
+    """
+    write("guides/index.html", shell("guides/index.html", f"DIY materials guides — {SITE_NAME}", "Every ProjectCalc guide: paint, mulch, concrete, drywall, wallpaper, flooring, tile, moving boxes and remodel cost.", body, "guides"))
 
 
 def simple_page(rel: str, title: str, desc: str, heading: str, inner: str, current: str) -> None:
@@ -468,6 +749,7 @@ def static_pages() -> None:
           <li>Wallpaper: US double-roll listed area is commonly ~56 sq ft; this tool defaults to 80% usable after match and waste.</li>
           <li>Moving boxes: midpoints of published per-room ranges (kitchen / bedroom / living mixes).</li>
           <li>Room cost: 2025–2026 published remodel bands of about $15–$30 / sq ft cosmetic and much higher for wet rooms (Angi / HomeAdvisor summaries). Intensity multipliers are ours and are labeled as planning only.</li>
+          <li>Small bathroom comparison: This Old House small-bathroom remodel cost guide (updated June 8, 2026, from Homewyse data): a 5×8 bath at $15,900–$20,100. Our planning bands come in lower, and the bathroom guide says so. <a href="https://www.thisoldhouse.com/bathrooms/reviews/small-bathroom-remodel-cost">thisoldhouse.com</a></li>
         </ul>
         <p>Full notes also live in <code>SOURCES.md</code> in the public repository.</p>
         """,
@@ -505,6 +787,7 @@ def static_pages() -> None:
 def robots_and_sitemap() -> None:
     files = ["index.html", "about.html", "disclaimer.html", "privacy.html", "sources.html", "pack/index.html"]
     files += [f"calculators/{slug}.html" for slug, _, _ in TOOLS]
+    files += ["guides/index.html"]
     files += [f"guides/{g['slug']}.html" for g in GUIDE_PAGES]
     urls = [pretty_path(f) for f in files]
     locs = "\n".join(f"  <url><loc>{BASE}{path}</loc></url>" for path in urls)
@@ -529,6 +812,7 @@ def main() -> None:
         tool_page(slug, name, blurb)
     for guide in GUIDE_PAGES:
         guide_page(guide)
+    guides_index()
     static_pages()
     robots_and_sitemap()
     print("built", len(list(ROOT.rglob("*.html"))), "html files")

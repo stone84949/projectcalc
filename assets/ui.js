@@ -416,19 +416,29 @@
     });
     form.addEventListener('input', () => run());
 
+    function applyValues(values) {
+      Object.entries(values).forEach(([name, value]) => {
+        const field = form.elements.namedItem(name);
+        if (!field) return;
+        if (field.type === 'checkbox') field.checked = Boolean(value);
+        else field.value = value;
+      });
+    }
+
+    // Guide pages pass their worked example as data-preset so the live numbers match the text.
+    let preset = null;
     try {
-      const saved = JSON.parse(localStorage.getItem(storageKey(tool)) || 'null');
-      if (saved && !schema.rooms) {
-        Object.entries(saved).forEach(([name, value]) => {
-          const field = form.elements.namedItem(name);
-          if (!field) return;
-          if (field.type === 'checkbox') field.checked = Boolean(value);
-          else field.value = value;
-        });
-      }
+      preset = JSON.parse(mount.getAttribute('data-preset') || 'null');
+    } catch (err) {
+      preset = null;
+    }
+    try {
+      const saved = preset ? null : JSON.parse(localStorage.getItem(storageKey(tool)) || 'null');
+      if (saved && !schema.rooms) applyValues(saved);
     } catch (err) {
       /* ignore */
     }
+    if (preset && !schema.rooms) applyValues(preset);
     run();
   }
 

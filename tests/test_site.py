@@ -29,6 +29,16 @@ GUIDES = [
     "2026-cost-to-tile-a-bathroom",
     "how-much-mulch-do-i-need",
     "concrete-bags-for-a-pad",
+    "how-much-paint-for-a-10x10-room",
+    "how-much-paint-for-a-bedroom",
+    "mulch-by-square-feet",
+    "concrete-bags-per-yard",
+    "drywall-sheets-for-a-12x12-room",
+    "wallpaper-rolls-for-a-12x12-room",
+    "flooring-for-a-12x12-room",
+    "tile-for-a-shower-floor",
+    "how-many-moving-boxes",
+    "cost-to-remodel-a-small-bathroom",
 ]
 
 REQUIRED = [
@@ -47,6 +57,7 @@ REQUIRED = [
     ROOT / "assets" / "config.js",
     ROOT / "engine" / "calc-engine.js",
     ROOT / "pack" / "index.html",
+    ROOT / "guides" / "index.html",
     *[ROOT / "calculators" / f"{slug}.html" for slug in TOOLS],
     *[ROOT / "guides" / f"{slug}.html" for slug in GUIDES],
 ]
@@ -200,6 +211,7 @@ class SiteContract(unittest.TestCase):
         expected = {"/", "/pack", "/about", "/disclaimer", "/privacy", "/sources"}
         expected.update(f"/calculators/{slug}" for slug in TOOLS)
         expected.update(f"/guides/{slug}" for slug in GUIDES)
+        expected.add("/guides")
         self.assertTrue(expected <= normalized, f"sitemap missing {sorted(expected - normalized)}")
 
     def test_sitemap_and_canonicals_use_final_extensionless_urls(self) -> None:
@@ -215,6 +227,30 @@ class SiteContract(unittest.TestCase):
             for line in text.splitlines():
                 if 'rel="canonical"' in line:
                     self.assertNotIn('.html"', line, str(page))
+
+    def test_guides_embed_live_calculator_and_link_out(self) -> None:
+        for slug in GUIDES:
+            path = ROOT / "guides" / f"{slug}.html"
+            html = path.read_text(encoding="utf-8")
+            self.assertRegex(html, r'class="calc-card" data-tool="[a-z-]+"', slug)
+            self.assertIn("calc-engine.js", html, slug)
+            self.assertIn('href="../calculators/', html, slug)
+            self.assertIn('href="index.html"', html, slug)
+
+    def test_guides_index_lists_every_guide(self) -> None:
+        html = (ROOT / "guides" / "index.html").read_text(encoding="utf-8")
+        for slug in GUIDES:
+            self.assertIn(f'href="{slug}.html"', html)
+        home = (ROOT / "index.html").read_text(encoding="utf-8")
+        for slug in GUIDES:
+            self.assertIn(f'href="guides/{slug}.html"', home)
+
+    def test_calculators_link_to_their_own_guides(self) -> None:
+        paint = (ROOT / "calculators" / "paint.html").read_text(encoding="utf-8")
+        self.assertIn("../guides/how-much-paint-for-a-10x10-room.html", paint)
+        mulch = (ROOT / "calculators" / "mulch.html").read_text(encoding="utf-8")
+        self.assertIn("../guides/mulch-by-square-feet.html", mulch)
+        self.assertNotIn("../guides/how-much-paint-for-a-12x12-room.html", mulch)
 
     def test_robots_allows_indexing(self) -> None:
         robots = (ROOT / "robots.txt").read_text(encoding="utf-8")
