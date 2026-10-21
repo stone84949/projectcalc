@@ -202,6 +202,20 @@ class SiteContract(unittest.TestCase):
         expected.update(f"/guides/{slug}" for slug in GUIDES)
         self.assertTrue(expected <= normalized, f"sitemap missing {sorted(expected - normalized)}")
 
+    def test_sitemap_and_canonicals_use_final_extensionless_urls(self) -> None:
+        # Cloudflare Pages 308-redirects *.html and */index.html; list the target.
+        tree = ET.parse(ROOT / "sitemap.xml")
+        ns = {"sm": "http://www.sitemaps.org/schemas/sitemap/0.9"}
+        for node in tree.findall(".//sm:loc", ns):
+            self.assertFalse((node.text or "").endswith(".html"), node.text)
+        for page in ROOT.rglob("*.html"):
+            if ".git" in page.parts:
+                continue
+            text = page.read_text(encoding="utf-8")
+            for line in text.splitlines():
+                if 'rel="canonical"' in line:
+                    self.assertNotIn('.html"', line, str(page))
+
     def test_robots_allows_indexing(self) -> None:
         robots = (ROOT / "robots.txt").read_text(encoding="utf-8")
         self.assertIn("Sitemap:", robots)

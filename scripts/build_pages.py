@@ -72,14 +72,23 @@ def footer(rel_path: str) -> str:
     """
 
 
+
+def pretty_path(rel_path: str) -> str:
+    """Final served URL path. Cloudflare Pages 308-redirects '.html' and
+    '/index.html' to extensionless URLs, so canonicals and the sitemap must
+    point at the redirect target, not the file name."""
+    path = "/" + rel_path.lstrip("./")
+    if path.endswith("/index.html"):
+        return path[: -len("index.html")]
+    if path.endswith(".html"):
+        return path[: -len(".html")]
+    return path
+
+
 def shell(rel_path: str, title: str, description: str, body: str, current: str, extra_head: str = "", absolute: bool = False) -> str:
     p = "" if absolute else asset_prefix(rel_path)
     prefix = (BASE.rstrip("/") + "/") if absolute else p
-    canonical = f"{BASE}/{rel_path.replace('index.html', '').lstrip('./')}"
-    if rel_path == "index.html":
-        canonical = BASE + "/"
-    elif rel_path == "404.html":
-        canonical = BASE + "/404.html"
+    canonical = BASE + pretty_path(rel_path)
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -494,9 +503,10 @@ def static_pages() -> None:
 
 
 def robots_and_sitemap() -> None:
-    urls = ["/", "/about.html", "/disclaimer.html", "/privacy.html", "/sources.html", "/pack/index.html"]
-    urls += [f"/calculators/{slug}.html" for slug, _, _ in TOOLS]
-    urls += [f"/guides/{g['slug']}.html" for g in GUIDE_PAGES]
+    files = ["index.html", "about.html", "disclaimer.html", "privacy.html", "sources.html", "pack/index.html"]
+    files += [f"calculators/{slug}.html" for slug, _, _ in TOOLS]
+    files += [f"guides/{g['slug']}.html" for g in GUIDE_PAGES]
+    urls = [pretty_path(f) for f in files]
     locs = "\n".join(f"  <url><loc>{BASE}{path}</loc></url>" for path in urls)
     (ROOT / "sitemap.xml").write_text(
         '<?xml version="1.0" encoding="UTF-8"?>\n'
