@@ -202,6 +202,30 @@ class SiteContract(unittest.TestCase):
         expected.update(f"/guides/{slug}" for slug in GUIDES)
         self.assertTrue(expected <= normalized, f"sitemap missing {sorted(expected - normalized)}")
 
+    def test_rebuild_keeps_every_sitemap_route_and_hand_built_pages(self) -> None:
+        """Rebuilding must not drop routes, including hand-built folders like /hotshot/."""
+        import shutil
+        import subprocess
+        import sys
+        import tempfile
+
+        def locs(path: Path) -> set[str]:
+            text = path.read_text(encoding="utf-8")
+            return set(re.findall(r"<loc>([^<]+)</loc>", text))
+
+        before = locs(ROOT / "sitemap.xml")
+        with tempfile.TemporaryDirectory() as tmp:
+            copy = Path(tmp) / "site"
+            shutil.copytree(ROOT, copy, ignore=shutil.ignore_patterns(".git", "node_modules", "__pycache__"))
+            (copy / "hotshot").mkdir(exist_ok=True)
+            (copy / "hotshot" / "index.html").write_text("<!doctype html><title>t</title>", encoding="utf-8")
+            subprocess.run([sys.executable, str(copy / "scripts" / "build_pages.py")], check=True, capture_output=True)
+            after = locs(copy / "sitemap.xml")
+        self.assertEqual(sorted(before - after), [], "rebuild dropped sitemap routes")
+        self.assertIn("https://projectcalc-tools.pages.dev/hotshot/", after)
+        for folder in ("assets", "engine", "scripts", "tests"):
+            self.assertFalse(any(f"/{folder}/" in loc for loc in after), folder)
+
     def test_robots_allows_indexing(self) -> None:
         robots = (ROOT / "robots.txt").read_text(encoding="utf-8")
         self.assertIn("Sitemap:", robots)
