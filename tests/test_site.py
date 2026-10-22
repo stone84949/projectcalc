@@ -224,6 +224,14 @@ class SiteContract(unittest.TestCase):
         self.assertIn("kitFormUrl", config)
         self.assertRegex(html, r'disabled>')
         self.assertIn("The list opens at launch", html)
+        # sign-up form posts email + consent + source page, with a honeypot
+        self.assertIn('id="kit-consent"', html)
+        self.assertIn('name="company_fax"', html)
+        script = (ROOT / "hotshot" / "hotshot.js").read_text(encoding="utf-8")
+        self.assertIn(r"script\.google\.com", script)
+        self.assertIn("method: 'POST'", script)
+        self.assertTrue((ROOT / "forms" / "hotshot-kit-signup.gs").exists())
+        self.assertTrue((ROOT / "HOTSHOT-EMAIL-SETUP.md").exists())
 
     def test_homepage_lists_all_tools(self) -> None:
         text = parse(ROOT / "index.html").text.lower()

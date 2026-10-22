@@ -440,6 +440,7 @@ def static_pages() -> None:
         """
         <p>There is no account and no server-side form. Calculator inputs are saved in your browser’s localStorage so a refresh does not wipe the room. Clear site data to delete them.</p>
         <p>If a PayPal payment link is added later, PayPal’s privacy policy applies to that checkout. This static site does not see your payment details.</p>
+        <p>If you join the Hotshot Math operator-kit list, your email address, your consent, the page you signed up on and the time are saved in a private Google Sheet. They are used only to email you about the kit, and you can ask to be removed at any time.</p>
         <p>We do not run an ad network on this first release. If display ads are added later, this page will name the vendor.</p>
         """,
         "legal",

@@ -174,10 +174,12 @@
       <form class="kit-form" id="kit-form" data-kit-form>
         <label class="kit-label" for="kit-email">WHERE TO SEND IT</label>
         <div class="kit-row">
-          <input id="kit-email" name="email" type="email" placeholder="you@dispatch.com" autocomplete="email" disabled>
+          <input id="kit-email" name="email" type="email" placeholder="you@dispatch.com" autocomplete="email" maxlength="254" required disabled>
           <button class="kit-btn" type="submit" disabled>LIGHT ME UP</button>
         </div>
-        <p class="kit-note" data-kit-note>The calculator works today. The list opens at launch.</p>
+        <label class="kit-consent" for="kit-consent"><input id="kit-consent" name="consent" type="checkbox" value="yes" required disabled> Email me about the operator kit. Unsubscribe any time.</label>
+        <div hidden><label for="kit-fax">Leave this empty</label> <input id="kit-fax" name="company_fax" tabindex="-1" autocomplete="off"></div>
+        <p class="kit-note" data-kit-note aria-live="polite">The calculator works today. The list opens at launch.</p>
       </form>
     </section>
 

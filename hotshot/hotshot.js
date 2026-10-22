@@ -118,19 +118,49 @@
     }
   });
 
-  // activate the kit capture only when a real endpoint exists
+  // Activate the kit capture only when kitFormUrl is a deployed Google Apps Script web app
+  // (forms/hotshot-kit-signup.gs; setup in HOTSHOT-EMAIL-SETUP.md). It POSTs form fields and
+  // reads back {ok:true} or {ok:false,error}.
+  var pageLoadedAt = Date.now();
   var kitForm = document.querySelector('[data-kit-form]');
   var note = document.querySelector('[data-kit-note]');
-  var endpoint = (window.HotshotConfig && window.HotshotConfig.kitFormUrl) || '';
-  if (kitForm && endpoint) {
+  var endpoint = String((window.HotshotConfig && window.HotshotConfig.kitFormUrl) || '').trim();
+  var APPS_SCRIPT_URL = /^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec$/;
+  if (kitForm && APPS_SCRIPT_URL.test(endpoint) && window.fetch && window.URLSearchParams) {
     var email = document.getElementById('kit-email');
+    var consent = document.getElementById('kit-consent');
+    var fax = document.getElementById('kit-fax');
     var button = kitForm.querySelector('.kit-btn');
+    var say = function (text) { if (note) note.textContent = text; };
     email.disabled = false;
+    consent.disabled = false;
     button.disabled = false;
-    if (note) note.textContent = 'One email when the kit drops. Nothing else.';
+    say('One email when the kit drops. Nothing else.');
     kitForm.addEventListener('submit', function (event) {
       event.preventDefault();
-      window.location.href = endpoint + encodeURIComponent(email.value.trim());
+      var address = email.value.trim();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(address)) { say('Check that email address.'); email.focus(); return; }
+      if (!consent.checked) { say('Tick the box so we can email you.'); consent.focus(); return; }
+      var body = new URLSearchParams();
+      body.set('email', address);
+      body.set('consent', 'yes');
+      body.set('source', window.location.pathname);
+      body.set('company_fax', fax ? fax.value : '');
+      body.set('elapsed_ms', String(Date.now() - pageLoadedAt));
+      button.disabled = true;
+      say('Sending...');
+      fetch(endpoint, { method: 'POST', body: body })
+        .then(function (response) { return response.json(); })
+        .then(function (data) {
+          if (data && data.ok) {
+            kitForm.reset();
+            say("You're on the list. One email when the kit drops.");
+          } else {
+            say(data && data.error === 'consent' ? 'Tick the box so we can email you.' : 'Check that email address.');
+          }
+        })
+        .catch(function () { say('Could not reach the list just now. Try again in a minute.'); })
+        .then(function () { button.disabled = false; });
     });
   }
 })();
