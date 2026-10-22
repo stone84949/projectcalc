@@ -49,7 +49,7 @@
   };
 
   // Planning multipliers on ROOM_COST_BANDS. Bathrooms do not use a multiplier:
-  // they use the cited per-sq-ft bands in ROOM_TYPE_BANDS below.
+  // they use the cited base + per-sq-ft bands in ROOM_TYPE_BANDS below.
   const ROOM_INTENSITY = {
     bedroom: 1,
     living: 1,
@@ -57,21 +57,27 @@
     kitchen: 2.5,
   };
 
-  // Bathroom bands, recalibrated 2026-10-21 to published 2026 cost guides (see SOURCES.md):
-  // - This Old House, "Small Bathroom Remodel Cost" (updated 2026-06-08, Homewyse data,
-  //   value-grade materials + medium-cost labor): 5x8 (40 sq ft) $15,900-$20,100 (~$400-$500/sq ft);
-  //   basic refresh $3,000-$8,000; mid-range update $8,000-$18,000.
-  // - Angi, "How Much Does a Bathroom Remodel Cost?" (updated 2026-07-09): $70-$250/sq ft overall;
-  //   minor $3,000-$10,000, partial $10,000-$25,000, full $25,000-$80,000.
-  // - HomeAdvisor True Cost Guide (updated 2026-06-17): typical $6,651-$17,660; full bath $3,500-$20,000.
-  // Set (with judgment on the mid low and full high) so a 40 sq ft bath lands at: cosmetic $3,000-$8,000 (TOH basic refresh),
-  // mid $9,000-$18,000 (TOH mid-range update), full $16,000-$30,000 (TOH 5x8 low end up to Angi full).
-  // Per-sq-ft costs fall in large primary baths, so these bands are for small/standard baths (about 25-60 sq ft).
+  // Bathroom bands: a fixed base (fixtures, plumbing, waterproofing, permits) plus a per-sq-ft
+  // part, so small baths cost more per sq ft and large primary baths less. First set 2026-10-21;
+  // reshaped 2026-10-22 to base + per-sq-ft with the same 5x8 (40 sq ft) results (see SOURCES.md).
+  // - This Old House, "Small Bathroom Remodel Cost" (updated 2026-06-08): size table from Homewyse,
+  //   value-grade materials + medium-cost labor, scope not itemized; its intro calls $18,000+ a
+  //   "full renovation": 5x6 $11,900-$15,100, 5x8 $15,900-$20,100, 6x8 $19,000-$24,100.
+  //   Separate scope tiers: basic refresh $3,000-$8,000; mid-range update (new fixtures, flooring,
+  //   tile, vanity, limited plumbing/electrical) $8,000-$18,000; premium $18,000+.
+  // - JLC/Zonda Cost vs. Value 2025, Bath Remodel | Midrange: $26,138 national for a 5x7 bath with
+  //   ALL fixtures replaced (tub + tile surround, toilet, vanity, medicine cabinet, tile floor).
+  // - Fixr (updated 2026-01-27): 5x8 $2,800-$16,000; partial $6,000-$25,000; full gut $9,000-$30,000+.
+  // - HomeAdvisor (updated 2026-06-17): typical $6,651-$17,660; half bath $1,500-$15,000;
+  //   full bath $3,500-$20,000; primary $7,000-$30,000.
+  // The TOH size table and Cost vs. Value "midrange" are full-replacement scopes, so they map to our
+  // `full` tier, not `mid`. Results for 40 sq ft: cosmetic $3,000-$8,000, mid $9,000-$18,000,
+  // full $16,000-$30,000. Base/rate split is our judgment, checked against the 5x6/6x8/5x7/10x10 figures.
   const ROOM_TYPE_BANDS = {
     bathroom: {
-      cosmetic: { low: 75, high: 200, label: 'Bathroom refresh (paint, vanity, fixtures, flooring)' },
-      mid: { low: 225, high: 450, label: 'Bathroom mid-range update (new surfaces, tile, some plumbing)' },
-      full: { low: 400, high: 750, label: 'Bathroom full remodel (gut to studs)' },
+      cosmetic: { baseLow: 2000, low: 25, baseHigh: 4000, high: 100, label: 'Bathroom refresh (paint, vanity, fixtures, flooring)' },
+      mid: { baseLow: 5000, low: 100, baseHigh: 10000, high: 200, label: 'Bathroom mid-range update (keep layout; new vanity, toilet, flooring, some tile and plumbing)' },
+      full: { baseLow: 6000, low: 250, baseHigh: 14000, high: 400, label: 'Bathroom full remodel (replace all fixtures, tub/shower, tile and surfaces; gut to studs)' },
     },
   };
 
@@ -561,8 +567,8 @@
     const band = Object.prototype.hasOwnProperty.call(bandSet, finish) ? bandSet[finish] : null;
     if (!band) return fail('Choose a finish: cosmetic, mid, or full.');
     const area = lengthFt * widthFt;
-    const low = money(area * band.low * intensity);
-    const high = money(area * band.high * intensity);
+    const low = money(((band.baseLow || 0) + area * band.low) * intensity);
+    const high = money(((band.baseHigh || 0) + area * band.high) * intensity);
     return ok(
       {
         areaSqFt: round(area, 2),
@@ -571,6 +577,8 @@
         intensity: intensity,
         usdPerSqFtLow: band.low,
         usdPerSqFtHigh: band.high,
+        baseUsdLow: band.baseLow || 0,
+        baseUsdHigh: band.baseHigh || 0,
         bandBasis: typeBands ? 'cited-' + roomType : 'general',
         costLow: low,
         costHigh: high,

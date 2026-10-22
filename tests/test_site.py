@@ -242,11 +242,15 @@ class SiteContract(unittest.TestCase):
             self.assertIn("thisoldhouse.com/bathrooms/reviews/small-bathroom-remodel-cost", text)
             self.assertIn("angi.com/articles/how-much-does-bathroom-remodel-cost", text)
             self.assertIn("$15,900–$20,100", text)
+            self.assertIn("jlconline.com/cost-vs-value/2025/national", text)
+            self.assertIn("$26,138", text)
+            self.assertIn("fixr.com/costs/bathroom-remodeling", text)
         public = [p for p in ROOT.rglob("*.html") if "node_modules" not in p.parts] + [ROOT / "assets" / "ui.js"]
         for path in public:
             body = path.read_text(encoding="utf-8")
             self.assertNotIn("2.2×", body, path.name)
             self.assertNotIn("$3,520", body, path.name)
+            self.assertNotIn("$225–$450", body, path.name)
 
 
 if __name__ == "__main__":

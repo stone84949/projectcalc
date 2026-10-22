@@ -187,9 +187,9 @@
           type: 'select',
           value: 'mid',
           options: [
-            { value: 'cosmetic', label: 'Cosmetic ($15–$30 / sq ft; bath $75–$200)' },
-            { value: 'mid', label: 'Mid remodel ($40–$80 / sq ft; bath $225–$450)' },
-            { value: 'full', label: 'Full gut-level ($100–$200 / sq ft; bath $400–$750)' },
+            { value: 'cosmetic', label: 'Cosmetic ($15–$30 / sq ft; 5×8 bath $3k–$8k)' },
+            { value: 'mid', label: 'Mid remodel ($40–$80 / sq ft; 5×8 bath $9k–$18k)' },
+            { value: 'full', label: 'Full gut-level ($100–$200 / sq ft; 5×8 bath $16k–$30k)' },
           ],
         },
       ],
