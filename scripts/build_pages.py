@@ -785,12 +785,32 @@ def static_pages() -> None:
     )
 
 
+# Top-level folders that are not public pages.
+NON_PAGE_DIRS = {"assets", "engine", "scripts", "tests", "node_modules", "calculators", "guides", "pack"}
+
+
+def hand_built_routes() -> list[str]:
+    """Public routes this script does not generate (e.g. /hotshot/), found on disk.
+
+    Any top-level folder with an index.html that this build does not own is a
+    hand-built page and stays in the sitemap across rebuilds.
+    """
+    routes = []
+    for index in sorted(ROOT.glob("*/index.html")):
+        folder = index.parent.name
+        if folder.startswith((".", "_")) or folder in NON_PAGE_DIRS:
+            continue
+        routes.append(f"/{folder}/")
+    return routes
+
+
 def robots_and_sitemap() -> None:
     files = ["index.html", "about.html", "disclaimer.html", "privacy.html", "sources.html", "pack/index.html"]
     files += [f"calculators/{slug}.html" for slug, _, _ in TOOLS]
     files += ["guides/index.html"]
     files += [f"guides/{g['slug']}.html" for g in GUIDE_PAGES]
     urls = [pretty_path(f) for f in files]
+    urls += [r for r in hand_built_routes() if r not in urls]
     locs = "\n".join(f"  <url><loc>{BASE}{path}</loc></url>" for path in urls)
     (ROOT / "sitemap.xml").write_text(
         '<?xml version="1.0" encoding="UTF-8"?>\n'
