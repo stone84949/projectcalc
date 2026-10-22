@@ -49,7 +49,8 @@ Coverage and waste figures used by `engine/calc-engine.js`. The site restates th
 ## Room cost
 
 - 2025–2026 published remodel writeups: roughly **$15–$30 / sq ft** cosmetic, much higher for wet rooms and gut work (Angi / HomeAdvisor summaries).
-- Kitchen intensity multiplier (2.5×) is a ProjectCalc planning factor, labeled as such. Not a bid.
+- Mid ($40–$80 / sq ft) and full gut ($100–$200 / sq ft) general bands: ProjectCalc rough planning ranges. No free public source was found that states these bands; the guide pages call them "rough planning ranges" and say they are not published figures. Not a bid.
+- Kitchen intensity multiplier (2.5×) is a ProjectCalc rough planning factor with no outside citation, labeled as such on the kitchen guide and calculator. Not a bid.
 - Bathrooms (recalibrated 2026-10-21, reshaped 2026-10-22) no longer use a multiplier (was 2.2×, which put a 5×8 mid remodel at $3,520–$7,040, well below published figures). They use a fixed base (fixtures, plumbing, waterproofing, permits) plus a per-sq-ft part, so small baths cost more per sq ft and large primary baths less:
   - cosmetic: $2,000–$4,000 + $25–$100 / sq ft
   - mid: $5,000–$10,000 + $100–$200 / sq ft
@@ -62,3 +63,10 @@ Coverage and waste figures used by `engine/calc-engine.js`. The site restates th
   - HomeAdvisor True Cost Guide, bathroom remodel (updated 2026-06-17, re-read 2026-10-22): typical $6,651–$17,660; half bath or powder room $1,500–$15,000; full bath $3,500–$20,000; primary bath $7,000–$30,000. https://www.homeadvisor.com/cost/bathrooms/remodel-a-bathroom/
   - Scope, and why the 5×8 mid is not $15,900+: the This Old House size table and the Cost vs. Value "midrange" bath both replace every fixture, the tub or shower and the tile. That is our **full** tier, which at 5×8 is $16,000–$30,000 and contains both (Cost vs. Value's $26,138 for 35 sq ft sits inside our 5×7 full band of $14,750–$28,000). Our **mid** tier keeps the layout and replaces some surfaces and fixtures; it matches This Old House's own $8,000–$18,000 mid-range update tier, Fixr's partial remodel and HomeAdvisor's typical $6,651–$17,660. The word "midrange" in Cost vs. Value means material grade, not partial scope.
   - Judgment calls: the base/per-sq-ft split; the mid low end ($9,000 vs This Old House's $8,000); the full high end ($30,000 at 5×8, above This Old House and HomeAdvisor's full-bath $20,000 top, inside Angi's full scope and Fixr's $30,000+). Our full low end runs about 10% above This Old House at 5×6 ($13,500 vs $11,900) and 5% below at 6×8 ($18,000 vs $19,000) because their table is strictly proportional to area. Layout changes, moved plumbing and premium finishes are beyond the full tier.
+
+## Hotshot Math (hotshot load calculator)
+
+- Method: `hotshotLoad` in `engine/calc-engine.js` is arithmetic on the operator's own inputs only: gross = rate × loaded miles (or a flat rate); fuel = (loaded + deadhead miles) / MPG × fuel price; tolls as entered; factoring = gross × factoring %. Net = gross − fuel − tolls − factoring, reported per loaded and per total mile, with a take/pass verdict against the operator's own minimum net $/mi. No external data feeds the calculation.
+- Excluded by design: truck payment, insurance and maintenance. Those live inside the operator's minimum $/mi (`minNetPerMile`), as the engine comment and the starter guide both say.
+- Starter guide (`hotshot/guides/how-to-start-hotshot-trucking.html`) names FMCSA as the authority for operating authority (USDOT number free, MC docket filing $300) and states the for-hire non-hazmat liability minimum ($750,000) and the 26,001 lb GVWR CDL threshold. The repo does not yet carry URLs for those figures; they need a linked FMCSA citation before the guide is promoted as a reference.
+- Worked example on the page (540 loaded mi, 80 deadhead, 3% factoring) is computed by the same engine function and covered by the node tests.
