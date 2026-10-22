@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Should you take this load? — Hotshot Math</title>
+  <meta name="description" content="Free hotshot load calculator: rate, deadhead, fuel, tolls, and factoring on six night gauges, then a needle-sweep take-it-or-pass verdict.">
+  <link rel="canonical" href="https://projectcalc-tools.pages.dev/hotshot/">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="hotshot.css">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="panel-bar">
+    <p class="panel-name">HOTSHOT MATH</p>
+    <p class="panel-sub">LOAD DECISION PANEL</p>
+  </header>
+
+  <main id="main" class="panel">
+    <h1 class="panel-head">Should you take<br>this load?</h1>
+    <p class="panel-lede">Read the load like a panel: six gauges, your numbers, one verdict. Free, no signup, nothing to install.</p>
+
+    <form class="gauges" id="load-form" autocomplete="off">
+      <section class="gauge gauge-net" aria-label="Net verdict gauge">
+        <div class="dial" data-dial="net">
+          <svg viewBox="0 0 200 120" aria-hidden="true">
+            <path class="scale" d="M 15 105 A 85 85 0 0 1 185 105"></path>
+            <path class="band amber" id="amber-band" d="M 15 105 A 85 85 0 0 1 61.4 29.3"></path>
+            <path class="band green" id="green-band" d="M 61.4 29.3 A 85 85 0 0 1 185 105"></path>
+            <g class="ticks" id="net-ticks"></g>
+            <line class="needle" id="net-needle" x1="100" y1="105" x2="100" y2="32"></line>
+            <circle class="hub" cx="100" cy="105" r="6"></circle>
+            <text class="readout" id="net-readout" x="100" y="92" text-anchor="middle">--</text>
+          </svg>
+        </div>
+        <p class="placard">NET <span class="placard-note" id="net-state">SET YOUR NUMBERS</span></p>
+        <div class="flag" id="flag" hidden>
+          <span class="flag-word" id="flag-word">TAKE IT</span>
+          <span class="flag-sub" id="flag-sub">$1.90/MI NET</span>
+        </div>
+      </section>
+
+      <section class="gauge" aria-label="Rate per mile gauge">
+        <div class="dial">
+          <svg viewBox="0 0 200 120" aria-hidden="true">
+            <path class="scale" d="M 15 105 A 85 85 0 0 1 185 105"></path>
+            <g class="ticks"></g>
+            <line class="needle" data-gauge="rate" x1="100" y1="105" x2="100" y2="34"></line>
+            <circle class="hub" cx="100" cy="105" r="5"></circle>
+            <text class="readout" x="100" y="92" text-anchor="middle">--</text>
+          </svg>
+        </div>
+        <p class="placard">RATE <span class="unit">$/MI</span></p>
+        <input id="ratePerMile" name="ratePerMile" type="number" inputmode="decimal" step="0.01" min="0" placeholder="2.85" aria-label="Rate dollars per mile">
+      </section>
+
+      <section class="gauge" aria-label="Fuel price gauge">
+        <div class="dial">
+          <svg viewBox="0 0 200 120" aria-hidden="true">
+            <path class="scale" d="M 15 105 A 85 85 0 0 1 185 105"></path>
+            <g class="ticks"></g>
+            <line class="needle" data-gauge="fuel" x1="100" y1="105" x2="100" y2="34"></line>
+            <circle class="hub" cx="100" cy="105" r="5"></circle>
+            <text class="readout" x="100" y="92" text-anchor="middle">--</text>
+          </svg>
+        </div>
+        <p class="placard">FUEL <span class="unit">$/GAL</span></p>
+        <input id="fuelPrice" name="fuelPrice" type="number" inputmode="decimal" step="0.01" min="0" placeholder="3.65" required aria-label="Fuel price per gallon">
+      </section>
+
+      <section class="gauge" aria-label="Deadhead gauge">
+        <div class="dial">
+          <svg viewBox="0 0 200 120" aria-hidden="true">
+            <path class="scale" d="M 15 105 A 85 85 0 0 1 185 105"></path>
+            <g class="ticks"></g>
+            <line class="needle" data-gauge="deadhead" x1="100" y1="105" x2="100" y2="34"></line>
+            <circle class="hub" cx="100" cy="105" r="5"></circle>
+            <text class="readout" x="100" y="92" text-anchor="middle">--</text>
+          </svg>
+        </div>
+        <p class="placard">DEADHEAD <span class="unit">MI</span></p>
+        <input id="deadheadMiles" name="deadheadMiles" type="number" inputmode="numeric" step="1" min="0" placeholder="80" aria-label="Deadhead miles">
+      </section>
+
+      <section class="gauge" aria-label="Tolls gauge">
+        <div class="dial">
+          <svg viewBox="0 0 200 120" aria-hidden="true">
+            <path class="scale" d="M 15 105 A 85 85 0 0 1 185 105"></path>
+            <g class="ticks"></g>
+            <line class="needle" data-gauge="tolls" x1="100" y1="105" x2="100" y2="34"></line>
+            <circle class="hub" cx="100" cy="105" r="5"></circle>
+            <text class="readout" x="100" y="92" text-anchor="middle">--</text>
+          </svg>
+        </div>
+        <p class="placard">TOLLS <span class="unit">$</span></p>
+        <input id="tolls" name="tolls" type="number" inputmode="decimal" step="0.01" min="0" placeholder="45" aria-label="Tolls dollars">
+      </section>
+
+      <section class="gauge" aria-label="Factoring gauge">
+        <div class="dial">
+          <svg viewBox="0 0 200 120" aria-hidden="true">
+            <path class="scale" d="M 15 105 A 85 85 0 0 1 185 105"></path>
+            <g class="ticks"></g>
+            <line class="needle" data-gauge="factoring" x1="100" y1="105" x2="100" y2="34"></line>
+            <circle class="hub" cx="100" cy="105" r="5"></circle>
+            <text class="readout" x="100" y="92" text-anchor="middle">--</text>
+          </svg>
+        </div>
+        <p class="placard">FACTORING <span class="unit">%</span></p>
+        <input id="factoringPct" name="factoringPct" type="number" inputmode="decimal" step="0.1" min="0" max="15" placeholder="3" aria-label="Factoring percent">
+      </section>
+
+      <section class="gauge" aria-label="Loaded miles gauge">
+        <div class="dial">
+          <svg viewBox="0 0 200 120" aria-hidden="true">
+            <path class="scale" d="M 15 105 A 85 85 0 0 1 185 105"></path>
+            <g class="ticks"></g>
+            <line class="needle" data-gauge="miles" x1="100" y1="105" x2="100" y2="34"></line>
+            <circle class="hub" cx="100" cy="105" r="5"></circle>
+            <text class="readout" x="100" y="92" text-anchor="middle">--</text>
+          </svg>
+        </div>
+        <p class="placard">LOADED <span class="unit">MI</span></p>
+        <input id="miles" name="miles" type="number" inputmode="numeric" step="1" min="1" placeholder="540" required aria-label="Loaded miles">
+      </section>
+
+      <div class="mini-placards">
+        <div class="mini">
+          <label for="truckMpg">TRUCK MPG</label>
+          <input id="truckMpg" name="truckMpg" type="number" inputmode="decimal" step="0.1" min="1" placeholder="8.4" required>
+        </div>
+        <div class="mini">
+          <label for="flatRate">FLAT $ <span class="unit">(0 = $/mi)</span></label>
+          <input id="flatRate" name="flatRate" type="number" inputmode="decimal" step="1" min="0" placeholder="0">
+        </div>
+        <div class="mini">
+          <label for="minNetPerMile">MIN $/MI NET</label>
+          <input id="minNetPerMile" name="minNetPerMile" type="number" inputmode="decimal" step="0.05" min="0" placeholder="1.25">
+        </div>
+      </div>
+
+      <button class="run-btn" type="submit">RUN THE NUMBERS</button>
+      <p class="verdict-note" id="verdict-note" aria-live="polite">Every gauge above, then the verdict.</p>
+    </form>
+
+    <section class="how">
+      <h2>The math, on the placard</h2>
+      <p class="example-label">EXAMPLE - 540 mi at $2.85/mi, 80 mi deadhead, $3.65 fuel, 8.4 mpg, $45 tolls, 3% factoring:</p>
+      <div class="worked">
+        <p><span>Gross linehaul</span><span>$1,539.00</span></p>
+        <p><span>Fuel - 620 mi / 8.4 mpg x $3.65</span><span>-$269.40</span></p>
+        <p><span>Tolls</span><span>-$45.00</span></p>
+        <p><span>Factoring - 3% of gross</span><span>-$46.17</span></p>
+        <p class="worked-net"><span>Net to truck</span><span>$1,178.43</span></p>
+        <p><span>Net per total mile</span><span>$1.90/mi</span></p>
+      </div>
+      <p class="fine">Fuel, tolls, and factoring are counted - the costs that change with the load. Truck payment, insurance, and maintenance live in your MIN $/MI. Set it once; the needle tells you the rest.</p>
+    </section>
+
+    <section class="who">
+      <div class="who-front">
+        <h2>Read by an operator, not a content farm</h2>
+        <p>Built from the driver's seat of a running hotshot. The template shops selling trucking spreadsheets have never pulled a rate confirmation.</p>
+      </div>
+      <div class="who-back">
+        <p>Every formula is printed above. No black box, no premium unlock, no selling your email. If the math is wrong, it gets fixed in the open.</p>
+      </div>
+    </section>
+
+    <section class="kit-strip">
+      <h2>OPERATOR KIT</h2>
+      <p class="kit-lede">The full load-math kit is in the works: rate-con walk-through, deadhead rules of thumb, factoring math, and quarterly IFTA sheets.</p>
+      <form class="kit-form" id="kit-form" data-kit-form>
+        <label class="kit-label" for="kit-email">WHERE TO SEND IT</label>
+        <div class="kit-row">
+          <input id="kit-email" name="email" type="email" placeholder="you@dispatch.com" autocomplete="email" maxlength="254" required disabled>
+          <button class="kit-btn" type="submit" disabled>LIGHT ME UP</button>
+        </div>
+        <label class="kit-consent" for="kit-consent"><input id="kit-consent" name="consent" type="checkbox" value="yes" required disabled> Email me about the operator kit. Unsubscribe any time.</label>
+        <div hidden><label for="kit-fax">Leave this empty</label> <input id="kit-fax" name="company_fax" tabindex="-1" autocomplete="off"></div>
+        <p class="kit-note" data-kit-note aria-live="polite">The calculator works today. The list opens at launch.</p>
+      </form>
+    </section>
+
+    <footer class="panel-foot">
+      <p>Hotshot Math is a planning tool, not tax or legal advice. Numbers are estimates; verify against your own rate confirmation.</p>
+      <nav aria-label="Footer">
+        <ul>
+          <li><a href="../about.html">About</a></li>
+          <li><a href="../disclaimer.html">Disclaimer</a></li>
+          <li><a href="../privacy.html">Privacy</a></li>
+          <li><a href="../sources.html">Sources</a></li>
+        </ul>
+      </nav>
+    </footer>
+  </main>
+
+  <script src="config.js"></script>
+  <script src="../engine/calc-engine.js"></script>
+  <script src="hotshot.js"></script>
+</body>
+</html>

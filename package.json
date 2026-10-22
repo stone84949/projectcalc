@@ -4,6 +4,6 @@
   "description": "Static DIY calculator site",
   "scripts": {
     "build": "node scripts/run-python.js scripts/build_pages.py",
-    "test": "node --test tests/engine.test.js tests/guides.test.js tests/run-python.test.js && node scripts/run-python.js -m unittest tests.test_site"
+    "test": "node --test tests/engine.test.js tests/guides.test.js tests/run-python.test.js tests/hotshot-kit-signup.test.js && node scripts/run-python.js -m unittest tests.test_site"
   }
 }

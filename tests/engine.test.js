@@ -336,3 +336,89 @@ test('ceilBuy rounds leftover volume up and ignores float dust', () => {
   assert.equal(ceilBuy(2), 2);
   assert.equal(ceilBuy(0), 0);
 });
+
+test('hotshot-load: strong load clears the operator minimum', () => {
+  const result = compute('hotshot-load', {
+    ratePerMile: 2.85,
+    miles: 540,
+    deadheadMiles: 80,
+    fuelPrice: 3.65,
+    truckMpg: 8.4,
+    tolls: 45,
+    factoringPct: 3,
+    minNetPerMile: 1.25,
+  });
+
+  assert.equal(result.ok, true);
+  assert.equal(result.values.grossPay, 1539);
+  assert.equal(result.values.totalMiles, 620);
+  assert.equal(result.values.fuelGallons, 73.8);
+  assert.equal(result.values.fuelCost, 269.4);
+  assert.equal(result.values.factoringFee, 46.17);
+  assert.equal(result.values.factoringPct, 3);
+  assert.equal(result.values.totalDeductions, 360.57);
+  assert.equal(result.values.netToTruck, 1178.43);
+  assert.equal(result.values.netPerLoadedMile, 2.18);
+  assert.equal(result.values.netPerTotalMile, 1.9);
+  assert.equal(result.values.verdict, 'take');
+});
+
+test('hotshot-load: weak load below the minimum says pass', () => {
+  const result = compute('hotshot-load', {
+    ratePerMile: 1.9,
+    miles: 540,
+    deadheadMiles: 120,
+    fuelPrice: 4,
+    truckMpg: 7.5,
+    tolls: 85,
+    factoringPct: 3,
+    minNetPerMile: 1.25,
+  });
+
+  assert.equal(result.ok, true);
+  assert.equal(result.values.grossPay, 1026);
+  assert.equal(result.values.fuelGallons, 88);
+  assert.equal(result.values.fuelCost, 352);
+  assert.equal(result.values.netToTruck, 558.22);
+  assert.equal(result.values.netPerTotalMile, 0.85);
+  assert.equal(result.values.verdict, 'pass');
+});
+
+test('hotshot-load: flat rate converts to an effective per-mile rate', () => {
+  const result = compute('hotshot-load', {
+    flatRate: 1539,
+    miles: 540,
+    fuelPrice: 3.65,
+    truckMpg: 8.4,
+  });
+
+  assert.equal(result.ok, true);
+  assert.equal(result.values.effectiveRatePerMile, 2.85);
+  assert.equal(result.values.grossPay, 1539);
+  assert.equal(result.values.factoringPct, 0);
+  assert.equal(result.values.netToTruck, 1304.36);
+  assert.equal(result.values.verdict, '');
+});
+
+test('hotshot-load: rejects missing rate when no flat rate given', () => {
+  const result = compute('hotshot-load', {
+    miles: 540,
+    fuelPrice: 3.65,
+    truckMpg: 8.4,
+  });
+  assert.equal(result.ok, false);
+  assert.match(result.error, /rate/i);
+});
+
+test('hotshot-load: verdict stays neutral with no minimum set', () => {
+  const result = compute('hotshot-load', {
+    ratePerMile: 2,
+    miles: 300,
+    fuelPrice: 3.5,
+    truckMpg: 8,
+  });
+
+  assert.equal(result.ok, true);
+  assert.equal(result.values.verdict, '');
+  assert.equal(result.values.netToTruck, 468.75);
+});

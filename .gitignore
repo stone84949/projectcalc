@@ -4,4 +4,8 @@ node_modules/
 __pycache__/
 *.pyc
 .idea/
+
+# impeccable design workflow artifacts (local only; public repo ships HTML/CSS/JS)
+PRODUCT.md
+.impeccable/
 .vscode/

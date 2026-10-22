@@ -58,6 +58,10 @@ REQUIRED = [
     ROOT / "engine" / "calc-engine.js",
     ROOT / "pack" / "index.html",
     ROOT / "guides" / "index.html",
+    ROOT / "hotshot" / "index.html",
+    ROOT / "hotshot" / "hotshot.css",
+    ROOT / "hotshot" / "hotshot.js",
+    ROOT / "hotshot" / "config.js",
     *[ROOT / "calculators" / f"{slug}.html" for slug in TOOLS],
     *[ROOT / "guides" / f"{slug}.html" for slug in GUIDES],
 ]
@@ -279,6 +283,29 @@ class SiteContract(unittest.TestCase):
         robots = (ROOT / "robots.txt").read_text(encoding="utf-8")
         self.assertIn("Sitemap:", robots)
         self.assertNotIn("Disallow: /", robots)
+
+    def test_hotshot_page_mounts_engine_with_gated_kit(self) -> None:
+        path = ROOT / "hotshot" / "index.html"
+        html = path.read_text(encoding="utf-8")
+        doc = parse(path)
+        self.assertIn("calc-engine.js", html)
+        self.assertIn("hotshot.js", html)
+        self.assertIn('id="load-form"', html)
+        self.assertIn('aria-live="polite"', html)
+        self.assertTrue(doc.attrs.get("h1"), "hotshot missing h1")
+        # kit capture stays disabled until a real endpoint is configured
+        config = (ROOT / "hotshot" / "config.js").read_text(encoding="utf-8")
+        self.assertIn("kitFormUrl", config)
+        self.assertRegex(html, r'disabled>')
+        self.assertIn("The list opens at launch", html)
+        # sign-up form posts email + consent + source page, with a honeypot
+        self.assertIn('id="kit-consent"', html)
+        self.assertIn('name="company_fax"', html)
+        script = (ROOT / "hotshot" / "hotshot.js").read_text(encoding="utf-8")
+        self.assertIn(r"script\.google\.com", script)
+        self.assertIn("method: 'POST'", script)
+        self.assertTrue((ROOT / "forms" / "hotshot-kit-signup.gs").exists())
+        self.assertTrue((ROOT / "HOTSHOT-EMAIL-SETUP.md").exists())
 
     def test_homepage_lists_all_tools(self) -> None:
         text = parse(ROOT / "index.html").text.lower()

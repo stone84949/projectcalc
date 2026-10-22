@@ -1,0 +1,383 @@
+/* Hotshot Math - night instrument six-pack world.
+   Matte black panel, luminous needles, placard caps. The page IS the panel. */
+
+:root {
+  --panel: #0c0f12;
+  --face: #11151a;
+  --face-edge: #2a323c;
+  --white: #e8ecef;
+  --pad-x: 16px;
+  --pad-b: 34px;
+  --dim: #aab6bf;
+  --needle: #57d98a;
+  --amber: #e0a52e;
+  --amber-deep: #b97f14;
+  --green: #2f9e5c;
+  --mono: "Courier New", ui-monospace, SFMono-Regular, Menlo, monospace;
+  /* Courier New committed knowingly: closest installed instrument-readout mono
+     while the repo ships HTML/CSS/JS only. */
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--panel);
+  color: var(--white);
+  font-family: var(--mono);
+  line-height: 1.5;
+}
+
+/* browser surfaces carry the panel */
+::selection { background: var(--amber); color: var(--panel); }
+input { caret-color: var(--amber); }
+.worked p, .readout, .flag-sub { font-variant-numeric: tabular-nums; }
+
+.skip {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  background: var(--amber);
+  color: var(--panel);
+  padding: 8px 14px;
+  z-index: 10;
+}
+.skip:focus { left: 8px; top: 8px; }
+
+/* ---- panel bar (nameplate chrome, not a kicker) ---- */
+
+.panel-bar {
+  margin: 0;
+  padding: 14px 20px 12px;
+  border-bottom: 1px solid var(--face-edge);
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+.panel-name {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+}
+.panel-sub {
+  margin: 0;
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  color: var(--dim);
+}
+
+/* ---- panel ---- */
+
+.panel {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 22px var(--pad-x) var(--pad-b);
+}
+
+.panel-head {
+  font-size: clamp(30px, 8.5vw, 42px);
+  line-height: 1.05;
+  margin: 8px 0 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 800;
+  text-align: center;
+}
+
+.panel-lede {
+  font-size: 14px;
+  color: var(--dim);
+  margin: 0 auto 20px;
+  max-width: 36ch;
+  text-align: center;
+}
+
+/* ---- gauges ---- */
+
+.gauges {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.gauge {
+  background: var(--face);
+  border: 1px solid var(--face-edge);
+  border-radius: 8px;
+  padding: 12px 10px 10px;
+  text-align: center;
+}
+
+.gauge-net {
+  grid-column: 1 / -1;
+  padding: 16px 12px 14px;
+}
+
+.dial svg { width: 100%; height: auto; display: block; }
+
+.scale { fill: none; stroke: var(--face-edge); stroke-width: 3; }
+.band { fill: none; stroke-width: 8; opacity: 0.85; }
+.band.amber { stroke: var(--amber-deep); }
+.band.green { stroke: var(--green); }
+.ticks line { stroke: var(--dim); stroke-width: 1.5; opacity: 0.6; }
+.needle {
+  stroke: var(--needle);
+  stroke-width: 4;
+  stroke-linecap: round;
+  transform-origin: 100px 105px;
+  transform: rotate(-90deg);
+  transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+  filter: drop-shadow(0 0 4px rgba(87, 217, 138, 0.6));
+}
+.hub { fill: var(--white); }
+.readout {
+  fill: var(--white);
+  font-family: var(--mono);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+.gauge-net .readout { font-size: 26px; }
+
+.placard {
+  margin: 10px 0 6px;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+}
+.placard-note { color: var(--amber); font-weight: 400; letter-spacing: 0.1em; }
+.unit { color: var(--dim); font-weight: 400; letter-spacing: 0.05em; }
+
+.gauge input {
+  width: 100%;
+  font: inherit;
+  font-size: 16px;
+  text-align: center;
+  color: var(--white);
+  background: #151a20;
+  border: 1px solid var(--face-edge);
+  border-radius: 4px;
+  padding: 8px 6px;
+}
+.gauge input::placeholder, .mini input::placeholder { color: #8a98a3; }
+.gauge input:focus, .mini input:focus {
+  outline: 3px solid var(--amber);
+  outline-offset: 1px;
+  border-color: var(--amber);
+}
+
+/* verdict flag on the NET gauge */
+.flag {
+  margin: 10px auto 2px;
+  display: inline-block;
+  padding: 8px 22px;
+  border: 3px solid var(--needle);
+  border-radius: 6px;
+  transform: rotate(-2deg);
+  text-align: center;
+}
+.flag.pass { border-color: var(--white); opacity: 0.95; }
+.flag-word {
+  display: block;
+  font-size: clamp(26px, 7vw, 34px);
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  color: var(--needle);
+  line-height: 1.1;
+}
+.flag.pass .flag-word { color: var(--white); text-shadow: none; }
+.flag-sub {
+  display: block;
+  margin-top: 4px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--dim);
+}
+
+/* ---- mini placards (set numbers without a dial) ---- */
+
+.mini-placards {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.mini:last-child:nth-child(odd) { grid-column: 1 / -1; }
+
+.mini {
+  background: var(--face);
+  border: 1px solid var(--face-edge);
+  border-radius: 6px;
+  padding: 10px;
+}
+
+.mini label {
+  display: block;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  color: var(--dim);
+  margin-bottom: 6px;
+}
+
+.mini input {
+  width: 100%;
+  font: inherit;
+  font-size: 16px;
+  text-align: center;
+  color: var(--white);
+  background: #151a20;
+  border: 1px solid var(--face-edge);
+  border-radius: 4px;
+  padding: 8px 6px;
+}
+
+.run-btn {
+  grid-column: 1 / -1;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 0.24em;
+  padding: 16px;
+  color: var(--panel);
+  background: var(--amber);
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.run-btn:hover { background: var(--needle); }
+.run-btn:focus-visible { outline: 3px solid var(--white); outline-offset: 3px; }
+.run-btn:active { transform: translateY(1px); }
+
+.verdict-note {
+  grid-column: 1 / -1;
+  font-size: 13px;
+  color: var(--dim);
+  text-align: center;
+  margin: 4px 0 0;
+}
+
+/* ---- placard sections below the panel ---- */
+
+.how, .who {
+  margin-top: 22px;
+  border-top: 1px solid var(--face-edge);
+  padding-top: 16px;
+}
+
+.how h2, .who h2, .kit-strip h2 {
+  font-size: 14px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin: 0 0 10px;
+  color: var(--white);
+}
+
+.example-label { font-size: 12px; color: var(--dim); margin: 0 0 8px; }
+
+.worked p {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0;
+  padding: 5px 0;
+  font-size: 14px;
+  border-bottom: 1px dotted #3a434e;
+}
+.worked p span:last-child { font-weight: 700; }
+.worked p.neg span:last-child { color: var(--amber); }
+.worked-net { font-weight: 800; font-size: 16px; }
+
+.fine { font-size: 12.5px; color: var(--dim); margin: 12px 0 0; }
+
+/* promise front / instruction back */
+.who-front h2 { color: var(--amber); }
+.who-front p { font-size: 14px; margin: 0 0 10px; }
+.who-back {
+  background: #151a20;
+  border: 1px solid var(--face-edge);
+  border-top: 3px double var(--dim);
+  padding: 10px 12px;
+}
+.who-back p { font-size: 13px; margin: 0; color: var(--dim); }
+
+/* ---- operator kit strip ---- */
+
+.kit-strip {
+  margin: 22px calc(var(--pad-x) * -1) calc(var(--pad-b) * -1);
+  padding: 18px 16px 26px;
+  background: #101418;
+  border-top: 2px solid var(--amber-deep);
+}
+
+.kit-lede { font-size: 13.5px; color: var(--dim); margin: 0 0 14px; max-width: 44ch; }
+
+.kit-label {
+  display: block;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  font-weight: 800;
+  color: var(--dim);
+  margin-bottom: 8px;
+}
+
+.kit-row { display: flex; gap: 10px; flex-wrap: wrap; }
+
+.kit-row input {
+  flex: 1 1 180px;
+  font: inherit;
+  font-size: 16px;
+  padding: 10px 12px;
+  color: var(--white);
+  background: #151a20;
+  border: 1px solid var(--face-edge);
+  border-radius: 4px;
+}
+.kit-row input::placeholder { color: #8a98a3; }
+.kit-row input:focus { outline: 3px solid var(--amber); }
+
+.kit-btn {
+  font: inherit;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  padding: 10px 18px;
+  background: var(--amber);
+  color: var(--panel);
+  border: 0;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.kit-btn:disabled { opacity: 0.5; cursor: default; }
+.kit-btn:focus-visible { outline: 3px solid var(--white); outline-offset: 2px; }
+
+.kit-consent { display: flex; gap: 8px; align-items: flex-start; font-size: 12.5px; color: var(--dim); margin: 10px 0 0; cursor: pointer; }
+.kit-consent input { margin: 2px 0 0; width: 16px; height: 16px; accent-color: var(--amber); flex: none; }
+.kit-consent input:focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; }
+
+.kit-note { font-size: 12.5px; color: var(--dim); margin: 10px 0 0; }
+
+/* ---- footer ---- */
+
+.panel-foot { margin-top: 24px; border-top: 1px solid var(--face-edge); padding-top: 14px; }
+.panel-foot p { font-size: 12.5px; color: var(--dim); margin: 0 0 10px; }
+.panel-foot ul { list-style: none; display: flex; gap: 14px; flex-wrap: wrap; margin: 0; padding: 0; font-size: 12.5px; }
+.panel-foot a { color: var(--amber); text-decoration: underline; }
+
+/* reduced motion: needles and flags land instantly, content visible */
+@media (prefers-reduced-motion: reduce) {
+  .needle { transition: none; }
+}
+
+/* wider screens: panel stays one coherent cluster */
+@media (min-width: 700px) {
+  :root { --pad-x: 24px; --pad-b: 40px; }
+  .gauges { grid-template-columns: repeat(3, 1fr); }
+  .gauge-net { grid-column: 1 / -1; width: min(460px, 100%); margin: 0 auto; }
+  .mini-placards { grid-column: 1 / -1; grid-template-columns: repeat(3, 1fr); }
+  .mini:last-child:nth-child(odd) { grid-column: auto; }
+}
