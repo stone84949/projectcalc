@@ -174,14 +174,14 @@ test('moving boxes studio to 3-bedroom', () => {
 test('small bathroom cost bands', () => {
   const p = preset('cost-to-remodel-a-small-bathroom');
   const hero = v('room-cost', p.input);
-  assert.deepEqual([hero.costLow, hero.costHigh], [3520, 7040]);
+  assert.deepEqual([hero.costLow, hero.costHigh], [9000, 18000]);
   const rows = [
-    [5, 8, 'cosmetic', 1320, 2640],
-    [5, 8, 'full', 8800, 17600],
-    [5, 7, 'mid', 3080, 6160],
-    [5, 7, 'full', 7700, 15400],
-    [6, 8, 'mid', 4224, 8448],
-    [6, 8, 'full', 10560, 21120],
+    [5, 8, 'cosmetic', 3000, 8000],
+    [5, 8, 'full', 16000, 30000],
+    [5, 7, 'mid', 8500, 17000],
+    [5, 7, 'full', 14750, 28000],
+    [6, 8, 'mid', 9800, 19600],
+    [6, 8, 'full', 18000, 33200],
   ];
   for (const [l, w, finish, low, high] of rows) {
     const r = v('room-cost', { lengthFt: l, widthFt: w, roomType: 'bathroom', finish: finish });
