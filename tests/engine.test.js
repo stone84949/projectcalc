@@ -248,6 +248,50 @@ test('room cost: kitchen applies 2.5× intensity to the same bands', () => {
   assert.equal(result.values.costHigh, 7500);
 });
 
+test('room cost: 5x8 bathroom uses cited 2026 bathroom bands, not a multiplier', () => {
+  const expected = { cosmetic: [3000, 8000], mid: [9000, 18000], full: [16000, 30000] };
+  Object.keys(expected).forEach((finish) => {
+    const result = compute('room-cost', { lengthFt: 8, widthFt: 5, roomType: 'bathroom', finish });
+    assert.equal(result.ok, true);
+    assert.equal(result.values.areaSqFt, 40);
+    assert.equal(result.values.intensity, 1);
+    assert.equal(result.values.bandBasis, 'cited-bathroom');
+    assert.equal(result.values.costLow, expected[finish][0]);
+    assert.equal(result.values.costHigh, expected[finish][1]);
+  });
+});
+
+test('room cost: 5x8 full bathroom brackets the This Old House 2026 figure ($15,900-$20,100)', () => {
+  const result = compute('room-cost', { lengthFt: 8, widthFt: 5, roomType: 'bathroom', finish: 'full' });
+  assert.equal(result.ok, true);
+  // Low end within 1% of the cited low, and the cited high sits inside the range.
+  assert.ok(Math.abs(result.values.costLow - 15900) / 15900 <= 0.01);
+  assert.ok(result.values.costHigh >= 20100);
+});
+
+test('room cost: non-bath rooms keep the general bands', () => {
+  const result = compute('room-cost', { lengthFt: 12, widthFt: 12, roomType: 'bedroom', finish: 'full' });
+  assert.equal(result.ok, true);
+  assert.equal(result.values.bandBasis, 'general');
+  assert.equal(result.values.costLow, 14400);
+  assert.equal(result.values.costHigh, 28800);
+});
+
+test('room cost: rejects unknown or prototype room types and finishes', () => {
+  ['garage', '__proto__', 'constructor', 'toString'].forEach((roomType) => {
+    const result = compute('room-cost', { lengthFt: 8, widthFt: 5, roomType, finish: 'mid' });
+    assert.equal(result.ok, false);
+    assert.match(result.error, /room type/i);
+  });
+  ['luxury', '__proto__', 'constructor'].forEach((finish) => {
+    ['bathroom', 'bedroom'].forEach((roomType) => {
+      const result = compute('room-cost', { lengthFt: 8, widthFt: 5, roomType, finish });
+      assert.equal(result.ok, false);
+      assert.match(result.error, /finish/i);
+    });
+  });
+});
+
 test('unknown tool fails cleanly', () => {
   const result = compute('spaceship', {});
   assert.equal(result.ok, false);

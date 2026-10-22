@@ -235,5 +235,19 @@ class SiteContract(unittest.TestCase):
         self.assertNotIn('href="index.html" aria-current="page"', about)
 
 
+    def test_bathroom_bands_are_cited_and_old_multiplier_is_gone(self) -> None:
+        sources = (ROOT / "sources.html").read_text(encoding="utf-8")
+        notes = (ROOT / "SOURCES.md").read_text(encoding="utf-8")
+        for text in (sources, notes):
+            self.assertIn("thisoldhouse.com/bathrooms/reviews/small-bathroom-remodel-cost", text)
+            self.assertIn("angi.com/articles/how-much-does-bathroom-remodel-cost", text)
+            self.assertIn("$15,900–$20,100", text)
+        public = [p for p in ROOT.rglob("*.html") if "node_modules" not in p.parts] + [ROOT / "assets" / "ui.js"]
+        for path in public:
+            body = path.read_text(encoding="utf-8")
+            self.assertNotIn("2.2×", body, path.name)
+            self.assertNotIn("$3,520", body, path.name)
+
+
 if __name__ == "__main__":
     unittest.main()

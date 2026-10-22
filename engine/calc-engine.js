@@ -48,11 +48,31 @@
     full: { low: 100, high: 200, label: 'Full gut-level intensity' },
   };
 
+  // Planning multipliers on ROOM_COST_BANDS. Bathrooms do not use a multiplier:
+  // they use the cited per-sq-ft bands in ROOM_TYPE_BANDS below.
   const ROOM_INTENSITY = {
     bedroom: 1,
     living: 1,
-    bathroom: 2.2,
+    bathroom: 1,
     kitchen: 2.5,
+  };
+
+  // Bathroom bands, recalibrated 2026-10-21 to published 2026 cost guides (see SOURCES.md):
+  // - This Old House, "Small Bathroom Remodel Cost" (updated 2026-06-08, Homewyse data,
+  //   value-grade materials + medium-cost labor): 5x8 (40 sq ft) $15,900-$20,100 (~$400-$500/sq ft);
+  //   basic refresh $3,000-$8,000; mid-range update $8,000-$18,000.
+  // - Angi, "How Much Does a Bathroom Remodel Cost?" (updated 2026-07-09): $70-$250/sq ft overall;
+  //   minor $3,000-$10,000, partial $10,000-$25,000, full $25,000-$80,000.
+  // - HomeAdvisor True Cost Guide (updated 2026-06-17): typical $6,651-$17,660; full bath $3,500-$20,000.
+  // Calibrated so a 40 sq ft bath lands at: cosmetic $3,000-$8,000 (TOH basic refresh),
+  // mid $9,000-$18,000 (TOH mid-range update), full $16,000-$30,000 (TOH 5x8 low end up to Angi full).
+  // Per-sq-ft costs fall in large primary baths, so these bands are for small/standard baths (about 25-60 sq ft).
+  const ROOM_TYPE_BANDS = {
+    bathroom: {
+      cosmetic: { low: 75, high: 200, label: 'Bathroom refresh (paint, vanity, fixtures, flooring)' },
+      mid: { low: 225, high: 450, label: 'Bathroom mid-range update (new surfaces, tile, some plumbing)' },
+      full: { low: 400, high: 750, label: 'Bathroom full remodel (gut to studs)' },
+    },
   };
 
   // Midpoints of published per-room moving-box ranges (see SOURCES.md).
@@ -533,10 +553,12 @@
     const lengthFt = readNumber(input.lengthFt, 'length', { min: 0.5, max: 200 });
     const widthFt = readNumber(input.widthFt, 'width', { min: 0.5, max: 200 });
     const roomType = String(input.roomType || 'bedroom');
-    const intensity = ROOM_INTENSITY[roomType];
+    const intensity = Object.prototype.hasOwnProperty.call(ROOM_INTENSITY, roomType) ? ROOM_INTENSITY[roomType] : null;
     if (intensity == null) return fail('Choose a room type: bedroom, living, bathroom, or kitchen.');
     const finish = String(input.finish || 'mid');
-    const band = ROOM_COST_BANDS[finish];
+    const typeBands = Object.prototype.hasOwnProperty.call(ROOM_TYPE_BANDS, roomType) ? ROOM_TYPE_BANDS[roomType] : null;
+    const bandSet = typeBands || ROOM_COST_BANDS;
+    const band = Object.prototype.hasOwnProperty.call(bandSet, finish) ? bandSet[finish] : null;
     if (!band) return fail('Choose a finish: cosmetic, mid, or full.');
     const area = lengthFt * widthFt;
     const low = money(area * band.low * intensity);
@@ -549,6 +571,7 @@
         intensity: intensity,
         usdPerSqFtLow: band.low,
         usdPerSqFtHigh: band.high,
+        bandBasis: typeBands ? 'cited-' + roomType : 'general',
         costLow: low,
         costHigh: high,
       },
@@ -589,6 +612,7 @@
     TILE_WASTE: TILE_WASTE,
     FLOOR_WASTE: FLOOR_WASTE,
     ROOM_COST_BANDS: ROOM_COST_BANDS,
+    ROOM_TYPE_BANDS: ROOM_TYPE_BANDS,
     compute: compute,
     tools: Object.keys(TOOLS),
     round: round,

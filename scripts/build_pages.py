@@ -265,10 +265,11 @@ PAGES = {
     },
     "room-cost": {
         "h1": "Room renovation cost calculator",
-        "example": "A 12×12 bedroom at mid finish is 144 × $40–$80, or <strong>$5,760–$11,520</strong>. A kitchen uses a 2.5× intensity on the same bands because of plumbing and cabinets.",
+        "example": "A 12×12 bedroom at mid finish is 144 × $40–$80, or <strong>$5,760–$11,520</strong>. A kitchen uses a 2.5× intensity on the same bands because of plumbing and cabinets. A 5×8 bathroom (40 sq ft) at mid finish uses the bathroom bands of $225–$450 per sq ft, or <strong>$9,000–$18,000</strong>; This Old House puts a 5×8 remodel at $15,900–$20,100 (June 2026).",
         "faq": [
             ("Is this what a Knoxville contractor will charge?", "No. These are national planning bands assembled from 2025–2026 published remodel ranges. Local labor moves the number."),
-            ("Why is a bathroom more than a bedroom?", "Water, tile, ventilation, and code. We apply 2.2× for baths and 2.5× for kitchens."),
+            ("Why is a bathroom more than a bedroom?", "Water, tile, waterproofing, ventilation, plumbing, and code. Kitchens use 2.5× the general bands. Bathrooms use their own per-sq-ft bands (cosmetic $75–$200, mid $225–$450, full $400–$750), calibrated in October 2026 to This Old House (June 2026, Homewyse data), Angi (July 2026) and HomeAdvisor (June 2026) cost guides."),
+            ("Does it work for a big primary bathroom?", "The bathroom bands are tuned for small and standard baths of about 25–60 sq ft. Cost per sq ft drops in large primary baths, so for those treat the result as a high ceiling and get bids."),
         ],
     },
 }
@@ -343,11 +344,11 @@ GUIDE_PAGES = [
     {
         "slug": "2026-cost-to-tile-a-bathroom",
         "title": "2026 cost to tile a bathroom",
-        "desc": "Planning range for tiling a bathroom, using floor area, waste, and remodel intensity.",
+        "desc": "Planning range for tiling a bathroom, using floor area, waste, and 2026 cited bathroom cost bands.",
         "tool": "room-cost",
         "body": """
         <p>There is no honest single number. A 5×8 bath floor is 40 sq ft. With 10% waste you buy 44 sq ft of tile. At $4–$12 per sq ft the material is $176–$528 before thinset, grout, membrane, and a wet-saw blade.</p>
-        <p>Labor dominates. Industry 2025–2026 remodel writeups still put light cosmetic work near $15–$30 per sq ft and wet-room work much higher. This site’s bathroom intensity (2.2×) on the mid band is a planning range, not what a Knoxville tile setter will quote after they see the subfloor.</p>
+        <p>Labor dominates. Industry 2025–2026 remodel writeups still put light cosmetic work near $15–$30 per sq ft and wet-room work much higher. For whole-bathroom work this site uses bathroom bands calibrated to 2026 cost guides: a 5×8 bath plans at $3,000–$8,000 for a cosmetic refresh, $9,000–$18,000 for a mid-range update and $16,000–$30,000 for a full remodel. This Old House (June 2026, Homewyse data) puts a 5×8 remodel at $15,900–$20,100. It is a planning range, not what a Knoxville tile setter will quote after they see the subfloor.</p>
         <p>Use the tile calculator for the box count. Use the room cost calculator for a budget envelope. Then get a real bid.</p>
         """,
     },
@@ -458,7 +459,8 @@ def static_pages() -> None:
           <li>Drywall sheet area is geometry: 4×8 = 32 sq ft. Waste default 15%. CertainTeed’s public calculator does not subtract openings and does not include waste.</li>
           <li>Wallpaper: US double-roll listed area is commonly ~56 sq ft; this tool defaults to 80% usable after match and waste.</li>
           <li>Moving boxes: midpoints of published per-room ranges (kitchen / bedroom / living mixes).</li>
-          <li>Room cost: 2025–2026 published remodel bands of about $15–$30 / sq ft cosmetic and much higher for wet rooms (Angi / HomeAdvisor summaries). Intensity multipliers are ours and are labeled as planning only.</li>
+          <li>Room cost: 2025–2026 published remodel bands of about $15–$30 / sq ft cosmetic and much higher for wet rooms (Angi / HomeAdvisor summaries). The kitchen multiplier (2.5×) is ours and is labeled as planning only.</li>
+          <li>Bathroom cost bands (recalibrated October 2026): cosmetic $75–$200, mid $225–$450, full $400–$750 per sq ft, for small and standard baths. Sources: This Old House small-bathroom remodel cost guide (updated June 8, 2026, Homewyse data): 5×8 at $15,900–$20,100, basic refresh $3,000–$8,000, mid-range update $8,000–$18,000 (<a href="https://www.thisoldhouse.com/bathrooms/reviews/small-bathroom-remodel-cost">thisoldhouse.com</a>); Angi bathroom remodel cost guide (updated July 9, 2026): $70–$250 per sq ft, minor $3,000–$10,000, partial $10,000–$25,000, full $25,000–$80,000 (<a href="https://www.angi.com/articles/how-much-does-bathroom-remodel-cost.htm">angi.com</a>); HomeAdvisor True Cost Guide (updated June 17, 2026): typical $6,651–$17,660, full bath $3,500–$20,000 (<a href="https://www.homeadvisor.com/cost/bathrooms/remodel-a-bathroom/">homeadvisor.com</a>).</li>
         </ul>
         <p>Full notes also live in <code>SOURCES.md</code> in the public repository.</p>
         """,
