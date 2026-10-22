@@ -39,7 +39,19 @@ GUIDES = [
     "tile-for-a-shower-floor",
     "how-many-moving-boxes",
     "cost-to-remodel-a-small-bathroom",
+    "cost-to-remodel-a-kitchen",
+    "cost-to-renovate-a-bedroom",
+    "cost-to-remodel-a-primary-bathroom",
+    "how-much-paint-for-a-living-room",
+    "how-many-bags-of-mulch-in-a-yard",
+    "concrete-for-a-shed-base",
+    "how-much-tile-for-a-backsplash",
+    "flooring-boxes-by-square-feet",
+    "drywall-sheets-by-room-size",
 ]
+
+# Guides added 2026-10-22 carry a FAQ block (every guide carries the disclaimer).
+FAQ_GUIDES = GUIDES[GUIDES.index("cost-to-remodel-a-kitchen"):]
 
 REQUIRED = [
     ROOT / "index.html",
@@ -240,6 +252,19 @@ class SiteContract(unittest.TestCase):
             self.assertIn("calc-engine.js", html, slug)
             self.assertIn('href="../calculators/', html, slug)
             self.assertIn('href="index.html"', html, slug)
+
+    def test_guides_carry_estimate_disclaimer_and_faq(self) -> None:
+        for slug in GUIDES:
+            html = (ROOT / "guides" / f"{slug}.html").read_text(encoding="utf-8")
+            self.assertIn('class="disclaimer"', html, slug)
+            self.assertIn("Estimate only.", html, slug)
+            self.assertIn('href="../disclaimer.html"', html, slug)
+        for slug in FAQ_GUIDES:
+            html = (ROOT / "guides" / f"{slug}.html").read_text(encoding="utf-8")
+            self.assertIn('<div class="faq"><h2>FAQ</h2>', html, slug)
+            self.assertGreaterEqual(html.count("<details><summary>"), 3, slug)
+            self.assertIn("<table>", html, slug)
+            self.assertIn("data-preset=", html, slug)
 
     def test_guides_index_lists_every_guide(self) -> None:
         html = (ROOT / "guides" / "index.html").read_text(encoding="utf-8")
