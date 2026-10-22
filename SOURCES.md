@@ -49,5 +49,3 @@ Coverage and waste figures used by `engine/calc-engine.js`. The site restates th
 ## Room cost
 
 - 2025–2026 published remodel writeups: roughly **$15–$30 / sq ft** cosmetic, much higher for wet rooms and gut work (Angi / HomeAdvisor summaries).
-- Intensity multipliers (bathroom 2.2×, kitchen 2.5×) are ProjectCalc planning factors, labeled as such. Not a bid.
-- Comparison point for small bathrooms: This Old House, "Small Bathroom Remodel Cost" (updated 2026-06-08), based on Homewyse costs for value-grade materials and medium-cost labor: 5×8 ft $15,900–$20,100; basic refresh $3,000–$8,000; mid-range update $8,000–$18,000. https://www.thisoldhouse.com/bathrooms/reviews/small-bathroom-remodel-cost . Our 5×8 bathroom bands (mid $3,520–$7,040, full $8,800–$17,600) sit below that estimate; the guide says so.

@@ -48,11 +48,37 @@
     full: { low: 100, high: 200, label: 'Full gut-level intensity' },
   };
 
+  // Planning multipliers on ROOM_COST_BANDS. Bathrooms do not use a multiplier:
+  // they use the cited base + per-sq-ft bands in ROOM_TYPE_BANDS below.
   const ROOM_INTENSITY = {
     bedroom: 1,
     living: 1,
-    bathroom: 2.2,
+    bathroom: 1,
     kitchen: 2.5,
+  };
+
+  // Bathroom bands: a fixed base (fixtures, plumbing, waterproofing, permits) plus a per-sq-ft
+  // part, so small baths cost more per sq ft and large primary baths less. First set 2026-10-21;
+  // reshaped 2026-10-22 to base + per-sq-ft with the same 5x8 (40 sq ft) results (see SOURCES.md).
+  // - This Old House, "Small Bathroom Remodel Cost" (updated 2026-06-08): size table from Homewyse,
+  //   value-grade materials + medium-cost labor, scope not itemized; its intro calls $18,000+ a
+  //   "full renovation": 5x6 $11,900-$15,100, 5x8 $15,900-$20,100, 6x8 $19,000-$24,100.
+  //   Separate scope tiers: basic refresh $3,000-$8,000; mid-range update (new fixtures, flooring,
+  //   tile, vanity, limited plumbing/electrical) $8,000-$18,000; premium $18,000+.
+  // - JLC/Zonda Cost vs. Value 2025, Bath Remodel | Midrange: $26,138 national for a 5x7 bath with
+  //   ALL fixtures replaced (tub + tile surround, toilet, vanity, medicine cabinet, tile floor).
+  // - Fixr (updated 2026-01-27): 5x8 $2,800-$16,000; partial $6,000-$25,000; full gut $9,000-$30,000+.
+  // - HomeAdvisor (updated 2026-06-17): typical $6,651-$17,660; half bath $1,500-$15,000;
+  //   full bath $3,500-$20,000; primary $7,000-$30,000.
+  // The TOH size table and Cost vs. Value "midrange" are full-replacement scopes, so they map to our
+  // `full` tier, not `mid`. Results for 40 sq ft: cosmetic $3,000-$8,000, mid $9,000-$18,000,
+  // full $16,000-$30,000. Base/rate split is our judgment, checked against the 5x6/6x8/5x7/10x10 figures.
+  const ROOM_TYPE_BANDS = {
+    bathroom: {
+      cosmetic: { baseLow: 2000, low: 25, baseHigh: 4000, high: 100, label: 'Bathroom refresh (paint, vanity, fixtures, flooring)' },
+      mid: { baseLow: 5000, low: 100, baseHigh: 10000, high: 200, label: 'Bathroom mid-range update (keep layout; new vanity, toilet, flooring, some tile and plumbing)' },
+      full: { baseLow: 6000, low: 250, baseHigh: 14000, high: 400, label: 'Bathroom full remodel (replace all fixtures, tub/shower, tile and surfaces; gut to studs)' },
+    },
   };
 
   // Midpoints of published per-room moving-box ranges (see SOURCES.md).
@@ -533,14 +559,16 @@
     const lengthFt = readNumber(input.lengthFt, 'length', { min: 0.5, max: 200 });
     const widthFt = readNumber(input.widthFt, 'width', { min: 0.5, max: 200 });
     const roomType = String(input.roomType || 'bedroom');
-    const intensity = ROOM_INTENSITY[roomType];
+    const intensity = Object.prototype.hasOwnProperty.call(ROOM_INTENSITY, roomType) ? ROOM_INTENSITY[roomType] : null;
     if (intensity == null) return fail('Choose a room type: bedroom, living, bathroom, or kitchen.');
     const finish = String(input.finish || 'mid');
-    const band = ROOM_COST_BANDS[finish];
+    const typeBands = Object.prototype.hasOwnProperty.call(ROOM_TYPE_BANDS, roomType) ? ROOM_TYPE_BANDS[roomType] : null;
+    const bandSet = typeBands || ROOM_COST_BANDS;
+    const band = Object.prototype.hasOwnProperty.call(bandSet, finish) ? bandSet[finish] : null;
     if (!band) return fail('Choose a finish: cosmetic, mid, or full.');
     const area = lengthFt * widthFt;
-    const low = money(area * band.low * intensity);
-    const high = money(area * band.high * intensity);
+    const low = money(((band.baseLow || 0) + area * band.low) * intensity);
+    const high = money(((band.baseHigh || 0) + area * band.high) * intensity);
     return ok(
       {
         areaSqFt: round(area, 2),
@@ -549,6 +577,9 @@
         intensity: intensity,
         usdPerSqFtLow: band.low,
         usdPerSqFtHigh: band.high,
+        baseUsdLow: band.baseLow || 0,
+        baseUsdHigh: band.baseHigh || 0,
+        bandBasis: typeBands ? 'cited-' + roomType : 'general',
         costLow: low,
         costHigh: high,
       },
@@ -589,6 +620,7 @@
     TILE_WASTE: TILE_WASTE,
     FLOOR_WASTE: FLOOR_WASTE,
     ROOM_COST_BANDS: ROOM_COST_BANDS,
+    ROOM_TYPE_BANDS: ROOM_TYPE_BANDS,
     compute: compute,
     tools: Object.keys(TOOLS),
     round: round,

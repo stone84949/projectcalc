@@ -248,6 +248,81 @@ test('room cost: kitchen applies 2.5× intensity to the same bands', () => {
   assert.equal(result.values.costHigh, 7500);
 });
 
+test('room cost: 5x8 bathroom uses cited 2026 bathroom bands, not a multiplier', () => {
+  const expected = { cosmetic: [3000, 8000], mid: [9000, 18000], full: [16000, 30000] };
+  Object.keys(expected).forEach((finish) => {
+    const result = compute('room-cost', { lengthFt: 8, widthFt: 5, roomType: 'bathroom', finish });
+    assert.equal(result.ok, true);
+    assert.equal(result.values.areaSqFt, 40);
+    assert.equal(result.values.intensity, 1);
+    assert.equal(result.values.bandBasis, 'cited-bathroom');
+    assert.equal(result.values.costLow, expected[finish][0]);
+    assert.equal(result.values.costHigh, expected[finish][1]);
+  });
+});
+
+test('room cost: 5x8 full bathroom brackets the This Old House 2026 figure ($15,900-$20,100)', () => {
+  const result = compute('room-cost', { lengthFt: 8, widthFt: 5, roomType: 'bathroom', finish: 'full' });
+  assert.equal(result.ok, true);
+  // Low end within 1% of the cited low, and the cited high sits inside the range.
+  assert.ok(Math.abs(result.values.costLow - 15900) / 15900 <= 0.01);
+  assert.ok(result.values.costHigh >= 20100);
+});
+
+test('room cost: 5x8 mid bathroom is $9,000-$18,000, inside the This Old House mid-range update tier', () => {
+  const result = compute('room-cost', { lengthFt: 8, widthFt: 5, roomType: 'bathroom', finish: 'mid' });
+  assert.equal(result.ok, true);
+  assert.equal(result.values.costLow, 9000);
+  assert.equal(result.values.costHigh, 18000);
+  // This Old House 2026 mid-range update tier: $8,000-$18,000.
+  assert.ok(result.values.costLow >= 8000 && result.values.costHigh <= 18000);
+});
+
+test('room cost: 5x7 full bathroom contains the 2025 Cost vs. Value midrange bath ($26,138, all fixtures replaced)', () => {
+  const result = compute('room-cost', { lengthFt: 7, widthFt: 5, roomType: 'bathroom', finish: 'full' });
+  assert.equal(result.ok, true);
+  assert.ok(result.values.costLow <= 26138 && result.values.costHigh >= 26138);
+});
+
+test('room cost: bathroom cost per sq ft falls as the room grows (fixed base + per sq ft)', () => {
+  ['cosmetic', 'mid', 'full'].forEach((finish) => {
+    const small = compute('room-cost', { lengthFt: 6, widthFt: 5, roomType: 'bathroom', finish }).values;
+    const large = compute('room-cost', { lengthFt: 10, widthFt: 10, roomType: 'bathroom', finish }).values;
+    assert.ok(large.costLow / 100 < small.costLow / 30, finish);
+    assert.ok(large.costHigh / 100 < small.costHigh / 30, finish);
+  });
+  // A 10x10 mid-range update stays inside HomeAdvisor's 2026 primary-bath range ($7,000-$30,000).
+  const primary = compute('room-cost', { lengthFt: 10, widthFt: 10, roomType: 'bathroom', finish: 'mid' }).values;
+  assert.equal(primary.costLow, 15000);
+  assert.equal(primary.costHigh, 30000);
+  // A 4x5 powder room no longer computes below the guides' ~$2,500 minimum.
+  const powder = compute('room-cost', { lengthFt: 5, widthFt: 4, roomType: 'bathroom', finish: 'cosmetic' }).values;
+  assert.ok(powder.costLow >= 2500);
+});
+
+test('room cost: non-bath rooms keep the general bands', () => {
+  const result = compute('room-cost', { lengthFt: 12, widthFt: 12, roomType: 'bedroom', finish: 'full' });
+  assert.equal(result.ok, true);
+  assert.equal(result.values.bandBasis, 'general');
+  assert.equal(result.values.costLow, 14400);
+  assert.equal(result.values.costHigh, 28800);
+});
+
+test('room cost: rejects unknown or prototype room types and finishes', () => {
+  ['garage', '__proto__', 'constructor', 'toString'].forEach((roomType) => {
+    const result = compute('room-cost', { lengthFt: 8, widthFt: 5, roomType, finish: 'mid' });
+    assert.equal(result.ok, false);
+    assert.match(result.error, /room type/i);
+  });
+  ['luxury', '__proto__', 'constructor'].forEach((finish) => {
+    ['bathroom', 'bedroom'].forEach((roomType) => {
+      const result = compute('room-cost', { lengthFt: 8, widthFt: 5, roomType, finish });
+      assert.equal(result.ok, false);
+      assert.match(result.error, /finish/i);
+    });
+  });
+});
+
 test('unknown tool fails cleanly', () => {
   const result = compute('spaceship', {});
   assert.equal(result.ok, false);

@@ -165,7 +165,7 @@
     },
     'room-cost': {
       headline: 'Room renovation cost calculator',
-      lead: 'Planning bands only. Not a bid. Kitchen and bath use higher intensity because of trades.',
+      lead: 'Planning bands only. Not a bid. Kitchens use a 2.5× intensity; bathrooms use their own bands from 2026 published cost guides.',
       fields: [
         { name: 'lengthFt', label: 'Room length', unit: 'ft', type: 'number', step: '0.1', value: 12, min: 0.5 },
         { name: 'widthFt', label: 'Room width', unit: 'ft', type: 'number', step: '0.1', value: 12, min: 0.5 },
@@ -177,7 +177,7 @@
           options: [
             { value: 'bedroom', label: 'Bedroom' },
             { value: 'living', label: 'Living room' },
-            { value: 'bathroom', label: 'Bathroom (2.2×)' },
+            { value: 'bathroom', label: 'Bathroom (own 2026 bands)' },
             { value: 'kitchen', label: 'Kitchen (2.5×)' },
           ],
         },
@@ -187,9 +187,9 @@
           type: 'select',
           value: 'mid',
           options: [
-            { value: 'cosmetic', label: 'Cosmetic ($15–$30 / sq ft)' },
-            { value: 'mid', label: 'Mid remodel ($40–$80 / sq ft)' },
-            { value: 'full', label: 'Full gut-level ($100–$200 / sq ft)' },
+            { value: 'cosmetic', label: 'Cosmetic ($15–$30 / sq ft; 5×8 bath $3k–$8k)' },
+            { value: 'mid', label: 'Mid remodel ($40–$80 / sq ft; 5×8 bath $9k–$18k)' },
+            { value: 'full', label: 'Full gut-level ($100–$200 / sq ft; 5×8 bath $16k–$30k)' },
           ],
         },
       ],
