@@ -265,11 +265,11 @@ PAGES = {
     },
     "room-cost": {
         "h1": "Room renovation cost calculator",
-        "example": "A 12×12 bedroom at mid finish is 144 × $40–$80, or <strong>$5,760–$11,520</strong>. A kitchen uses a 2.5× intensity on the same bands because of plumbing and cabinets. A 5×8 bathroom (40 sq ft) at mid finish uses the bathroom bands of $225–$450 per sq ft, or <strong>$9,000–$18,000</strong>; This Old House puts a 5×8 remodel at $15,900–$20,100 (June 2026).",
+        "example": "A 12×12 bedroom at mid finish is 144 × $40–$80, or <strong>$5,760–$11,520</strong>. A kitchen uses a 2.5× intensity on the same bands because of plumbing and cabinets. A 5×8 bathroom (40 sq ft) at mid finish uses the bathroom bands of $225–$450 per sq ft, or <strong>$9,000–$18,000</strong>, close to This Old House’s $8,000–$18,000 mid-range update. A full 5×8 remodel plans at $16,000–$30,000; This Old House puts one at $15,900–$20,100 (June 2026).",
         "faq": [
             ("Is this what a Knoxville contractor will charge?", "No. These are national planning bands assembled from 2025–2026 published remodel ranges. Local labor moves the number."),
-            ("Why is a bathroom more than a bedroom?", "Water, tile, waterproofing, ventilation, plumbing, and code. Kitchens use 2.5× the general bands. Bathrooms use their own per-sq-ft bands (cosmetic $75–$200, mid $225–$450, full $400–$750), calibrated in October 2026 to This Old House (June 2026, Homewyse data), Angi (July 2026) and HomeAdvisor (June 2026) cost guides."),
-            ("Does it work for a big primary bathroom?", "The bathroom bands are tuned for small and standard baths of about 25–60 sq ft. Cost per sq ft drops in large primary baths, so for those treat the result as a high ceiling and get bids."),
+            ("Why is a bathroom more than a bedroom?", "Water, tile, waterproofing, ventilation, plumbing, and code. Kitchens use 2.5× the general bands. Bathrooms use their own per-sq-ft bands (cosmetic $75–$200, mid $225–$450, full $400–$750), set in October 2026 from This Old House (June 2026, Homewyse data), Angi (July 2026) and HomeAdvisor (June 2026) cost guides. The mid low end and the full high end are our judgment between those sources."),
+            ("Does it work for a big primary bathroom?", "The bathroom bands are tuned for small and standard baths of about 25–60 sq ft. Cost per sq ft drops in large primary baths, so for those treat the result as a high ceiling and get bids. Very small powder rooms can come out under the $2,500–$3,500 minimums the guides list."),
         ],
     },
 }
@@ -348,7 +348,7 @@ GUIDE_PAGES = [
         "tool": "room-cost",
         "body": """
         <p>There is no honest single number. A 5×8 bath floor is 40 sq ft. With 10% waste you buy 44 sq ft of tile. At $4–$12 per sq ft the material is $176–$528 before thinset, grout, membrane, and a wet-saw blade.</p>
-        <p>Labor dominates. Industry 2025–2026 remodel writeups still put light cosmetic work near $15–$30 per sq ft and wet-room work much higher. For whole-bathroom work this site uses bathroom bands calibrated to 2026 cost guides: a 5×8 bath plans at $3,000–$8,000 for a cosmetic refresh, $9,000–$18,000 for a mid-range update and $16,000–$30,000 for a full remodel. This Old House (June 2026, Homewyse data) puts a 5×8 remodel at $15,900–$20,100. It is a planning range, not what a Knoxville tile setter will quote after they see the subfloor.</p>
+        <p>Labor dominates. Industry 2025–2026 remodel writeups still put light cosmetic work near $15–$30 per sq ft and wet-room work much higher. For whole-bathroom work this site uses bathroom bands set from 2026 cost guides: a 5×8 bath plans at $3,000–$8,000 for a cosmetic refresh, $9,000–$18,000 for a mid-range update and $16,000–$30,000 for a full remodel. This Old House (June 2026, Homewyse data) puts a 5×8 remodel at $15,900–$20,100. It is a planning range, not what a Knoxville tile setter will quote after they see the subfloor.</p>
         <p>Use the tile calculator for the box count. Use the room cost calculator for a budget envelope. Then get a real bid.</p>
         """,
     },

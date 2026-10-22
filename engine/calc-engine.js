@@ -64,7 +64,7 @@
   // - Angi, "How Much Does a Bathroom Remodel Cost?" (updated 2026-07-09): $70-$250/sq ft overall;
   //   minor $3,000-$10,000, partial $10,000-$25,000, full $25,000-$80,000.
   // - HomeAdvisor True Cost Guide (updated 2026-06-17): typical $6,651-$17,660; full bath $3,500-$20,000.
-  // Calibrated so a 40 sq ft bath lands at: cosmetic $3,000-$8,000 (TOH basic refresh),
+  // Set (with judgment on the mid low and full high) so a 40 sq ft bath lands at: cosmetic $3,000-$8,000 (TOH basic refresh),
   // mid $9,000-$18,000 (TOH mid-range update), full $16,000-$30,000 (TOH 5x8 low end up to Angi full).
   // Per-sq-ft costs fall in large primary baths, so these bands are for small/standard baths (about 25-60 sq ft).
   const ROOM_TYPE_BANDS = {
