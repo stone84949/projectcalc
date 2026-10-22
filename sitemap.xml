@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://projectcalc-tools.pages.dev/</loc></url>
-<<<<<<< HEAD
   <url><loc>https://projectcalc-tools.pages.dev/about</loc></url>
   <url><loc>https://projectcalc-tools.pages.dev/disclaimer</loc></url>
   <url><loc>https://projectcalc-tools.pages.dev/privacy</loc></url>
@@ -33,27 +32,5 @@
   <url><loc>https://projectcalc-tools.pages.dev/guides/tile-for-a-shower-floor</loc></url>
   <url><loc>https://projectcalc-tools.pages.dev/guides/how-many-moving-boxes</loc></url>
   <url><loc>https://projectcalc-tools.pages.dev/guides/cost-to-remodel-a-small-bathroom</loc></url>
-=======
-  <url><loc>https://projectcalc-tools.pages.dev/about.html</loc></url>
-  <url><loc>https://projectcalc-tools.pages.dev/disclaimer.html</loc></url>
-  <url><loc>https://projectcalc-tools.pages.dev/privacy.html</loc></url>
-  <url><loc>https://projectcalc-tools.pages.dev/sources.html</loc></url>
-  <url><loc>https://projectcalc-tools.pages.dev/pack/index.html</loc></url>
-  <url><loc>https://projectcalc-tools.pages.dev/calculators/paint.html</loc></url>
-  <url><loc>https://projectcalc-tools.pages.dev/calculators/square-footage.html</loc></url>
-  <url><loc>https://projectcalc-tools.pages.dev/calculators/tile.html</loc></url>
-  <url><loc>https://projectcalc-tools.pages.dev/calculators/flooring.html</loc></url>
-  <url><loc>https://projectcalc-tools.pages.dev/calculators/mulch.html</loc></url>
-  <url><loc>https://projectcalc-tools.pages.dev/calculators/concrete.html</loc></url>
-  <url><loc>https://projectcalc-tools.pages.dev/calculators/drywall.html</loc></url>
-  <url><loc>https://projectcalc-tools.pages.dev/calculators/wallpaper.html</loc></url>
-  <url><loc>https://projectcalc-tools.pages.dev/calculators/moving-boxes.html</loc></url>
-  <url><loc>https://projectcalc-tools.pages.dev/calculators/room-cost.html</loc></url>
-  <url><loc>https://projectcalc-tools.pages.dev/guides/how-much-paint-for-a-12x12-room.html</loc></url>
-  <url><loc>https://projectcalc-tools.pages.dev/guides/tile-calculator-with-waste.html</loc></url>
-  <url><loc>https://projectcalc-tools.pages.dev/guides/2026-cost-to-tile-a-bathroom.html</loc></url>
-  <url><loc>https://projectcalc-tools.pages.dev/guides/how-much-mulch-do-i-need.html</loc></url>
-  <url><loc>https://projectcalc-tools.pages.dev/guides/concrete-bags-for-a-pad.html</loc></url>
   <url><loc>https://projectcalc-tools.pages.dev/hotshot/</loc></url>
->>>>>>> origin/task/hotshot-email-20261021
 </urlset>
