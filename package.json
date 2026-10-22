@@ -3,7 +3,7 @@
   "private": true,
   "description": "Static DIY calculator site",
   "scripts": {
-    "build": "python scripts/build_pages.py",
-    "test": "node --test tests/engine.test.js tests/guides.test.js && python -m unittest tests.test_site"
+    "build": "node scripts/run-python.js scripts/build_pages.py",
+    "test": "node --test tests/engine.test.js tests/guides.test.js tests/run-python.test.js && node scripts/run-python.js -m unittest tests.test_site"
   }
 }

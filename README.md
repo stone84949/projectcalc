@@ -7,10 +7,9 @@ Live (after Pages is on): https://projectcalc-tools.pages.dev/
 ## Local
 
 ```bash
-python scripts/build_pages.py
-node --test tests/engine.test.js
-python -m unittest tests.test_site
-python -m http.server 4173
+npm run build   # finds py -3, python3 or python
+npm test        # node --test + Python site tests
+node scripts/run-python.js -m http.server 4173
 ```
 
 Open http://127.0.0.1:4173/
