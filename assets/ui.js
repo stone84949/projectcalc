@@ -228,6 +228,10 @@
     return String(row.value);
   }
 
+  function track(name, props) {
+    if (window.SiteTrack) window.SiteTrack.event(name, props);
+  }
+
   function storageKey(tool) {
     return 'projectcalc:' + tool;
   }
@@ -378,7 +382,10 @@
       el('button', {
         type: 'button',
         text: 'Print job sheet',
-        onClick: () => window.print(),
+        onClick: () => {
+          track('print_sheet', { tool });
+          window.print();
+        },
       }),
       el('button', {
         type: 'button',
@@ -386,7 +393,7 @@
         onClick: () => {
           const lines = Array.from(results.querySelectorAll('tr')).map((row) => row.innerText.replace(/\t/g, ' '));
           if (!lines.length) return;
-          navigator.clipboard.writeText(lines.join('\n')).catch(() => {});
+          navigator.clipboard.writeText(lines.join('\n')).then(() => track('copy_results', { tool })).catch(() => {});
         },
       }),
     ]);
@@ -410,11 +417,21 @@
       renderResults(mount, result);
     }
 
+    // One tool_run per calculator per page view, on the visitor's first change.
+    // Inputs recalculate on every keystroke, so counting each run would inflate usage.
+    let counted = false;
+    function runByVisitor() {
+      run();
+      if (counted) return;
+      counted = true;
+      track('tool_run', { tool });
+    }
+
     form.addEventListener('submit', (event) => {
       event.preventDefault();
-      run();
+      runByVisitor();
     });
-    form.addEventListener('input', () => run());
+    form.addEventListener('input', () => runByVisitor());
 
     function applyValues(values) {
       Object.entries(values).forEach(([name, value]) => {
@@ -445,6 +462,8 @@
   function boot() {
     bindPayPal(document);
     document.querySelectorAll('[data-tool]').forEach(mountCalculator);
+    const guide = document.querySelector('[data-guide]');
+    if (guide) track('guide_view', { guide: guide.getAttribute('data-guide') });
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);

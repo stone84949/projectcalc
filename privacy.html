@@ -6,6 +6,17 @@
   <title>ProjectCalc privacy</title>
   <meta name="description" content="What ProjectCalc stores. No accounts. Inputs stay in your browser.">
   <link rel="canonical" href="https://projectcalc-tools.pages.dev/privacy">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="ProjectCalc">
+  <meta property="og:title" content="ProjectCalc privacy">
+  <meta property="og:description" content="What ProjectCalc stores. No accounts. Inputs stay in your browser.">
+  <meta property="og:url" content="https://projectcalc-tools.pages.dev/privacy">
+  <meta property="og:image" content="https://projectcalc-tools.pages.dev/assets/og/projectcalc.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="ProjectCalc privacy">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://projectcalc-tools.pages.dev/assets/og/projectcalc.png">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="assets/site.css">
   
@@ -32,6 +43,7 @@
         <p>There is no account and no server-side form. Calculator inputs are saved in your browser’s localStorage so a refresh does not wipe the room. Clear site data to delete them.</p>
         <p>If a PayPal payment link is added later, PayPal’s privacy policy applies to that checkout. This static site does not see your payment details.</p>
         <p>If you join the Hotshot Math operator-kit list, your email address, your consent, the page you signed up on and the time are saved in a private Google Sheet. They are used only to email you about the kit, and you can ask to be removed at any time.</p>
+        <p>Analytics are off. When they are turned on, this page will name the service. It will count page visits, which calculators get used and whether the load panel said take it or pass. It will never record the numbers you type or your email address.</p>
         <p>We do not run an ad network on this first release. If display ads are added later, this page will name the vendor.</p>
         </div>
   </main>
@@ -52,6 +64,7 @@
     </footer>
     
   <script src="assets/config.js"></script>
+  <script src="assets/track.js"></script>
   <script src="engine/calc-engine.js"></script>
   <script src="assets/ui.js"></script>
 </body>

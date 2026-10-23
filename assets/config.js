@@ -5,5 +5,8 @@ window.PROJECTCALC_CONFIG = {
   paypalUrl: '',
   productName: 'ProjectCalc Job Pack',
   productPrice: 9,
-  version: '1.0.0'
+  version: '1.0.0',
+  /* Analytics stay off until provider is 'plausible', 'umami' or 'ga4' with its settings
+     (plausible: domain; umami: scriptUrl + websiteId; ga4: measurementId). See ANALYTICS.md. */
+  analytics: { provider: '', domain: '', scriptUrl: '', websiteId: '', measurementId: '' }
 };

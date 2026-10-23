@@ -1,0 +1,60 @@
+# Analytics, UTM links and share images
+
+Analytics are built in and switched off. Nothing leaves the browser until a provider is set in config.
+
+## Turn analytics on
+
+Pick one provider, then fill in its settings in **both** `assets/config.js` (ProjectCalc) and `hotshot/config.js` (Hotshot Math). Use a separate site or property for each if they get separate domains.
+
+| Provider | Settings | Notes |
+| --- | --- | --- |
+| Plausible | `provider: 'plausible'`, `domain: 'yourdomain.com'` | Paid, cookieless. If Plausible gives you a site-specific script, also set `scriptUrl`. |
+| Umami | `provider: 'umami'`, `scriptUrl: 'https://…/script.js'`, `websiteId: '<uuid>'` | Free if self-hosted. Cookieless. |
+| GA4 | `provider: 'ga4'`, `measurementId: 'G-XXXXXXX'` | Free. Uses cookies, so it may need a consent banner for EU visitors. Ad networks such as Mediavine may ask for GA4 access. |
+
+`assets/track.js` refuses settings that are incomplete or not `https://`, and stays off. After switching a provider on:
+
+1. Update the analytics paragraph on the privacy page (`scripts/build_pages.py`, `static_pages`) to name the service, then rebuild.
+2. Commit on a task branch and send it through review and the release guard.
+3. Open the live site, run a calculator, and check the provider's realtime view.
+
+## Events
+
+Events carry only the tool or guide name. Typed numbers, money and email addresses are never sent.
+
+| Event | When | Props |
+| --- | --- | --- |
+| `tool_run` | ProjectCalc: the visitor's first change to a calculator on a page (once per calculator per page view, because inputs recalculate on every keystroke). Hotshot: every RUN THE NUMBERS press. | `tool` |
+| `verdict_take` / `verdict_pass` | Hotshot verdict after a run with a minimum set | `tool` |
+| `copy_results` | Copy results succeeded | `tool` |
+| `print_sheet` | Print job sheet pressed | `tool` |
+| `guide_view` | A guide page loaded | `guide` |
+| `signup` | Operator kit sign-up accepted | `list` |
+| `outbound_affiliate` | Click on any `<a rel="sponsored">` link. Mark every affiliate link that way. | `host` |
+
+Page views come from the provider itself.
+
+## UTM links
+
+Every link we post gets tagged so visitors show where they came from. The providers read `utm_*` from the landing URL on their own.
+
+```bash
+node scripts/utm.js --url https://projectcalc-tools.pages.dev/hotshot/ --source youtube --medium social --campaign w04-teardown --content short-deadhead
+```
+
+- `source`: youtube, instagram, tiktok, facebook, reddit, substack, pinterest, meta_ads, youtube_ads
+- `medium`: social, email, paid
+- `campaign`: plan week plus a label, like `w04-teardown` or `w10-ifta-kit`
+- `content` (optional): which post or ad, lowercase with hyphens
+
+## Share images
+
+Every page has Open Graph and Twitter card tags. Calculator pages use their own 1200×630 card, guides use their calculator's card, and the rest use the ProjectCalc card. Hotshot has its own. The PNGs live in `assets/og/` and are committed.
+
+To redraw them after changing a tool name, blurb or worked example (needs Chrome or Edge; set `CHROME_PATH` if it's elsewhere):
+
+```bash
+node scripts/run-python.js scripts/render_share_images.py
+```
+
+When the sites move to their own domains, change `BASE` in `scripts/build_pages.py` and the URLs in `hotshot/index.html`, then rebuild, so the share tags point at the new domain.
