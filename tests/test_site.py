@@ -397,7 +397,18 @@ class SiteContract(unittest.TestCase):
             text = config.read_text(encoding="utf-8")
             self.assertIn(f"provider: 'ga4', measurementId: '{measurement_id}'", text, config.name)
             self.assertIn("hosts: ['projectcalc-tools.pages.dev']", text, config.name)
+        # Each page loads exactly one site's config, so the IDs can't cross over.
+        for path in html_files():
+            if ".git" in path.parts:
+                continue
+            html = path.read_text(encoding="utf-8")
+            if path == ROOT / "hotshot" / "index.html":
+                self.assertNotIn("assets/config.js", html)
+            else:
+                self.assertNotIn("hotshot/config.js", html, path.relative_to(ROOT))
         privacy = parse(ROOT / "privacy.html").text
+        self.assertIn("Google signals and ad personalization are turned off", privacy)
+        self.assertIn("approximate location, device and browser type", privacy)
         self.assertIn("We use Google Analytics", privacy)
         self.assertIn("sets cookies", privacy)
         self.assertIn("never records the numbers you type", privacy)

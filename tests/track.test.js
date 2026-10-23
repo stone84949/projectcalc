@@ -150,6 +150,33 @@ test('a blocked provider script turns tracking off and drops the queue', () => {
   assert.equal(api.event('tool_run', { tool: 'paint' }), false);
 });
 
+test('the shipped configs turn GA4 on only on the live host', () => {
+  const fs = require('fs');
+  const path = require('path');
+  const vm = require('vm');
+  const load = (file, name) => {
+    const ctx = { window: {} };
+    vm.runInNewContext(fs.readFileSync(path.join(__dirname, '..', file), 'utf8'), ctx);
+    return ctx.window[name].analytics;
+  };
+  const sites = [
+    [load('assets/config.js', 'PROJECTCALC_CONFIG'), 'G-1W8VKWBBXY'],
+    [load('hotshot/config.js', 'HotshotConfig'), 'G-NLRYCRRB2H'],
+  ];
+  const saved = globalThis.location;
+  sites.forEach(([config, id]) => {
+    assert.equal(config.measurementId, id);
+    globalThis.location = { hostname: 'projectcalc-tools.pages.dev' };
+    assert.equal(track.create(config, fakeDoc()).enabled, true, id + ' on the live host');
+    ['localhost', '127.0.0.1', 'abc123.projectcalc-tools.pages.dev'].forEach((hostname) => {
+      globalThis.location = { hostname };
+      assert.equal(track.create(config, fakeDoc()).enabled, false, id + ' off on ' + hostname);
+    });
+    cleanup();
+  });
+  globalThis.location = saved;
+});
+
 test('a hosts list keeps local and preview traffic out', () => {
   const saved = globalThis.location;
   globalThis.location = { hostname: 'localhost' };
