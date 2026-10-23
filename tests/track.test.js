@@ -68,7 +68,7 @@ test('plausible: loads its script, queues until load, sends only listed events',
 
   globalThis.plausible = (name, opts) => sent.push([name, opts.props]);
   doc.scripts[0].handlers.load();
-  assert.deepEqual(sent, [['tool_run', { tool: 'paint' }]], 'numbers and long strings are dropped');
+  assert.deepEqual(sent, [['tool_run', { tool: 'paint' }]], 'props outside the allowlist are dropped');
 
   api.event('verdict_pass', { tool: 'hotshot-load' });
   assert.deepEqual(sent[1], ['verdict_pass', { tool: 'hotshot-load' }]);
@@ -107,7 +107,56 @@ test('sponsored links count as outbound_affiliate with the host only', () => {
   const link = { hostname: 'partner.example.com' };
   doc.listeners.click({ target: { closest: (sel) => (sel === 'a[rel~="sponsored"]' ? link : null) } });
   doc.listeners.click({ target: { closest: () => null } });
-  assert.deepEqual(sent, [['outbound_affiliate', { host: 'partner.example.com' }]]);
+  doc.listeners.auxclick({ target: { closest: () => link } });
+  assert.deepEqual(sent, [['outbound_affiliate', { host: 'partner.example.com' }], ['outbound_affiliate', { host: 'partner.example.com' }]]);
   assert.ok(api.enabled);
+  cleanup();
+});
+
+test('only allowlisted slug-like props are sent; emails and amounts never are', () => {
+  const doc = fakeDoc();
+  const sent = [];
+  const api = track.create({ provider: 'ga4', measurementId: 'G-ABC123XYZ' }, doc);
+  globalThis.gtag = (kind, name, props) => sent.push(props);
+  api.event('signup', { list: 'jo@example.com', email: 'jo@example.com' });
+  api.event('tool_run', { tool: 'paint', rate: '2.85', miles: '540' });
+  api.event('tool_run', { tool: '12500 dollars' });
+  assert.deepEqual(sent, [{}, { tool: 'paint' }, {}]);
+  cleanup();
+});
+
+test('ga4 turns off Google signals and ad personalization', () => {
+  const doc = fakeDoc();
+  track.create({ provider: 'ga4', measurementId: 'G-ABC123XYZ' }, doc);
+  const config = globalThis.dataLayer.map((args) => Array.from(args)).find((args) => args[0] === 'config');
+  assert.deepEqual(config, ['config', 'G-ABC123XYZ', { allow_google_signals: false, allow_ad_personalization_signals: false }]);
+  cleanup();
+});
+
+test('a throwing provider never breaks the caller', () => {
+  const doc = fakeDoc();
+  const api = track.create({ provider: 'ga4', measurementId: 'G-ABC123XYZ' }, doc);
+  globalThis.gtag = () => { throw new Error('provider blew up'); };
+  assert.doesNotThrow(() => api.event('print_sheet', { tool: 'paint' }));
+  cleanup();
+});
+
+test('a blocked provider script turns tracking off and drops the queue', () => {
+  const doc = fakeDoc();
+  const api = track.create({ provider: 'plausible', domain: 'projectcalc.example' }, doc);
+  api.event('tool_run', { tool: 'paint' });
+  doc.scripts[0].handlers.error();
+  assert.equal(api.enabled, false);
+  assert.equal(api.event('tool_run', { tool: 'paint' }), false);
+});
+
+test('a hosts list keeps local and preview traffic out', () => {
+  const saved = globalThis.location;
+  globalThis.location = { hostname: 'localhost' };
+  const config = { provider: 'plausible', domain: 'projectcalc.example', hosts: ['projectcalc.example'] };
+  assert.equal(track.create(config, fakeDoc()).enabled, false);
+  globalThis.location = { hostname: 'projectcalc.example' };
+  assert.equal(track.create(config, fakeDoc()).enabled, true);
+  globalThis.location = saved;
   cleanup();
 });

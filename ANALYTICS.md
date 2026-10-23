@@ -12,15 +12,20 @@ Pick one provider, then fill in its settings in **both** `assets/config.js` (Pro
 | Umami | `provider: 'umami'`, `scriptUrl: 'https://…/script.js'`, `websiteId: '<uuid>'` | Free if self-hosted. Cookieless. |
 | GA4 | `provider: 'ga4'`, `measurementId: 'G-XXXXXXX'` | Free. Uses cookies, so it may need a consent banner for EU visitors. Ad networks such as Mediavine may ask for GA4 access. |
 
-`assets/track.js` refuses settings that are incomplete or not `https://`, and stays off. After switching a provider on:
+`assets/track.js` refuses settings that are incomplete or not `https://`, and stays off. It also goes quiet if the provider's script is blocked, and a provider error can never break a calculator or the sign-up.
 
-1. Update the analytics paragraph on the privacy page (`scripts/build_pages.py`, `static_pages`) to name the service, then rebuild.
-2. Commit on a task branch and send it through review and the release guard.
-3. Open the live site, run a calculator, and check the provider's realtime view.
+Add `hosts: ['yourdomain.com']` to the analytics settings to count only the live site. Without it, local runs and `*.pages.dev` preview builds are counted too. Plausible already filters by its `domain`.
+
+After switching a provider on:
+
+1. Set the provider up so the event props show as breakdowns. In Plausible, add the custom properties `tool`, `guide`, `list` and `host` in the site settings. In GA4, register them as event-scoped custom dimensions and turn **off** enhanced measurement's form interactions, outbound clicks and site search, so GA4 doesn't collect more than the privacy page says.
+2. Update the analytics paragraph on the privacy page (`scripts/build_pages.py`, `static_pages`) to name the service. For GA4, also say it sets cookies. Then rebuild.
+3. Commit on a task branch and send it through review and the release guard.
+4. Open the live site, run a calculator, and check the provider's realtime view.
 
 ## Events
 
-Events carry only the tool or guide name. Typed numbers, money and email addresses are never sent.
+Events carry only the tool or guide name. Typed numbers, money and email addresses are never sent: `track.js` drops every prop except `tool`, `guide`, `list` and `host`, and keeps those only when they're short lowercase slugs.
 
 | Event | When | Props |
 | --- | --- | --- |

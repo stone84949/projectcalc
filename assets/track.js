@@ -43,28 +43,45 @@
     return provider && provider.valid(config) ? provider : null;
   }
 
+  // Only these props, and only short slug-like values, ever leave the page.
+  const PROP_KEYS = ['tool', 'guide', 'list', 'host'];
+  const SLUG = /^[a-z0-9.-]{1,80}$/;
+
   function cleanProps(props) {
     const out = {};
-    Object.entries(props || {}).forEach(([key, value]) => {
-      if (typeof value === 'string' && value.length <= 80) out[key] = value;
+    PROP_KEYS.forEach((key) => {
+      const value = props && props[key];
+      if (typeof value === 'string' && SLUG.test(value)) out[key] = value;
     });
     return out;
   }
 
+  // An optional hosts list keeps local and preview traffic out of the numbers.
+  function hostAllowed(config) {
+    if (!Array.isArray(config.hosts) || !config.hosts.length) return true;
+    return Boolean(root.location) && config.hosts.indexOf(root.location.hostname) !== -1;
+  }
+
   function create(config, doc) {
-    const provider = pick(config);
+    let provider = hostAllowed(config) ? pick(config) : null;
     const queue = [];
     let loaded = false;
 
     function flush() {
       if (!provider || !provider.ready()) return;
       loaded = true;
-      queue.splice(0).forEach(([name, props]) => provider.send(name, props));
+      queue.splice(0).forEach(([name, props]) => {
+        try {
+          provider.send(name, props);
+        } catch (err) {
+          /* analytics must never break a calculator or the sign-up */
+        }
+      });
     }
 
     function event(name, props) {
       if (!provider || EVENTS.indexOf(name) === -1) return false;
-      queue.push([name, cleanProps(props)]);
+      if (queue.length < 50) queue.push([name, cleanProps(props)]);
       if (loaded) flush();
       return true;
     }
@@ -74,7 +91,7 @@
         root.dataLayer = root.dataLayer || [];
         root.gtag = function () { root.dataLayer.push(arguments); };
         root.gtag('js', new Date());
-        root.gtag('config', config.measurementId);
+        root.gtag('config', config.measurementId, { allow_google_signals: false, allow_ad_personalization_signals: false });
       }
       const spec = provider.script(config);
       const tag = doc.createElement('script');
@@ -82,17 +99,28 @@
       tag.src = spec.src;
       Object.entries(spec.attrs).forEach(([key, value]) => tag.setAttribute(key, value));
       tag.addEventListener('load', flush);
+      // Blocked or down: stop collecting rather than queue forever.
+      tag.addEventListener('error', () => {
+        provider = null;
+        queue.length = 0;
+      });
       doc.head.appendChild(tag);
       flush();
 
       // Affiliate links are marked rel="sponsored"; count the click, not the person.
-      doc.addEventListener('click', (e) => {
-        const link = e.target.closest && e.target.closest('a[rel~="sponsored"]');
+      // auxclick covers middle-click "open in new tab".
+      const onLinkClick = (e) => {
+        const link = e.target && e.target.closest && e.target.closest('a[rel~="sponsored"]');
         if (link) event('outbound_affiliate', { host: link.hostname });
-      });
+      };
+      doc.addEventListener('click', onLinkClick);
+      doc.addEventListener('auxclick', onLinkClick);
     }
 
-    return { enabled: Boolean(provider), event };
+    return {
+      get enabled() { return Boolean(provider); },
+      event,
+    };
   }
 
   const api = create(settings(), root.document);
