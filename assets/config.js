@@ -6,7 +6,7 @@ window.PROJECTCALC_CONFIG = {
   productName: 'ProjectCalc Job Pack',
   productPrice: 9,
   version: '1.0.0',
-  /* Analytics stay off until provider is 'plausible', 'umami' or 'ga4' with its settings
-     (plausible: domain; umami: scriptUrl + websiteId; ga4: measurementId). See ANALYTICS.md. */
-  analytics: { provider: '', domain: '', scriptUrl: '', websiteId: '', measurementId: '' }
+  /* GA4 property "ProjectCalc". hosts keeps local runs and preview builds out of the numbers;
+     add the new domain here when the site moves. See ANALYTICS.md. */
+  analytics: { provider: 'ga4', measurementId: 'G-1W8VKWBBXY', hosts: ['projectcalc-tools.pages.dev'] }
 };

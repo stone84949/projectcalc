@@ -375,7 +375,7 @@ class SiteContract(unittest.TestCase):
         hotshot = (ROOT / "hotshot" / "index.html").read_text(encoding="utf-8")
         self.assertIn("assets/og/hotshot.png", hotshot)
 
-    def test_analytics_loads_on_every_page_but_ships_off(self) -> None:
+    def test_analytics_loads_on_every_page_with_each_sites_ga4_property(self) -> None:
         for path in html_files():
             if ".git" in path.parts:
                 continue
@@ -388,12 +388,20 @@ class SiteContract(unittest.TestCase):
             for later in ("assets/ui.js", "hotshot.js"):
                 if later in html:
                     self.assertLess(track, html.find(later), f"{path.relative_to(ROOT)} loads {later} before track.js")
-        # No provider is chosen yet, so nothing leaves the browser.
-        for config in (ROOT / "assets" / "config.js", ROOT / "hotshot" / "config.js"):
-            self.assertRegex(config.read_text(encoding="utf-8"), r"analytics: \{ provider: ''", config.name)
+        # Each site reports to its own GA4 property, only from the live host.
+        expected = {
+            ROOT / "assets" / "config.js": "G-1W8VKWBBXY",
+            ROOT / "hotshot" / "config.js": "G-NLRYCRRB2H",
+        }
+        for config, measurement_id in expected.items():
+            text = config.read_text(encoding="utf-8")
+            self.assertIn(f"provider: 'ga4', measurementId: '{measurement_id}'", text, config.name)
+            self.assertIn("hosts: ['projectcalc-tools.pages.dev']", text, config.name)
         privacy = parse(ROOT / "privacy.html").text
-        self.assertIn("Analytics are off", privacy)
-        self.assertIn("never record the numbers you type", privacy)
+        self.assertIn("We use Google Analytics", privacy)
+        self.assertIn("sets cookies", privacy)
+        self.assertIn("never records the numbers you type", privacy)
+        self.assertIn("tools.google.com/dlpage/gaoptout", (ROOT / "privacy.html").read_text(encoding="utf-8"))
 
     def test_guides_tag_themselves_for_guide_view(self) -> None:
         for slug in GUIDES:

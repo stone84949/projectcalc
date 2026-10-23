@@ -1,6 +1,15 @@
 # Analytics, UTM links and share images
 
-Analytics are built in and switched off. Nothing leaves the browser until a provider is set in config.
+**Current setup (2026-10-23):** GA4, one property per site, counting only on `projectcalc-tools.pages.dev`.
+
+| Site | GA4 property | Measurement ID | Config |
+| --- | --- | --- | --- |
+| ProjectCalc | ProjectCalc | `G-1W8VKWBBXY` | `assets/config.js` |
+| Hotshot Math | Hotshot Math | `G-NLRYCRRB2H` | `hotshot/config.js` |
+
+Both properties track page views only (the other enhanced-measurement events are off), keep event data 14 months, leave Google signals off and have the custom dimensions registered. When a site moves to its own domain, add the domain to `hosts`, update the stream URL in GA4, and rebuild.
+
+A provider only loads when config names it with complete settings. Clearing `provider` turns analytics back off.
 
 ## Turn analytics on
 
