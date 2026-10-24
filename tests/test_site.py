@@ -62,6 +62,8 @@ REQUIRED = [
     ROOT / "hotshot" / "hotshot.css",
     ROOT / "hotshot" / "hotshot.js",
     ROOT / "hotshot" / "config.js",
+    ROOT / "hotshot" / "og.png",
+    ROOT / "hotshot" / "guides" / "how-to-start-hotshot-trucking.html",
     *[ROOT / "calculators" / f"{slug}.html" for slug in TOOLS],
     *[ROOT / "guides" / f"{slug}.html" for slug in GUIDES],
 ]
@@ -351,6 +353,77 @@ class SiteContract(unittest.TestCase):
             self.assertNotIn("2.2×", body, path.name)
             self.assertNotIn("$3,520", body, path.name)
             self.assertNotIn("$225–$450", body, path.name)
+
+    def test_public_pages_have_share_previews(self) -> None:
+        """Every public page carries og/twitter tags whose image is a committed 1200×630 PNG."""
+        import struct
+
+        pages = [p for p in html_files() if p.name != "404.html" and ".git" not in p.parts]
+        for path in pages:
+            html = path.read_text(encoding="utf-8")
+            for tag in ('property="og:title"', 'property="og:description"', 'property="og:url"', 'name="twitter:card" content="summary_large_image"'):
+                self.assertIn(tag, html, f"{path.relative_to(ROOT)} missing {tag}")
+            image = re.search(r'property="og:image" content="https://projectcalc-tools\.pages\.dev/([^"]+)"', html)
+            self.assertIsNotNone(image, f"{path.relative_to(ROOT)} missing og:image")
+            png = ROOT / image.group(1)
+            self.assertTrue(png.exists(), f"{path.relative_to(ROOT)} -> {image.group(1)}")
+            head = png.read_bytes()[:24]
+            self.assertEqual(head[:8], b"\x89PNG\r\n\x1a\n", png.name)
+            self.assertEqual(struct.unpack(">II", head[16:24]), (1200, 630), png.name)
+        paint = (ROOT / "calculators" / "paint.html").read_text(encoding="utf-8")
+        self.assertIn("assets/og/paint.png", paint)
+        guide = (ROOT / "guides" / "mulch-by-square-feet.html").read_text(encoding="utf-8")
+        self.assertIn("assets/og/mulch.png", guide)
+        hotshot = (ROOT / "hotshot" / "index.html").read_text(encoding="utf-8")
+        self.assertIn("hotshot/og.png", hotshot)
+        self.assertEqual(hotshot.count('property="og:image"'), 1, "one share image on the Hotshot panel")
+        hotshot_guide = (ROOT / "hotshot" / "guides" / "how-to-start-hotshot-trucking.html").read_text(encoding="utf-8")
+        self.assertIn("hotshot/og.png", hotshot_guide)
+        self.assertIn('data-guide="how-to-start-hotshot-trucking"', hotshot_guide)
+
+    def test_analytics_loads_on_every_page_with_each_sites_ga4_property(self) -> None:
+        for path in html_files():
+            if ".git" in path.parts:
+                continue
+            html = path.read_text(encoding="utf-8")
+            if "calc-engine.js" not in html:
+                continue
+            track = html.find("assets/track.js")
+            self.assertNotEqual(track, -1, f"{path.relative_to(ROOT)} missing track.js")
+            self.assertLess(html.find("config.js"), track, f"{path.relative_to(ROOT)} loads track.js before config")
+            for later in ("assets/ui.js", "hotshot.js"):
+                if later in html:
+                    self.assertLess(track, html.find(later), f"{path.relative_to(ROOT)} loads {later} before track.js")
+        # Each site reports to its own GA4 property, only from the live host.
+        expected = {
+            ROOT / "assets" / "config.js": "G-1W8VKWBBXY",
+            ROOT / "hotshot" / "config.js": "G-NLRYCRRB2H",
+        }
+        for config, measurement_id in expected.items():
+            text = config.read_text(encoding="utf-8")
+            self.assertIn(f"provider: 'ga4', measurementId: '{measurement_id}'", text, config.name)
+            self.assertIn("hosts: ['projectcalc-tools.pages.dev']", text, config.name)
+        # Each page loads exactly one site's config, so the IDs can't cross over.
+        for path in html_files():
+            if ".git" in path.parts:
+                continue
+            html = path.read_text(encoding="utf-8")
+            if path.relative_to(ROOT).parts[0] == "hotshot":
+                self.assertNotIn("assets/config.js", html)
+            else:
+                self.assertNotIn("hotshot/config.js", html, path.relative_to(ROOT))
+        privacy = parse(ROOT / "privacy.html").text
+        self.assertIn("Google signals and ad personalization are turned off", privacy)
+        self.assertIn("approximate location, device and browser type", privacy)
+        self.assertIn("We use Google Analytics", privacy)
+        self.assertIn("sets cookies", privacy)
+        self.assertIn("never records the numbers you type", privacy)
+        self.assertIn("tools.google.com/dlpage/gaoptout", (ROOT / "privacy.html").read_text(encoding="utf-8"))
+
+    def test_guides_tag_themselves_for_guide_view(self) -> None:
+        for slug in GUIDES:
+            html = (ROOT / "guides" / f"{slug}.html").read_text(encoding="utf-8")
+            self.assertIn(f'data-guide="{slug}"', html, slug)
 
 
 if __name__ == "__main__":

@@ -87,7 +87,29 @@ def pretty_path(rel_path: str) -> str:
     return path
 
 
-def shell(rel_path: str, title: str, description: str, body: str, current: str, extra_head: str = "", absolute: bool = False) -> str:
+DEFAULT_SHARE_IMAGE = "assets/og/projectcalc.png"
+
+
+def share_tags(title: str, description: str, canonical: str, image: str) -> str:
+    """Open Graph + Twitter card tags so links pasted in groups, texts and posts show a preview.
+    Images are 1200×630 PNGs from scripts/render_share_images.py."""
+    t = html.escape(title, quote=True)
+    d = html.escape(description, quote=True)
+    img = f"{BASE}/{image}"
+    return f"""<meta property="og:type" content="website">
+  <meta property="og:site_name" content="{SITE_NAME}">
+  <meta property="og:title" content="{t}">
+  <meta property="og:description" content="{d}">
+  <meta property="og:url" content="{canonical}">
+  <meta property="og:image" content="{img}">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="{t}">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="{img}">"""
+
+
+def shell(rel_path: str, title: str, description: str, body: str, current: str, extra_head: str = "", absolute: bool = False, share_image: str = DEFAULT_SHARE_IMAGE) -> str:
     p = "" if absolute else asset_prefix(rel_path)
     prefix = (BASE.rstrip("/") + "/") if absolute else p
     canonical = BASE + pretty_path(rel_path)
@@ -99,6 +121,7 @@ def shell(rel_path: str, title: str, description: str, body: str, current: str, 
   <title>{title}</title>
   <meta name="description" content="{description}">
   <link rel="canonical" href="{canonical}">
+  {share_tags(title, description, canonical, share_image)}
   <link rel="icon" href="{prefix}favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="{prefix}assets/site.css">
   {extra_head}
@@ -111,6 +134,7 @@ def shell(rel_path: str, title: str, description: str, body: str, current: str, 
   </main>
   {footer(rel_path) if not absolute else footer_absolute()}
   <script src="{prefix}assets/config.js"></script>
+  <script src="{prefix}assets/track.js"></script>
   <script src="{prefix}engine/calc-engine.js"></script>
   <script src="{prefix}assets/ui.js"></script>
 </body>
@@ -361,6 +385,7 @@ def tool_page(slug: str, name: str, blurb: str) -> None:
             blurb,
             body,
             "home",
+            share_image=f"assets/og/{slug}.png",
         ),
     )
 
@@ -654,7 +679,7 @@ def guide_page(guide: dict) -> None:
       <p class="lede">{guide["desc"]}</p>
     </div>
     <div class="wrap layout">
-      <div class="prose">{guide["body"]}
+      <div class="prose" data-guide="{guide["slug"]}">{guide["body"]}
         <p><a href="../calculators/{tool}.html">Open the full {tool.replace("-", " ")} calculator</a></p>
         {related}
         <p><a href="index.html">All guides</a> · <a href="../sources.html">Sources</a></p>
@@ -670,6 +695,7 @@ def guide_page(guide: dict) -> None:
             guide["desc"],
             body,
             "guides",
+            share_image=f"assets/og/{tool}.png",
         ),
     )
 
@@ -732,6 +758,8 @@ def static_pages() -> None:
         <p>There is no account and no server-side form. Calculator inputs are saved in your browser’s localStorage so a refresh does not wipe the room. Clear site data to delete them.</p>
         <p>If a PayPal payment link is added later, PayPal’s privacy policy applies to that checkout. This static site does not see your payment details.</p>
         <p>If you join the Hotshot Math operator-kit list, your email address, your consent, the page you signed up on and the time are saved in a private Google Sheet. They are used only to email you about the kit, and you can ask to be removed at any time.</p>
+        <p>We use Google Analytics to count visits. It counts page visits, where visitors came from, which calculators get used, whether the load panel said take it or pass, and whether someone copied or printed results, joined the kit list or clicked a partner link. Like any Google Analytics site, it also sees your approximate location, device and browser type. It never records the numbers you type or your email address. Google signals and ad personalization are turned off.</p>
+        <p>Google Analytics sets cookies in your browser, and Google handles that data under <a href="https://policies.google.com/privacy">its privacy policy</a>. To opt out, use <a href="https://tools.google.com/dlpage/gaoptout">Google’s opt-out browser add-on</a> or any ad blocker. The calculators work the same either way.</p>
         <p>We do not run an ad network on this first release. If display ads are added later, this page will name the vendor.</p>
         """,
         "legal",
@@ -802,6 +830,12 @@ def hand_built_routes() -> list[str]:
         if folder.startswith((".", "_")) or folder in NON_PAGE_DIRS:
             continue
         routes.append(f"/{folder}/")
+        # deeper hand-built pages inside a hand-built folder (e.g. /hotshot/guides/...)
+        for page in sorted(index.parent.rglob("*.html")):
+            if page == index:
+                continue
+            rel = page.relative_to(ROOT).with_suffix("")
+            routes.append("/" + str(rel).replace("\\", "/"))
     return routes
 
 

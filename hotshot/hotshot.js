@@ -9,7 +9,12 @@
   var netNeedle = document.getElementById('net-needle');
   var netReadout = document.getElementById('net-readout');
   var netState = document.getElementById('net-state');
-
+  // Guide pages load this file for parity; only the panel has the form.
+  if (!form) {
+    var guide = document.querySelector('[data-guide]');
+    if (guide) track('guide_view', { guide: guide.getAttribute('data-guide') });
+    return;
+  }
   // Dial geometry: -90deg (empty) to +90deg (full sweep), 180deg total.
   function needleRotation(fraction) {
     var f = Math.max(0, Math.min(1, fraction));
@@ -48,6 +53,10 @@
     var p = bandPoint(minFraction);
     amber.setAttribute('d', 'M 15 105 A 85 85 0 0 1 ' + p);
     green.setAttribute('d', 'M ' + p + ' A 85 85 0 0 1 185 105');
+  }
+
+  function track(name, props) {
+    if (window.SiteTrack) window.SiteTrack.event(name, props);
   }
 
   var TICKS = 7; // across the sweep
@@ -89,6 +98,10 @@
     }
 
     var v = result.values;
+    // Each RUN THE NUMBERS press is a deliberate load check, so every one counts.
+    // Only the verdict is sent; rates, miles and money stay on the page.
+    track('tool_run', { tool: 'hotshot-load' });
+    if (v.verdict) track(v.verdict === 'take' ? 'verdict_take' : 'verdict_pass', { tool: 'hotshot-load' });
     setGauge('rate', v.effectiveRatePerMile / 5, v.effectiveRatePerMile.toFixed(2));
     setGauge('fuel', v.fuelCost / 500, '$' + Math.round(v.fuelCost));
     setGauge('deadhead', v.deadheadMiles / 500, String(v.deadheadMiles));
@@ -154,6 +167,7 @@
         .then(function (data) {
           if (data && data.ok) {
             kitForm.reset();
+            track('signup', { list: 'operator-kit' });
             say("You're on the list. One email when the kit drops.");
           } else {
             say(data && data.error === 'consent' ? 'Tick the box so we can email you.' : 'Check that email address.');
