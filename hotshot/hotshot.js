@@ -9,7 +9,12 @@
   var netNeedle = document.getElementById('net-needle');
   var netReadout = document.getElementById('net-readout');
   var netState = document.getElementById('net-state');
-  if (!form) return; // guide pages load this file for parity; only the panel has the form
+  // Guide pages load this file for parity; only the panel has the form.
+  if (!form) {
+    var guide = document.querySelector('[data-guide]');
+    if (guide) track('guide_view', { guide: guide.getAttribute('data-guide') });
+    return;
+  }
   // Dial geometry: -90deg (empty) to +90deg (full sweep), 180deg total.
   function needleRotation(fraction) {
     var f = Math.max(0, Math.min(1, fraction));

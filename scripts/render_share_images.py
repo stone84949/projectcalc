@@ -64,36 +64,7 @@ h1{{font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;fon
 <div class="band"><span><b>Free.</b> Every buy quantity rounds up. Coverage numbers cited.</span><span>No signup</span></div>
 </body></html>"""
 
-HOTSHOT_CARD = """<!DOCTYPE html><html><head><meta charset="utf-8"><style>
-html,body{margin:0;width:1200px;height:630px;overflow:hidden}
-body{background:#0c0f12;color:#e8ecef;font-family:"Courier New",ui-monospace,Menlo,monospace;display:grid;grid-template-columns:1.1fr 1fr;align-items:center;gap:24px;padding:0 64px;box-sizing:border-box}
-.name{font-size:24px;font-weight:800;letter-spacing:.16em;color:#e0a52e;margin-bottom:26px}
-h1{font-size:66px;line-height:1.02;font-weight:800;letter-spacing:.03em;margin:0 0 26px;text-transform:uppercase}
-.sub{font-size:25px;line-height:1.45;color:#aab6bf;margin:0 0 30px}
-.free{font-size:19px;font-weight:800;letter-spacing:.08em;white-space:nowrap;color:#e8ecef;border-top:2px dotted #3a434e;padding-top:18px}
-.face{background:#11151a;border:2px solid #2a323c;border-radius:18px;padding:28px 26px 30px;text-align:center}
-svg{width:100%;height:auto;display:block}
-.flag{display:inline-block;margin-top:6px;border:3px solid #57d98a;border-radius:6px;padding:12px 26px;color:#57d98a}
-.flag b{display:block;font-size:46px;letter-spacing:.14em}
-.flag span{font-size:20px;letter-spacing:.1em;color:#e8ecef}
-</style></head><body>
-<div>
-<div class="name">HOTSHOT MATH</div>
-<h1>Should you take this load?</h1>
-<p class="sub">Rate, deadhead, fuel, tolls and factoring on six gauges. One verdict against your own minimum $/mi.</p>
-<div class="free">FREE · NO SIGNUP · NOTHING TO INSTALL</div>
-</div>
-<div class="face">
-<svg viewBox="0 0 200 118" aria-hidden="true">
-<path d="M 15 105 A 85 85 0 0 1 185 105" fill="none" stroke="#2a323c" stroke-width="12"/>
-<path d="M 15 105 A 85 85 0 0 1 61.4 29.3" fill="none" stroke="#b97f14" stroke-width="12"/>
-<path d="M 61.4 29.3 A 85 85 0 0 1 185 105" fill="none" stroke="#2f9e5c" stroke-width="12"/>
-<line x1="100" y1="105" x2="161" y2="52" stroke="#57d98a" stroke-width="4" stroke-linecap="round"/>
-<circle cx="100" cy="105" r="7" fill="#e8ecef"/>
-</svg>
-<div class="flag"><b>TAKE IT</b><span>$1.90/MI NET</span></div>
-</div>
-</body></html>"""
+
 
 
 def find_browser() -> str:
@@ -162,7 +133,7 @@ def main() -> None:
         render(browser, projectcalc_card("Home DIY materials", "How much do I need?", "Ten free calculators for paint, tile, flooring, mulch, concrete, drywall and more.", "12×12 room, 2 coats of paint", "2 gallons"), OUT / "projectcalc.png", work)
         for slug, name, blurb in TOOLS:
             render(browser, projectcalc_card("Free calculator", name, blurb, *SAMPLES[slug]), OUT / f"{slug}.png", work)
-        render(browser, HOTSHOT_CARD, OUT / "hotshot.png", work)
+        # Hotshot uses a real panel screenshot (hotshot/og.png), not a drawn card.
     print("rendered", len(list(OUT.glob("*.png"))), "share images in", OUT.relative_to(ROOT))
 
 

@@ -375,7 +375,11 @@ class SiteContract(unittest.TestCase):
         guide = (ROOT / "guides" / "mulch-by-square-feet.html").read_text(encoding="utf-8")
         self.assertIn("assets/og/mulch.png", guide)
         hotshot = (ROOT / "hotshot" / "index.html").read_text(encoding="utf-8")
-        self.assertIn("assets/og/hotshot.png", hotshot)
+        self.assertIn("hotshot/og.png", hotshot)
+        self.assertEqual(hotshot.count('property="og:image"'), 1, "one share image on the Hotshot panel")
+        hotshot_guide = (ROOT / "hotshot" / "guides" / "how-to-start-hotshot-trucking.html").read_text(encoding="utf-8")
+        self.assertIn("hotshot/og.png", hotshot_guide)
+        self.assertIn('data-guide="how-to-start-hotshot-trucking"', hotshot_guide)
 
     def test_analytics_loads_on_every_page_with_each_sites_ga4_property(self) -> None:
         for path in html_files():

@@ -63,7 +63,7 @@ node scripts/utm.js --url https://projectcalc-tools.pages.dev/hotshot/ --source 
 
 ## Share images
 
-Every page has Open Graph and Twitter card tags. Calculator pages use their own 1200×630 card, guides use their calculator's card, and the rest use the ProjectCalc card. Hotshot has its own. The PNGs live in `assets/og/` and are committed.
+Every page has Open Graph and Twitter card tags. Calculator pages use their own 1200×630 card, guides use their calculator's card, and the rest use the ProjectCalc card. The PNGs live in `assets/og/` and are committed. Hotshot Math (the panel and its guides) uses `hotshot/og.png`, a real screenshot of the panel, not a drawn card.
 
 To redraw them after changing a tool name, blurb or worked example (needs Chrome or Edge; set `CHROME_PATH` if it's elsewhere):
 
@@ -71,4 +71,4 @@ To redraw them after changing a tool name, blurb or worked example (needs Chrome
 node scripts/run-python.js scripts/render_share_images.py
 ```
 
-When the sites move to their own domains, change `BASE` in `scripts/build_pages.py` and the URLs in `hotshot/index.html`, then rebuild, so the share tags point at the new domain.
+When the sites move to their own domains, change `BASE` in `scripts/build_pages.py` and the URLs in `hotshot/index.html` and `hotshot/guides/*.html`, then rebuild, so the share tags point at the new domain.
