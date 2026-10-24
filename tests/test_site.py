@@ -408,7 +408,7 @@ class SiteContract(unittest.TestCase):
             if ".git" in path.parts:
                 continue
             html = path.read_text(encoding="utf-8")
-            if path == ROOT / "hotshot" / "index.html":
+            if path.relative_to(ROOT).parts[0] == "hotshot":
                 self.assertNotIn("assets/config.js", html)
             else:
                 self.assertNotIn("hotshot/config.js", html, path.relative_to(ROOT))
