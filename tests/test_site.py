@@ -62,6 +62,8 @@ REQUIRED = [
     ROOT / "hotshot" / "hotshot.css",
     ROOT / "hotshot" / "hotshot.js",
     ROOT / "hotshot" / "config.js",
+    ROOT / "hotshot" / "og.png",
+    ROOT / "hotshot" / "guides" / "how-to-start-hotshot-trucking.html",
     *[ROOT / "calculators" / f"{slug}.html" for slug in TOOLS],
     *[ROOT / "guides" / f"{slug}.html" for slug in GUIDES],
 ]

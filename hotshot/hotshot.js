@@ -9,7 +9,7 @@
   var netNeedle = document.getElementById('net-needle');
   var netReadout = document.getElementById('net-readout');
   var netState = document.getElementById('net-state');
-
+  if (!form) return; // guide pages load this file for parity; only the panel has the form
   // Dial geometry: -90deg (empty) to +90deg (full sweep), 180deg total.
   function needleRotation(fraction) {
     var f = Math.max(0, Math.min(1, fraction));

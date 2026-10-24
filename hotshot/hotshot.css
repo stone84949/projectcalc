@@ -368,6 +368,36 @@ input { caret-color: var(--amber); }
 .panel-foot ul { list-style: none; display: flex; gap: 14px; flex-wrap: wrap; margin: 0; padding: 0; font-size: 12.5px; }
 .panel-foot a { color: var(--amber); text-decoration: underline; }
 
+
+/* ---- guide pages ---- */
+
+.guide h1 {
+  font-size: clamp(30px, 7vw, 42px);
+  text-transform: none;
+  letter-spacing: 0;
+  text-align: left;
+  margin: 18px 0 10px;
+}
+.guide-lede { color: var(--dim); font-size: 14px; margin: 0 0 18px; max-width: 60ch; }
+.guide section { margin-top: 22px; border-top: 1px solid var(--face-edge); padding-top: 14px; }
+.guide h2 { font-size: 16px; text-transform: none; margin: 0 0 10px; }
+.guide p { font-size: 14px; color: var(--white); max-width: 72ch; margin: 0 0 12px; }
+.guide-toc ul { list-style: none; margin: 0 0 6px; padding: 0; }
+.guide-toc li { padding: 3px 0; }
+.guide-toc a { color: var(--amber); text-decoration: underline; font-size: 13px; }
+.guide-note {
+  border: 1px solid var(--face-edge);
+  border-top: 3px double var(--amber-deep);
+  padding: 10px 12px;
+  color: var(--dim);
+  font-size: 13px;
+}
+.guide-note a, .guide-cta { color: var(--amber); }
+.guide-cta { display: inline-block; font-weight: 800; text-decoration: underline; padding: 8px 0; }
+.guide-faq details { border-bottom: 1px dotted var(--rule-dotted); padding: 8px 0; }
+.guide-faq summary { cursor: pointer; font-weight: 800; font-size: 13px; }
+.guide-faq p { color: var(--dim); }
+.guide .worked { margin: 12px 0; }
 /* reduced motion: needles and flags land instantly, content visible */
 @media (prefers-reduced-motion: reduce) {
   .needle { transition: none; }

@@ -830,6 +830,12 @@ def hand_built_routes() -> list[str]:
         if folder.startswith((".", "_")) or folder in NON_PAGE_DIRS:
             continue
         routes.append(f"/{folder}/")
+        # deeper hand-built pages inside a hand-built folder (e.g. /hotshot/guides/...)
+        for page in sorted(index.parent.rglob("*.html")):
+            if page == index:
+                continue
+            rel = page.relative_to(ROOT).with_suffix("")
+            routes.append("/" + str(rel).replace("\\", "/"))
     return routes
 
 
