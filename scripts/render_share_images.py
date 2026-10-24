@@ -65,8 +65,6 @@ h1{{font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;fon
 </body></html>"""
 
 
-
-
 def find_browser() -> str:
     candidates = [
         os.environ.get("CHROME_PATH", ""),
