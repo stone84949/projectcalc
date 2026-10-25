@@ -92,6 +92,7 @@ All read 2026-10-25. Ranges are shown as published; no single figure is treated 
 - U.S. EIA, Gasoline and Diesel Fuel Update: U.S. average on-highway diesel $6.276/gal for the week of 2026-10-19, up $2.656 from a year earlier (year-ago ≈ $3.62). The rates page examples use $6.28. https://www.eia.gov/petroleum/gasdiesel/
 - Not used (could not be read 2026-10-25): otrucking.com rates guide and ZipRecruiter salary pages (both block automated reads); DataTruck's hotshot guide (no publication date).
 - Worked examples on the page are engine output (`hotshot-load`, `hotshot-cost-per-mile`) with labelled example inputs; `tests/engine.test.js` checks the printed numbers.
+
 ## Hotshot Math: IFTA worksheet and calculator (`hotshot-ifta`, `/hotshot/ifta/`, `hotshot/downloads/hotshot-math-ifta-worksheet.xlsx`)
 
 All read 2026-10-25. No tax rate is stored anywhere: the visitor types rates from the official matrix. The three example rates on the page ($0.20, $0.30, $0.40) are made-up round numbers, labelled as examples.

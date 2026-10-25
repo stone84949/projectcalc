@@ -717,6 +717,9 @@ test('hotshot pages print the engine worked examples', () => {
   [d.deadheadPct + '%', usd(d.deadheadFuelCost), usd(d.ratePerLoadedMile), usd(d.ratePerTotalMile), usd(d.netAfterFuel),
     usd(d.netPerTotalMile), d.breakEvenDeadheadMiles + ' empty miles']
     .forEach((s) => assert.ok(dh.includes(s), 'deadhead missing ' + s));
+  // The static readout (what shows before tools.js runs) must match the prefilled example.
+  assert.ok(cpm.includes('id="result-main">' + usd(c.minRatePerLoadedMile) + '<'), 'cost-per-mile static readout');
+  assert.ok(dh.includes('id="result-main">' + d.breakEvenDeadheadMiles + ' MI<'), 'deadhead static readout');
 });
 
 // Hotshot weight / CDL line (49 CFR 383.5, 383.91, 390.5). Example rig printed on /hotshot/weight/.
@@ -848,7 +851,7 @@ test('weight and 2026 rates pages print the engine numbers', () => {
   [lbs(w.sumGvwr), lbs(w.gcwr), lbs(w.truckPayload), lbs(w.trailerPayload), lbs(w.maxCargo), lbs(w.loadedTrailer),
     lbs(w.grossCombined), lbs(w.trailerHeadroom), lbs(w.combinedHeadroom), 'Class ' + w.cdl]
     .forEach((s) => assert.ok(wp.includes(s), 'weight missing ' + s));
-  assert.ok(wp.includes('id="result-main">CLASS ' + w.cdl + '<'), 'weight readout should start on the example verdict');
+  assert.ok(wp.includes('id="result-main">LIKELY CLASS ' + w.cdl + '<'), 'weight readout should start on the example verdict');
 
   // Rates page examples: EIA U.S. diesel, week of 2026-10-19 ($6.276), at 10 mpg, 3% factoring, $1.30 minimum.
   const rp = hotshotPage('rates-2026');
