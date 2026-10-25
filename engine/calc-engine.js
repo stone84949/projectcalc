@@ -867,6 +867,101 @@
     );
   }
 
+  // IFTA quarter worksheet: taxable gallons = jurisdiction miles / fleet MPG, where fleet MPG
+  // = total miles / total gallons purchased (unless the caller overrides it); net taxable
+  // gallons = taxable - purchased there; tax = net x rate (negative = credit). Rates are NEVER
+  // built in: the caller types them from the current IFTA rate matrix, and a blank rate leaves
+  // that row's tax null. Math runs on exact values; the filed return rounds fleet MPG to two
+  // decimals and each column to whole gallons (IFTA Procedures Manual P720), so filed pennies
+  // can differ slightly. Sources in SOURCES.md.
+  function hotshotIfta(input) {
+    const list = input.jurisdictions;
+    if (!Array.isArray(list) || list.length === 0) throw new Error('Add at least one jurisdiction.');
+    if (list.length > 60) throw new Error('That is more jurisdictions than IFTA has members.');
+    const blank = function (v) { return v === '' || v == null; };
+    const entries = [];
+    list.forEach(function (raw, i) {
+      const row = raw || {};
+      if (blank(row.miles) && blank(row.gallonsPurchased) && blank(row.ratePerGallon)) return;
+      const name = String(row.name == null ? '' : row.name).trim().slice(0, 40) || 'Row ' + (i + 1);
+      entries.push({
+        name: name,
+        // blank miles = 0: fuel can be bought in a jurisdiction you logged no miles in
+        miles: readNumber(row.miles, 'miles for ' + name, { min: 0, max: 1e6, required: false, fallback: 0 }),
+        gallonsPurchased: readNumber(row.gallonsPurchased, 'gallons purchased for ' + name, {
+          min: 0,
+          max: 1e6,
+          required: false,
+          fallback: 0,
+        }),
+        rate: blank(row.ratePerGallon)
+          ? null
+          : readNumber(row.ratePerGallon, 'tax rate for ' + name, { min: 0, max: 10 }),
+      });
+    });
+    if (entries.length === 0) throw new Error('Enter miles for at least one jurisdiction.');
+
+    const totalMiles = entries.reduce(function (sum, e) { return sum + e.miles; }, 0);
+    const totalGallons = entries.reduce(function (sum, e) { return sum + e.gallonsPurchased; }, 0);
+    if (totalMiles <= 0) throw new Error('Enter miles for at least one jurisdiction.');
+    const override = readNumber(input.fleetMpg, 'fleet MPG', { min: 1, max: 60, required: false, fallback: 0 });
+    const hasOverride = override > 0;
+    if (!hasOverride && totalGallons <= 0) {
+      throw new Error('Enter the gallons you bought, or type a fleet MPG, so taxable gallons can be worked out.');
+    }
+    const fleetMpgExact = totalGallons > 0 ? totalMiles / totalGallons : 0;
+    const mpgUsed = hasOverride ? override : fleetMpgExact;
+
+    let taxableTotal = 0;
+    let netTotal = 0;
+    let taxTotal = 0;
+    let rated = 0;
+    const rows = entries.map(function (e) {
+      const taxable = e.miles / mpgUsed;
+      const net = taxable - e.gallonsPurchased;
+      const tax = e.rate == null ? null : net * e.rate;
+      taxableTotal += taxable;
+      netTotal += net;
+      if (tax != null) {
+        taxTotal += tax;
+        rated += 1;
+      }
+      return {
+        name: e.name,
+        miles: e.miles,
+        gallonsPurchased: e.gallonsPurchased,
+        taxableGallons: round(taxable, 2),
+        netTaxableGallons: round(net, 2) + 0,
+        ratePerGallon: e.rate,
+        tax: tax == null ? null : money(tax) + 0,
+      };
+    });
+    const missing = entries.length - rated;
+
+    return ok(
+      {
+        jurisdictions: rows,
+        totalMiles: round(totalMiles, 2),
+        totalGallonsPurchased: round(totalGallons, 2),
+        fleetMpgExact: round(fleetMpgExact, 4),
+        fleetMpg: round(fleetMpgExact, 2),
+        mpgUsed: round(mpgUsed, 4),
+        mpgOverridden: hasOverride,
+        totalTaxableGallons: round(taxableTotal, 2),
+        netTaxableGallons: round(netTotal, 2) + 0, // + 0 turns -0 into 0
+        rowsMissingRate: missing,
+        taxComplete: missing === 0,
+        totalTax: rated > 0 ? money(taxTotal) + 0 : null,
+      },
+      [
+        { label: 'Fleet MPG', value: round(mpgUsed, 2), unit: 'mpg' },
+        { label: 'Taxable gallons', value: round(taxableTotal, 2), unit: 'gal' },
+        { label: 'Net taxable gallons', value: round(netTotal, 2), unit: 'gal' },
+        rated > 0 ? { label: missing === 0 ? 'Net tax due (credit if negative)' : 'Tax so far (rates missing)', value: money(taxTotal), unit: 'USD', money: true } : null,
+      ].filter(Boolean),
+    );
+  }
+
   const TOOLS = {
     paint: paint,
     'square-footage': squareFootage,
@@ -882,6 +977,7 @@
     'hotshot-cost-per-mile': hotshotCostPerMile,
     'hotshot-factoring': hotshotFactoring,
     'hotshot-deadhead': hotshotDeadhead,
+    'hotshot-ifta': hotshotIfta,
   };
 
   function compute(tool, input) {
