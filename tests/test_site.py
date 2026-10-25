@@ -71,6 +71,10 @@ REQUIRED = [
     ROOT / "hotshot" / "og.png",
     ROOT / "hotshot" / "guides" / "how-to-start-hotshot-trucking.html",
     ROOT / "hotshot" / "tools.js",
+    ROOT / "hotshot" / "ifta" / "index.html",
+    ROOT / "hotshot" / "ifta" / "ifta.js",
+    ROOT / "hotshot" / "ifta" / "ifta.css",
+    ROOT / "hotshot" / "downloads" / "hotshot-math-ifta-worksheet.xlsx",
     *[ROOT / "hotshot" / slug / "index.html" for slug in HOTSHOT_TOOLS],
     *[ROOT / "calculators" / f"{slug}.html" for slug in TOOLS],
     *[ROOT / "guides" / f"{slug}.html" for slug in GUIDES],
@@ -290,6 +294,8 @@ class SiteContract(unittest.TestCase):
         for slug in HOTSHOT_TOOLS:
             self.assertIn(f"https://projectcalc-tools.pages.dev/hotshot/{slug}/", after)
         self.assertFalse(any(loc.endswith("/index") for loc in after), "sitemap lists an /index route")
+        self.assertIn("https://projectcalc-tools.pages.dev/hotshot/ifta/", after)
+        self.assertFalse(any("/hotshot/downloads" in loc for loc in after), "sitemap lists the downloads folder")
         for folder in ("assets", "engine", "scripts", "tests"):
             self.assertFalse(any(f"/{folder}/" in loc for loc in after), folder)
 
@@ -328,6 +334,120 @@ class SiteContract(unittest.TestCase):
         script = (ROOT / "hotshot" / "tools.js").read_text(encoding="utf-8")
         self.assertIn("track('tool_run', { tool: tool })", script)
         self.assertIn("window.SiteTrack", script)
+
+    def test_hotshot_ifta_page_links_a_real_ungated_worksheet(self) -> None:
+        """/hotshot/ifta/ is a calculator plus a direct download of a recalculated, rate-free xlsx."""
+        import datetime
+        import zipfile
+
+        path = ROOT / "hotshot" / "ifta" / "index.html"
+        html = path.read_text(encoding="utf-8")
+        doc = parse(path)
+        url = "https://projectcalc-tools.pages.dev/hotshot/ifta/"
+        self.assertIn(f'<link rel="canonical" href="{url}">', html)
+        self.assertIn(f'<meta property="og:url" content="{url}">', html)
+        self.assertIn('<meta property="og:site_name" content="Hotshot Math">', html)
+        self.assertIn('property="og:image:alt"', html)
+        self.assertIn("hotshot/og.png", html)
+        self.assertIn('data-hotshot-tool="hotshot-ifta"', html)
+        self.assertIn("'hotshot-ifta': hotshotIfta", (ROOT / "engine" / "calc-engine.js").read_text(encoding="utf-8"))
+        self.assertTrue(doc.attrs.get("h1"), "ifta missing h1")
+        self.assertIn('aria-live="polite"', html)
+        self.assertIn("The math, printed", doc.text)
+        self.assertIn("Excel", doc.title)
+        self.assertIn("IFTA", doc.title)
+        # script order: site config, analytics, engine, then the page's own script (not tools.js)
+        order = [html.find(s) for s in ('src="../config.js"', 'src="../../assets/track.js"', 'src="../../engine/calc-engine.js"', 'src="ifta.js"')]
+        self.assertNotIn(-1, order)
+        self.assertEqual(order, sorted(order))
+        self.assertNotIn("tools.js", html)
+        self.assertNotIn("hotshot.js", html)
+
+        # the download: a plain direct link, outside any form, to a file that exists
+        match = re.search(r'<a class="run-btn ifta-download-btn" href="([^"]+\.xlsx)" download>', html)
+        self.assertIsNotNone(match, "no direct .xlsx download link")
+        target = (path.parent / match.group(1)).resolve()
+        self.assertTrue(target.exists(), match.group(1))
+        self.assertEqual(target, (ROOT / "hotshot" / "downloads" / "hotshot-math-ifta-worksheet.xlsx").resolve())
+        self.assertLess(html.find(match.group(0)), html.find("<form"), "download must not sit inside the calculator form")
+        self.assertNotIn("type=\"email\"", html)
+        # the reminder line links to the panel's existing kit sign-up, which really has that id
+        self.assertIn('href="../index.html#kit-form"', html)
+        self.assertIn('id="kit-form"', (ROOT / "hotshot" / "index.html").read_text(encoding="utf-8"))
+        # no download event exists in track.js, so none may be sent
+        self.assertNotIn("file_download", html + (ROOT / "hotshot" / "ifta" / "ifta.js").read_text(encoding="utf-8"))
+        script = (ROOT / "hotshot" / "ifta" / "ifta.js").read_text(encoding="utf-8")
+        self.assertIn("track('tool_run', { tool: tool })", script)
+        self.assertEqual(script.count("track('"), 1)
+
+        # no tax rate is built in: the only rate values are the three labelled examples
+        rate_inputs = re.findall(r'<input[^>]*data-field="ratePerGallon"[^>]*>', html)
+        self.assertEqual(len(rate_inputs), 3)
+        for tag in rate_inputs:
+            self.assertRegex(tag, r'value="0\.[234]0"')
+        self.assertEqual(html.count("Example rate - use the current IFTA matrix."), 3)
+        self.assertEqual(html.count('class="ifta-row is-example"'), 3)
+
+        # citations and hedges are on the page
+        for needle in (
+            "https://www.iftach.org/manuals/2026/AA/Articles%20of%20Agreement%20-%2008-26-26.pdf",
+            "https://www.iftach.org/manuals/2026/PM/Procedures%20Manual%20-%2008-26-26.pdf",
+            "https://www.iftach.org/taxmatrix4/",
+            "https://www.ecfr.gov/current/title-49/section-383.91",
+            "R245",
+            "R305",
+            "R930.100",
+            "R960.100",
+            "Do non-CDL hotshots have to file IFTA?",
+            "not tax advice",
+        ):
+            self.assertIn(needle, html + " " + doc.text)
+
+        # printed 2026 due dates agree with the calendar and with the weekend rule
+        expected = [
+            (datetime.date(2026, 4, 30), 3, datetime.date(2026, 4, 30)),
+            (datetime.date(2026, 7, 31), 4, datetime.date(2026, 7, 31)),
+            (datetime.date(2026, 10, 31), 5, datetime.date(2026, 11, 2)),
+            (datetime.date(2027, 1, 31), 6, datetime.date(2027, 2, 1)),
+        ]
+        for statutory, weekday, due in expected:
+            self.assertEqual(statutory.weekday(), weekday)
+            shift = {5: 2, 6: 1}.get(weekday, 0)
+            self.assertEqual(statutory + datetime.timedelta(days=shift), due)
+        for text in ("Thursday, April 30, 2026", "Friday, July 31, 2026", "Monday, November 2, 2026", "Monday, February 1, 2027"):
+            self.assertIn(text, doc.text)
+
+        # the workbook: a real xlsx, no macros, four tabs, recalculated, zero error cells, blank rate cells
+        with zipfile.ZipFile(target) as book:
+            names = book.namelist()
+            self.assertFalse(any("vbaProject" in n for n in names), "macros are not allowed")
+            workbook = book.read("xl/workbook.xml").decode("utf-8")
+            tabs = re.findall(r'<sheet name="([^"]+)"', workbook)
+            self.assertEqual(tabs, ["How to use", "Quarter worksheet", "Due dates", "Disclaimer"])
+            total_formulas = 0
+            for name in names:
+                if not re.match(r"xl/worksheets/sheet\d+\.xml$", name):
+                    continue
+                sheet = book.read(name).decode("utf-8")
+                self.assertNotIn('t="e"', sheet, f"{name} has an error value")
+                cells = re.findall(r"<c [^>]*[^/]>.*?</c>", sheet, flags=re.S)
+                for cell in cells:
+                    if "<f>" in cell or "<f " in cell:
+                        total_formulas += 1
+                        self.assertIn("<v", cell, f"{name}: formula without a cached value")
+            self.assertGreater(total_formulas, 100)
+            # sheet2 is the quarter worksheet: the rate column F15:F44 and the optional MPG B8 are empty
+            quarter = book.read("xl/worksheets/sheet2.xml").decode("utf-8")
+            for row in range(15, 45):
+                cell = re.search(rf'<c r="F{row}"[^>]*?(?:/>|>(.*?)</c>)', quarter, flags=re.S)
+                self.assertIsNotNone(cell, f"F{row} missing")
+                self.assertNotIn("<v>", cell.group(0), f"F{row} must stay blank: the worksheet ships no rates")
+                self.assertNotIn("<f>", cell.group(0))
+            cell_b8 = re.search(r'<c r="B8"[^>]*?(?:/>|>(.*?)</c>)', quarter, flags=re.S)
+            self.assertNotIn("<v>", cell_b8.group(0))
+            strings = book.read("xl/sharedStrings.xml").decode("utf-8")
+            self.assertIn("https://projectcalc-tools.pages.dev/hotshot/", strings + quarter)
+            self.assertIn("Planning worksheet, not tax advice", strings)
 
     def test_robots_allows_indexing(self) -> None:
         robots = (ROOT / "robots.txt").read_text(encoding="utf-8")
