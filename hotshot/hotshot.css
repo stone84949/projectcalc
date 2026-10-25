@@ -181,6 +181,7 @@ input { caret-color: var(--amber); }
   transform: rotate(-2deg);
   text-align: center;
 }
+.flag[hidden] { display: none; } /* the display rule above would otherwise show the flag before a run */
 .flag.pass { border-color: var(--white); opacity: 0.95; }
 .flag-word {
   display: block;

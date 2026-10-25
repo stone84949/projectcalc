@@ -38,7 +38,7 @@ Events carry only the tool or guide name. Typed numbers, money and email address
 
 | Event | When | Props |
 | --- | --- | --- |
-| `tool_run` | ProjectCalc: the visitor's first change to a calculator on a page (once per calculator per page view, because inputs recalculate on every keystroke). Hotshot: every RUN THE NUMBERS press. | `tool` |
+| `tool_run` | ProjectCalc: the visitor's first change to a calculator on a page (once per calculator per page view, because inputs recalculate on every keystroke). Hotshot panel: every RUN THE NUMBERS press (`hotshot-load`). Hotshot tool pages: every Calculate press (`hotshot-cost-per-mile`, `hotshot-factoring`, `hotshot-deadhead`); their results update live as you type, but only the press counts. | `tool` |
 | `verdict_take` / `verdict_pass` | Hotshot verdict after a run with a minimum set | `tool` |
 | `copy_results` | Copy results succeeded | `tool` |
 | `print_sheet` | Print job sheet pressed | `tool` |
