@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Free IFTA calculator + Excel worksheet download (hotshot) - Hotshot Math</title>
+  <meta name="description" content="Free IFTA calculator and Excel worksheet download for hotshot trucking: fleet MPG, taxable gallons and net tax by jurisdiction. No app, no signup. You enter the rates from the official IFTA matrix.">
+  <link rel="canonical" href="https://projectcalc-tools.pages.dev/hotshot/ifta/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Hotshot Math">
+  <meta property="og:title" content="Free IFTA calculator + Excel worksheet download (hotshot) - Hotshot Math">
+  <meta property="og:description" content="Free IFTA calculator and Excel worksheet for hotshot trucking: fleet MPG, taxable gallons and net tax by jurisdiction. No app, no signup.">
+  <meta property="og:url" content="https://projectcalc-tools.pages.dev/hotshot/ifta/">
+  <meta property="og:image" content="https://projectcalc-tools.pages.dev/hotshot/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Hotshot Math: free calculators for hotshot trucking, including an IFTA calculator and Excel worksheet">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Free IFTA calculator + Excel worksheet download (hotshot)">
+  <meta name="twitter:description" content="Fleet MPG, taxable gallons and net tax by jurisdiction. Free, no app, no signup.">
+  <meta name="twitter:image" content="https://projectcalc-tools.pages.dev/hotshot/og.png">
+  <link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../hotshot.css">
+  <link rel="stylesheet" href="ifta.css">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="panel-bar">
+    <p class="panel-name">HOTSHOT MATH</p>
+    <p class="panel-sub">IFTA</p>
+  </header>
+
+  <main id="main" class="panel tool-page">
+    <h1 class="panel-head">Free IFTA calculator and Excel worksheet</h1>
+    <p class="panel-lede">Fleet MPG, taxable gallons and net tax by jurisdiction for one quarter. Use the calculator below or download the Excel worksheet. Free, no app, no signup. You type in the rates from the official IFTA matrix; none are built in.</p>
+
+    <section class="ifta-download" aria-labelledby="download-head">
+      <h2 id="download-head">FREE EXCEL IFTA WORKSHEET</h2>
+      <a class="run-btn ifta-download-btn" href="../downloads/hotshot-math-ifta-worksheet.xlsx" download>DOWNLOAD THE EXCEL WORKSHEET (.XLSX)</a>
+      <p class="ifta-download-note">Direct download: no email, no signup. A small Excel file with no macros: a quarter worksheet with a row per jurisdiction, a due-date calendar and a short "do I have to file" guide. Rates are blank for you to fill in. It is a planning worksheet, not tax advice.</p>
+      <p class="ifta-reminder">Put the <a href="#due-dates">due dates below</a> in your own calendar. Nothing here sends deadline reminders. <a href="../index.html#kit-form">The operator kit list</a> is for the kit announcement only.</p>
+    </section>
+
+    <form class="tool-form" id="ifta-form" data-hotshot-tool="hotshot-ifta" autocomplete="off" novalidate>
+      <fieldset class="ifta-fieldset">
+        <legend>JURISDICTIONS - ONE ROW EACH</legend>
+        <p class="ifta-help" id="rows-help">Miles driven and gallons bought (tax-paid, from receipts) in each state or province for the quarter. The three EXAMPLE rows show the format: type over them, or press CLEAR ALL ROWS. The example rates are made-up round numbers. Use the current IFTA matrix for yours.</p>
+        <div class="ifta-rows" id="ifta-rows" role="group" aria-describedby="rows-help">
+          <div class="ifta-row is-example">
+            <p class="ifta-row-head"><span class="ifta-row-title" data-row-title>ROW 1</span><span class="ifta-tag">EXAMPLE</span><button class="ifta-remove" type="button" data-remove aria-label="Remove row 1">REMOVE</button></p>
+            <div class="mini">
+              <label for="j1-name">JURISDICTION</label>
+              <input id="j1-name" data-field="name" type="text" maxlength="12" value="Example A" placeholder="e.g. TN">
+            </div>
+            <div class="mini">
+              <label for="j1-miles">MILES DRIVEN</label>
+              <input id="j1-miles" data-field="miles" type="number" inputmode="decimal" step="any" min="0" value="3100">
+            </div>
+            <div class="mini">
+              <label for="j1-gal">GALLONS BOUGHT</label>
+              <input id="j1-gal" data-field="gallonsPurchased" type="number" inputmode="decimal" step="any" min="0" value="330">
+            </div>
+            <div class="mini">
+              <label for="j1-rate">RATE $/GAL</label>
+              <input id="j1-rate" data-field="ratePerGallon" type="number" inputmode="decimal" step="any" min="0" value="0.20" aria-describedby="j1-rate-hint">
+              <span class="hint" id="j1-rate-hint">Example rate - use the current IFTA matrix.</span>
+            </div>
+          </div>
+          <div class="ifta-row is-example">
+            <p class="ifta-row-head"><span class="ifta-row-title" data-row-title>ROW 2</span><span class="ifta-tag">EXAMPLE</span><button class="ifta-remove" type="button" data-remove aria-label="Remove row 2">REMOVE</button></p>
+            <div class="mini">
+              <label for="j2-name">JURISDICTION</label>
+              <input id="j2-name" data-field="name" type="text" maxlength="12" value="Example B" placeholder="e.g. TN">
+            </div>
+            <div class="mini">
+              <label for="j2-miles">MILES DRIVEN</label>
+              <input id="j2-miles" data-field="miles" type="number" inputmode="decimal" step="any" min="0" value="1800">
+            </div>
+            <div class="mini">
+              <label for="j2-gal">GALLONS BOUGHT</label>
+              <input id="j2-gal" data-field="gallonsPurchased" type="number" inputmode="decimal" step="any" min="0" value="150">
+            </div>
+            <div class="mini">
+              <label for="j2-rate">RATE $/GAL</label>
+              <input id="j2-rate" data-field="ratePerGallon" type="number" inputmode="decimal" step="any" min="0" value="0.30" aria-describedby="j2-rate-hint">
+              <span class="hint" id="j2-rate-hint">Example rate - use the current IFTA matrix.</span>
+            </div>
+          </div>
+          <div class="ifta-row is-example">
+            <p class="ifta-row-head"><span class="ifta-row-title" data-row-title>ROW 3</span><span class="ifta-tag">EXAMPLE</span><button class="ifta-remove" type="button" data-remove aria-label="Remove row 3">REMOVE</button></p>
+            <div class="mini">
+              <label for="j3-name">JURISDICTION</label>
+              <input id="j3-name" data-field="name" type="text" maxlength="12" value="Example C" placeholder="e.g. TN">
+            </div>
+            <div class="mini">
+              <label for="j3-miles">MILES DRIVEN</label>
+              <input id="j3-miles" data-field="miles" type="number" inputmode="decimal" step="any" min="0" value="1000">
+            </div>
+            <div class="mini">
+              <label for="j3-gal">GALLONS BOUGHT</label>
+              <input id="j3-gal" data-field="gallonsPurchased" type="number" inputmode="decimal" step="any" min="0" value="210">
+            </div>
+            <div class="mini">
+              <label for="j3-rate">RATE $/GAL</label>
+              <input id="j3-rate" data-field="ratePerGallon" type="number" inputmode="decimal" step="any" min="0" value="0.40" aria-describedby="j3-rate-hint">
+              <span class="hint" id="j3-rate-hint">Example rate - use the current IFTA matrix.</span>
+            </div>
+          </div>
+        </div>
+        <div class="ifta-actions">
+          <button class="ifta-secondary" type="button" id="ifta-add">+ ADD A JURISDICTION</button>
+          <button class="ifta-secondary" type="button" id="ifta-clear">CLEAR ALL ROWS</button>
+        </div>
+        <p class="ifta-help" id="ifta-count" aria-live="polite"></p>
+      </fieldset>
+
+      <fieldset>
+        <legend>FLEET MPG - OPTIONAL</legend>
+        <div class="mini">
+          <label for="fleetMpg">YOUR OWN FLEET MPG</label>
+          <input id="fleetMpg" name="fleetMpg" type="number" inputmode="decimal" step="any" min="1" aria-describedby="fleetMpg-hint">
+          <span class="hint" id="fleetMpg-hint">Leave blank: it's total miles / total gallons.</span>
+        </div>
+      </fieldset>
+
+      <button class="run-btn" type="submit">CALCULATE</button>
+
+      <section class="readout-card" id="tool-result" aria-label="Result">
+        <p class="visually-hidden" id="result-announce" aria-live="polite"></p>
+        <p class="readout-label" id="result-label">NET CREDIT</p>
+        <p class="readout-main" id="result-main">$12.56</p>
+        <p class="readout-status" id="result-status">Fleet MPG 8.55 - EXAMPLE numbers, type over them</p>
+        <div class="worked" id="result-rows"></div>
+      </section>
+    </form>
+
+    <section class="how">
+      <h2>The math, printed</h2>
+      <p class="example-label">EXAMPLE - three jurisdictions, with made-up round-number rates. 5,900 miles, 690 gallons bought:</p>
+      <div class="worked">
+        <p><span>Fleet MPG - 5,900 mi / 690 gal (8.5507, shown as 8.55)</span><span>8.55</span></p>
+        <p><span>Example A: 3,100 mi / 8.5507 mpg = 362.54 taxable gal, less 330 bought</span><span>32.54 net gal</span></p>
+        <p><span>Example B: 1,800 mi / 8.5507 mpg = 210.51 taxable gal, less 150 bought</span><span>60.51 net gal</span></p>
+        <p><span>Example C: 1,000 mi / 8.5507 mpg = 116.95 taxable gal, less 210 bought</span><span>-93.05 net gal</span></p>
+        <p><span>Example A: 32.54 net gal x $0.20 example rate</span><span>$6.51</span></p>
+        <p><span>Example B: 60.51 net gal x $0.30 example rate</span><span>$18.15</span></p>
+        <p><span>Example C: -93.05 net gal x $0.40 example rate</span><span>-$37.22</span></p>
+        <p class="worked-net"><span>Net tax due (credit if negative)</span><span>-$12.56</span></p>
+      </div>
+      <p>Each jurisdiction's taxable gallons are its miles divided by your fleet MPG, where fleet MPG is all miles divided by all gallons bought. Net taxable gallons are the taxable gallons minus the tax-paid gallons you bought there. A positive number is tax owed to that jurisdiction; a negative number is a credit. With no MPG typed, the net gallons across all rows always add up to zero. Tax due is net taxable gallons times that jurisdiction's rate.</p>
+      <p class="fine">The math uses exact numbers and shows cents. The official return reports fleet MPG to two decimals and rounds each column to whole gallons (IFTA Procedures Manual P720), so what you file can differ, usually by pennies but by a few dollars on a quarter with many rows. Rows here are shown rounded to the cent while the total uses exact values, so the rows may not add up to the total by a cent. Fleet MPG here uses gallons bought; IFTA means fuel consumed, so adjust the gallons if your tank level changed a lot between the start and end of the quarter. Surcharges, interest, late fees and license fees are not included.</p>
+    </section>
+
+    <section class="how ifta-who" id="who-files">
+      <h2>Who has to file IFTA</h2>
+      <p>IFTA reporting is for a "qualified motor vehicle" used, designed or maintained to carry people or property that meets any one of these three tests (IFTA Articles of Agreement, section R245):</p>
+      <ul class="ifta-list">
+        <li>two axles and a gross vehicle weight or registered gross vehicle weight over 26,000 lb (11,797 kg); or</li>
+        <li>three or more axles, regardless of weight; or</li>
+        <li>used in combination, when the combination's gross vehicle or registered gross vehicle weight is over 26,000 lb (11,797 kg).</li>
+      </ul>
+      <p>Recreational vehicles used only for personal pleasure, and not in any business, are excluded (R245, R249). A person based in a member jurisdiction who operates a qualified motor vehicle in two or more member jurisdictions has to be licensed under IFTA (R305). Licensing, decals and the return itself go through your base jurisdiction.</p>
+      <p class="fine">This is a summary of IFTA's published definition, not a ruling on your truck. Which weight counts (rated, registered or actual) is for your base jurisdiction to say; ask them before you rely on it. If you are leased to a carrier, who reports depends on the lease (R530): the lessor reports on a lease of 29 days or less, and on a lease of 30 days or more the two sides can choose in writing, with the carrier reporting if nothing is written down.</p>
+    </section>
+
+    <section class="how" id="due-dates">
+      <h2>IFTA due dates, 2026 returns</h2>
+      <p class="example-label">A quarterly return is due on the last day of the month after the quarter ends. If that day is a Saturday, Sunday or legal holiday, the next business day is the due date (R960.100).</p>
+      <div class="worked">
+        <p><span>Q1 (Jan - Mar): Thursday, April 30, 2026</span><span>Apr 30</span></p>
+        <p><span>Q2 (Apr - Jun): Friday, July 31, 2026</span><span>Jul 31</span></p>
+        <p><span>Q3 (Jul - Sep): Saturday, October 31, so Monday, November 2, 2026</span><span>Nov 2</span></p>
+        <p><span>Q4 (Oct - Dec): Sunday, January 31, so Monday, February 1, 2027</span><span>Feb 1, 2027</span></p>
+      </div>
+      <p class="fine">A return is required every quarter, even if you drove no miles or used no taxable fuel (R930.100). Holidays that move a date, and your base jurisdiction's own filing date, are on you to check. The Excel worksheet works out these dates for any year, but only moves weekend dates, not holidays.</p>
+    </section>
+
+    <section class="tool-faq">
+      <h2>Common questions</h2>
+      <details>
+        <summary>Do non-CDL hotshots have to file IFTA?</summary>
+        <p>It depends on weight and axles, not on whether you need a CDL. IFTA covers a truck with two axles and a gross or registered weight over 26,000 lb, a truck with three or more axles, or a combination over 26,000 lb (R245). IFTA's board has said the axle test counts the truck's axles only, not the trailer's. The federal CDL rule is separate: a combination of 26,001 lb or more, with a towed unit rated over 10,000 lb (49 CFR 383.91). The two lines sit close together but are not the same test, so a rig can meet one and not the other. The weight test uses gross or registered weight, so use whichever is higher. IFTA applies when a qualified vehicle travels in two or more member jurisdictions (R305). Confirm with your base jurisdiction.</p>
+      </details>
+      <details>
+        <summary>Where do I get the tax rate for each state?</summary>
+        <p>From the IFTA rate matrix at <a href="https://www.iftach.org/taxmatrix4/">iftach.org</a>. Pick the quarter you are filing, then use the U.S.-dollar rate in your fuel's column (diesel is labelled "Special Diesel" there) and read the jurisdiction's footnotes. Rates change by quarter, which is why none are built in here.</p>
+      </details>
+      <details>
+        <summary>Is there an IFTA calculator by state?</summary>
+        <p>Yes: this one. Add a row for each state or province you drove in. Each row's tax is worked out from its own miles, gallons and rate, and the total nets credits against tax due.</p>
+      </details>
+      <details>
+        <summary>Do I file if I drove no miles, or bought no fuel in a state?</summary>
+        <p>A return is required for every quarter, even if no operations were conducted or no taxable fuel was used (R930.100). Fuel you bought in a state where you logged no miles generally still goes on the return as tax-paid gallons, and shows up as a credit there.</p>
+      </details>
+      <details>
+        <summary>Is the Excel worksheet really free?</summary>
+        <p>Yes. The download link above is direct: no email, no signup. A bigger operator kit is in the works; this worksheet stands on its own.</p>
+      </details>
+      <details>
+        <summary>Is this tax advice?</summary>
+        <p>No. It is a planning worksheet that does arithmetic on the numbers you type. Your base jurisdiction's return is what counts, and IFTA rules, rates and due dates can change. Check them with your base jurisdiction before you file or pay.</p>
+      </details>
+    </section>
+
+    <section class="how ifta-sources" id="sources">
+      <h2>Sources</h2>
+      <ul class="ifta-list">
+        <li><a href="https://www.iftach.org/manuals/2026/AA/Articles%20of%20Agreement%20-%2008-26-26.pdf">IFTA Articles of Agreement</a>, effective August 26, 2026: R245, R249, R305, R530, R930, R960.</li>
+        <li><a href="https://www.iftach.org/manuals/2026/PM/Procedures%20Manual%20-%2008-26-26.pdf">IFTA Procedures Manual</a>, effective August 26, 2026: P720.</li>
+        <li><a href="https://www.iftach.org/taxmatrix4/">IFTA tax rate matrix</a>, for the rates.</li>
+        <li><a href="https://www.ecfr.gov/current/title-49/section-383.91">49 CFR 383.91</a>, the separate federal CDL rule.</li>
+      </ul>
+      <p class="fine">Read October 25, 2026. IFTA, Inc. and your base jurisdiction publish the current rules; this page is not affiliated with either.</p>
+    </section>
+
+    <section class="more-tools" aria-labelledby="more-tools-head">
+      <h2 id="more-tools-head">MORE TOOLS</h2>
+      <ul>
+        <li><a href="../index.html">Load panel<span>Take it or pass on a load, with your minimum.</span></a></li>
+        <li><a href="../cost-per-mile/index.html">Cost per mile<span>Your all-in cost and the lowest rate to quote.</span></a></li>
+        <li><a href="../factoring-fee/index.html">Factoring cost<span>The real fee on an invoice, flat fees included.</span></a></li>
+        <li><a href="../deadhead/index.html">Deadhead miles<span>What the empty miles cost and how many a load can carry.</span></a></li>
+      </ul>
+    </section>
+
+    <footer class="panel-foot">
+      <p>Hotshot Math is a planning tool, not tax, legal, or financial advice. Numbers are estimates; your base jurisdiction's IFTA return is what counts.</p>
+      <nav aria-label="Footer">
+        <ul>
+          <li><a href="../index.html">The panel</a></li>
+          <li><a href="../../about.html">About</a></li>
+          <li><a href="../../disclaimer.html">Disclaimer</a></li>
+          <li><a href="../../privacy.html">Privacy</a></li>
+        </ul>
+      </nav>
+    </footer>
+  </main>
+
+  <script src="../config.js"></script>
+  <script src="../../assets/track.js"></script>
+  <script src="../../engine/calc-engine.js"></script>
+  <script src="ifta.js"></script>
+</body>
+</html>

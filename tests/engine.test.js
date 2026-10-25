@@ -870,3 +870,226 @@ test('weight and 2026 rates pages print the engine numbers', () => {
   });
   assert.ok(rp.includes(years.join(' / ')), 'rates-2026 missing year line ' + years.join(' / '));
 });
+
+// ---- hotshot-ifta -----------------------------------------------------------
+// Hand-computed. The rates below are TEST values only (round numbers chosen so the
+// arithmetic is checkable); the product never ships a rate.
+
+const IFTA_QUARTER = [
+  { name: 'TN', miles: 3100, gallonsPurchased: 330 },
+  { name: 'GA', miles: 1800, gallonsPurchased: 150 },
+  { name: 'AL', miles: 1000, gallonsPurchased: 210 },
+];
+
+test('hotshot-ifta: three-jurisdiction quarter, fleet MPG and net taxable gallons by hand', () => {
+  const result = compute('hotshot-ifta', { jurisdictions: IFTA_QUARTER });
+  assert.equal(result.ok, true);
+  const v = result.values;
+  // 5,900 mi / 690 gal = 8.5507246... -> 8.55 on the return
+  assert.equal(v.totalMiles, 5900);
+  assert.equal(v.totalGallonsPurchased, 690);
+  assert.equal(v.fleetMpg, 8.55);
+  assert.ok(Math.abs(v.fleetMpgExact - 8.5507) < 1e-4, 'fleet mpg exact ' + v.fleetMpgExact);
+  // taxable = miles x 690 / 5900: TN 2,139,000/5,900 = 362.54; GA 1,242,000/5,900 = 210.51; AL 690,000/5,900 = 116.95
+  assert.equal(v.jurisdictions[0].taxableGallons, 362.54);
+  assert.equal(v.jurisdictions[1].taxableGallons, 210.51);
+  assert.equal(v.jurisdictions[2].taxableGallons, 116.95);
+  // net = taxable - purchased: TN 192,000/5,900 = 32.54; GA 357,000/5,900 = 60.51; AL -549,000/5,900 = -93.05 (a credit)
+  assert.equal(v.jurisdictions[0].netTaxableGallons, 32.54);
+  assert.equal(v.jurisdictions[1].netTaxableGallons, 60.51);
+  assert.equal(v.jurisdictions[2].netTaxableGallons, -93.05);
+  assert.equal(v.totalTaxableGallons, 690);
+  assert.equal(v.netTaxableGallons, 0);
+  assert.equal(v.mpgOverridden, false);
+  // rates left blank: no tax is invented
+  assert.equal(v.jurisdictions[0].tax, null);
+  assert.equal(v.totalTax, null);
+  assert.equal(v.rowsMissingRate, 3);
+  assert.equal(v.taxComplete, false);
+});
+
+test('hotshot-ifta: with test rates, tax due and a credit net out to $7.68', () => {
+  const rates = [0.25, 0.3, 0.2];
+  const result = compute('hotshot-ifta', {
+    jurisdictions: IFTA_QUARTER.map((j, i) => ({ ...j, ratePerGallon: rates[i] })),
+  });
+  assert.equal(result.ok, true);
+  const v = result.values;
+  // TN 192,000/5,900 x 0.25 = 8.1356; GA 357,000/5,900 x 0.30 = 18.1525; AL -549,000/5,900 x 0.20 = -18.6102
+  assert.equal(v.jurisdictions[0].tax, 8.14);
+  assert.equal(v.jurisdictions[1].tax, 18.15);
+  assert.equal(v.jurisdictions[2].tax, -18.61);
+  // exact total (48,000 + 107,100 - 109,800) / 5,900 = 45,300 / 5,900 = 7.6780
+  assert.equal(v.totalTax, 7.68);
+  assert.equal(v.rowsMissingRate, 0);
+  assert.equal(v.taxComplete, true);
+});
+
+test('hotshot-ifta: without an MPG override the net taxable gallons always sum to zero', () => {
+  const shapes = [
+    [[3100, 330], [1800, 150], [1000, 210]],
+    [[1, 0.1], [999999, 71234.5], [17.5, 3], [0, 9]],
+    [[412, 41], [388.5, 0], [75, 19.25], [1200, 130], [0.5, 0]],
+  ];
+  shapes.forEach((shape) => {
+    const jurisdictions = shape.map((s, i) => ({ name: 'J' + i, miles: s[0], gallonsPurchased: s[1] }));
+    const v = compute('hotshot-ifta', { jurisdictions }).values;
+    const gallons = shape.reduce((a, s) => a + s[1], 0);
+    assert.ok(Math.abs(v.netTaxableGallons) < 0.011, 'rounded net ' + v.netTaxableGallons);
+    assert.ok(Math.abs(v.totalTaxableGallons - gallons) < 0.011, 'taxable total ' + v.totalTaxableGallons);
+    // each row is its share of the miles times the total gallons
+    const miles = shape.reduce((a, s) => a + s[0], 0);
+    shape.forEach((s, i) => {
+      const expected = Math.round((s[0] * gallons / miles) * 100) / 100;
+      assert.ok(Math.abs(v.jurisdictions[i].taxableGallons - expected) < 0.011, 'row ' + i);
+    });
+  });
+});
+
+test('hotshot-ifta: a single jurisdiction has nothing to net out', () => {
+  const result = compute('hotshot-ifta', {
+    jurisdictions: [{ name: 'One', miles: 1000, gallonsPurchased: 125, ratePerGallon: 0.5 }],
+  });
+  assert.equal(result.ok, true);
+  const v = result.values;
+  assert.equal(v.fleetMpg, 8);
+  assert.equal(v.jurisdictions[0].taxableGallons, 125);
+  assert.equal(v.jurisdictions[0].netTaxableGallons, 0);
+  assert.equal(v.jurisdictions[0].tax, 0);
+  assert.equal(v.totalTax, 0);
+  assert.equal(v.taxComplete, true);
+});
+
+test('hotshot-ifta: a row with miles but zero gallons owes tax on all its taxable gallons', () => {
+  const result = compute('hotshot-ifta', {
+    jurisdictions: [
+      { name: 'X', miles: 500, gallonsPurchased: 0, ratePerGallon: 0.4 },
+      { name: 'Y', miles: 500, gallonsPurchased: 100, ratePerGallon: 0.1 },
+    ],
+  });
+  assert.equal(result.ok, true);
+  const v = result.values;
+  // 1,000 mi / 100 gal = 10 mpg: each row burned 50 taxable gallons
+  assert.equal(v.fleetMpg, 10);
+  assert.equal(v.jurisdictions[0].netTaxableGallons, 50);
+  assert.equal(v.jurisdictions[0].tax, 20);
+  assert.equal(v.jurisdictions[1].netTaxableGallons, -50);
+  assert.equal(v.jurisdictions[1].tax, -5);
+  assert.equal(v.totalTax, 15);
+});
+
+test('hotshot-ifta: a partly filled-in rate column totals only the rated rows and says so', () => {
+  const result = compute('hotshot-ifta', {
+    jurisdictions: [
+      { name: 'X', miles: 500, gallonsPurchased: 0, ratePerGallon: 0.4 },
+      { name: 'Y', miles: 500, gallonsPurchased: 100 },
+    ],
+  });
+  const v = result.values;
+  assert.equal(v.jurisdictions[1].tax, null);
+  assert.equal(v.rowsMissingRate, 1);
+  assert.equal(v.taxComplete, false);
+  assert.equal(v.totalTax, 20);
+});
+
+test('hotshot-ifta: a typed fleet MPG replaces miles / gallons and nets no longer sum to zero', () => {
+  const result = compute('hotshot-ifta', {
+    fleetMpg: 10,
+    jurisdictions: [
+      { name: 'A', miles: 1000, gallonsPurchased: 80, ratePerGallon: 0.2 },
+      { name: 'B', miles: 500, gallonsPurchased: 50, ratePerGallon: 0.1 },
+    ],
+  });
+  assert.equal(result.ok, true);
+  const v = result.values;
+  assert.equal(v.mpgOverridden, true);
+  assert.equal(v.mpgUsed, 10);
+  // still reports what the purchases imply: 1,500 / 130 = 11.54
+  assert.equal(v.fleetMpg, 11.54);
+  assert.equal(v.jurisdictions[0].taxableGallons, 100);
+  assert.equal(v.jurisdictions[0].netTaxableGallons, 20);
+  assert.equal(v.jurisdictions[1].taxableGallons, 50);
+  assert.equal(v.jurisdictions[1].netTaxableGallons, 0);
+  assert.equal(v.netTaxableGallons, 20);
+  assert.equal(v.totalTax, 4);
+});
+
+test('hotshot-ifta: no gallons at all needs an MPG; with one, every gallon is taxable', () => {
+  const rows = [{ name: 'A', miles: 800, gallonsPurchased: 0 }];
+  const none = compute('hotshot-ifta', { jurisdictions: rows });
+  assert.equal(none.ok, false);
+  assert.match(none.error, /gallons/i);
+  const typed = compute('hotshot-ifta', { jurisdictions: rows, fleetMpg: 16 });
+  assert.equal(typed.ok, true);
+  assert.equal(typed.values.fleetMpg, 0);
+  assert.equal(typed.values.jurisdictions[0].taxableGallons, 50);
+  assert.equal(typed.values.jurisdictions[0].netTaxableGallons, 50);
+});
+
+test('hotshot-ifta: blank rows are skipped, and bad input is named in the error', () => {
+  const blankRows = compute('hotshot-ifta', {
+    jurisdictions: [{ name: '', miles: '', gallonsPurchased: '' }, { name: 'A', miles: '200', gallonsPurchased: '20' }, {}],
+  });
+  assert.equal(blankRows.ok, true);
+  assert.equal(blankRows.values.jurisdictions.length, 1);
+  assert.equal(blankRows.values.fleetMpg, 10);
+
+  assert.equal(compute('hotshot-ifta', { jurisdictions: [] }).ok, false);
+  assert.equal(compute('hotshot-ifta', {}).ok, false);
+  const allBlank = compute('hotshot-ifta', { jurisdictions: [{ miles: '' }, {}] });
+  assert.match(allBlank.error, /miles/i);
+  // fuel bought where no miles were logged is allowed, but a quarter with no miles at all is not
+  const noMiles = compute('hotshot-ifta', { jurisdictions: [{ name: 'AL', gallonsPurchased: 12 }] });
+  assert.match(noMiles.error, /miles for at least one/);
+  const textMiles = compute('hotshot-ifta', { jurisdictions: [{ name: 'AL', miles: 'lots', gallonsPurchased: 12 }] });
+  assert.match(textMiles.error, /miles for AL/);
+  const zeroMiles = compute('hotshot-ifta', { jurisdictions: [{ name: 'AL', miles: 0, gallonsPurchased: 12 }] });
+  assert.equal(zeroMiles.ok, false);
+  const negative = compute('hotshot-ifta', { jurisdictions: [{ name: 'AL', miles: -5, gallonsPurchased: 12 }] });
+  assert.equal(negative.ok, false);
+  const badRate = compute('hotshot-ifta', { jurisdictions: [{ name: 'AL', miles: 5, gallonsPurchased: 1, ratePerGallon: 'abc' }] });
+  assert.match(badRate.error, /tax rate for AL/);
+  const tooLow = compute('hotshot-ifta', { jurisdictions: [{ name: 'AL', miles: 5, gallonsPurchased: 1 }], fleetMpg: 0.5 });
+  assert.equal(tooLow.ok, false);
+});
+
+test('hotshot-ifta: miles in one jurisdiction and purchases in another still net out', () => {
+  const result = compute('hotshot-ifta', {
+    jurisdictions: [
+      { name: 'A', miles: 900, gallonsPurchased: 0 },
+      { name: 'B', miles: 0, gallonsPurchased: 90 },
+    ],
+  });
+  assert.equal(result.ok, true);
+  const v = result.values;
+  assert.equal(v.fleetMpg, 10);
+  assert.equal(v.jurisdictions[0].netTaxableGallons, 90);
+  assert.equal(v.jurisdictions[1].taxableGallons, 0);
+  assert.equal(v.jurisdictions[1].netTaxableGallons, -90);
+});
+
+test('hotshot-ifta page prints the engine worked example for the rows it ships', () => {
+  const html = hotshotPage('ifta');
+  const blocks = html.split('<div class="ifta-row is-example">').slice(1);
+  assert.equal(blocks.length, 3);
+  const jurisdictions = blocks.map((b) => {
+    const get = (f) => b.match(new RegExp('data-field="' + f + '"[^>]*value="([^"]*)"'))[1];
+    return { name: get('name'), miles: get('miles'), gallonsPurchased: get('gallonsPurchased'), ratePerGallon: get('ratePerGallon') };
+  });
+  const signed = (n) => (n < 0 ? '-' : '') + usd(Math.abs(n));
+  const v = compute('hotshot-ifta', { jurisdictions }).values;
+  assert.equal(v.taxComplete, true);
+  const printed = [
+    v.fleetMpg.toFixed(2),
+    String(v.fleetMpgExact),
+    ...v.jurisdictions.map((j) => j.taxableGallons.toFixed(2)),
+    ...v.jurisdictions.map((j) => j.netTaxableGallons.toFixed(2)),
+    ...v.jurisdictions.map((j) => signed(j.tax)),
+    signed(v.totalTax),
+    usd(Math.abs(v.totalTax)),
+    v.totalMiles.toLocaleString('en-US'),
+    v.totalGallonsPurchased.toLocaleString('en-US'),
+  ];
+  printed.forEach((s) => assert.ok(html.includes(s), 'ifta page missing ' + s));
+  assert.equal(v.totalTax, -12.56);
+});
