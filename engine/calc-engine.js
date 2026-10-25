@@ -710,6 +710,10 @@
     const loadedShare = 1 - deadheadPct / 100;
     const minRatePerLoadedMile = (costPerMile + profit) / loadedShare;
     const panelMin = fixedPerMile + maintenance + driverPay + profit;
+    // Quote the rate from the rounded panel minimum, so a load at the quoted rate
+    // (and this deadhead %) always clears the minimum typed into the panel.
+    const quotedPanelMin = ceilCents(panelMin);
+    const quotedMinRate = ceilCents((quotedPanelMin + fuelPerMile) / loadedShare);
 
     return ok(
       {
@@ -726,17 +730,17 @@
         deadheadPct: round(deadheadPct, 2),
         profitPerMile: round(profit, 3),
         minRatePerLoadedMileExact: round(minRatePerLoadedMile, 3),
-        minRatePerLoadedMile: ceilCents(minRatePerLoadedMile),
+        minRatePerLoadedMile: quotedMinRate,
         panelMinNetPerMileExact: round(panelMin, 3),
-        panelMinNetPerMile: ceilCents(panelMin),
+        panelMinNetPerMile: quotedPanelMin,
       },
       [
         { label: 'Fixed costs per month', value: money(fixedMonthly), unit: 'USD', money: true },
         { label: 'Fixed cost per mile', value: round(fixedPerMile, 3), unit: 'USD/mi', money: true },
         { label: 'Variable cost per mile', value: round(variablePerMile, 3), unit: 'USD/mi', money: true },
         { label: 'All-in cost per mile', value: round(costPerMile, 3), unit: 'USD/mi', money: true },
-        { label: 'Minimum rate per loaded mile', value: ceilCents(minRatePerLoadedMile), unit: 'USD/mi', money: true },
-        { label: 'Panel MIN $/MI NET', value: ceilCents(panelMin), unit: 'USD/mi', money: true },
+        { label: 'Minimum rate per loaded mile', value: quotedMinRate, unit: 'USD/mi', money: true },
+        { label: 'Panel MIN $/MI NET', value: quotedPanelMin, unit: 'USD/mi', money: true },
       ],
     );
   }

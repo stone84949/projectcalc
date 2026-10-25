@@ -503,6 +503,47 @@ test('hotshot-cost-per-mile: a load at the minimum rate clears the panel minimum
   assert.ok(Math.abs(exact.values.netPerTotalMile - cpm.panelMinNetPerMileExact) < 0.01);
 });
 
+test('hotshot-cost-per-mile: the quoted rate clears the quoted panel minimum for any inputs', () => {
+  // Seeded pseudo-random inputs with fractional cents; loads use exactly the deadhead %.
+  let seed = 20261024;
+  const rand = () => {
+    seed = (seed * 1103515245 + 12345) % 2147483648;
+    return seed / 2147483648;
+  };
+  const pick = (lo, hi, places) => Number((lo + rand() * (hi - lo)).toFixed(places));
+  let checked = 0;
+  for (let i = 0; i < 3000; i += 1) {
+    const deadheadPct = Math.floor(rand() * 60);
+    const input = {
+      truckPayment: pick(0, 2500, 2),
+      insurance: pick(200, 2000, 2),
+      trailerPayment: pick(0, 900, 2),
+      subscriptions: pick(0, 400, 2),
+      otherFixed: pick(0, 500, 2),
+      monthlyMiles: Math.round(pick(2000, 14000, 0)),
+      fuelPrice: pick(2.5, 6, 3),
+      truckMpg: pick(6, 16, 1),
+      maintenancePerMile: pick(0, 0.4, 3),
+      driverPayPerMile: pick(0, 0.8, 3),
+      deadheadPct,
+      profitPerMile: pick(0, 0.6, 3),
+    };
+    const cpm = compute('hotshot-cost-per-mile', input);
+    assert.equal(cpm.ok, true);
+    const load = compute('hotshot-load', {
+      ratePerMile: cpm.values.minRatePerLoadedMile,
+      miles: (100 - deadheadPct) * 10,
+      deadheadMiles: deadheadPct * 10,
+      fuelPrice: input.fuelPrice,
+      truckMpg: input.truckMpg,
+      minNetPerMile: cpm.values.panelMinNetPerMile,
+    });
+    assert.equal(load.values.verdict, 'take', JSON.stringify({ input, cpm: cpm.values, net: load.values.netPerTotalMile }));
+    checked += 1;
+  }
+  assert.equal(checked, 3000);
+});
+
 test('hotshot-cost-per-mile: blank fixed costs and no deadhead fall back to variable cost + profit', () => {
   const result = compute('hotshot-cost-per-mile', {
     monthlyMiles: 10000,

@@ -14,7 +14,7 @@
   <meta property="og:image" content="https://projectcalc-tools.pages.dev/hotshot/og.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="Hotshot Math load panel showing a TAKE IT verdict">
+  <meta property="og:image:alt" content="Hotshot Math cost per mile calculator: fixed and variable cost per mile and the minimum rate to quote">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Hotshot cost per mile calculator - free, no app">
   <meta name="twitter:description" content="Your all-in cost per mile and the minimum rate per loaded mile. Free, no app, no signup.">
@@ -102,7 +102,8 @@
 
       <button class="run-btn" type="submit">CALCULATE</button>
 
-      <section class="readout-card" id="tool-result" aria-live="polite" aria-label="Result">
+      <section class="readout-card" id="tool-result" aria-label="Result">
+        <p class="visually-hidden" id="result-announce" aria-live="polite"></p>
         <p class="readout-label" id="result-label">MINIMUM RATE PER LOADED MILE</p>
         <p class="readout-main" id="result-main">$2.09</p>
         <p class="readout-status" id="result-status">Panel MIN $/MI NET: $1.30 (no fuel - the panel subtracts it per load)</p>
@@ -126,8 +127,8 @@
         <p class="key"><span>Panel MIN $/MI NET - $0.400 + $0.150 + $0.500 + $0.250</span><span>$1.30</span></p>
       </div>
       <p>Fixed costs are spread over every mile you drive, loaded or empty, because the truck payment doesn't care which. Deadhead is the share of total miles that are empty; the minimum rate divides by the loaded share, since only loaded miles get paid.</p>
-      <p><strong>Which number goes in the panel?</strong> Type <code>$1.30</code> into the panel's MIN $/MI NET, not $1.415. The panel already subtracts fuel, tolls and factoring from each load before it compares, so its minimum is your cost per mile without fuel, plus profit: fixed + maintenance + driver pay + profit. Both are per total mile, so they line up.</p>
-      <p class="fine">The minimum rate per loaded mile leaves out tolls and factoring, because they change load to load. The <a href="../index.html">load panel</a> counts them. Minimums round up to the cent so the quoted number never lands under your real one.</p>
+      <p><strong>Which number goes in the panel?</strong> Type <code>$1.30</code> into the panel's MIN $/MI NET, not $1.415. The panel already subtracts fuel, tolls and factoring from each load before it compares, so its minimum is your cost per mile without fuel, plus profit: fixed + maintenance + driver pay + profit. Both are per total mile, so they line up. If you factor, quote a little above the minimum rate: the panel also takes your factoring percent off the top, and this calculator doesn't know it.</p>
+      <p class="fine">The minimum rate per loaded mile leaves out tolls and factoring, because they change load to load. The <a href="../index.html">load panel</a> counts them. Minimums round up to the cent, and the rate is worked out from the rounded panel minimum, so a load at the quoted rate and your usual deadhead clears the panel (before tolls and factoring).</p>
     </section>
 
     <section class="tool-faq">

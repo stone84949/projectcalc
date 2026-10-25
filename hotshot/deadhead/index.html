@@ -14,7 +14,7 @@
   <meta property="og:image" content="https://projectcalc-tools.pages.dev/hotshot/og.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="Hotshot Math load panel showing a TAKE IT verdict">
+  <meta property="og:image:alt" content="Hotshot Math deadhead miles calculator: deadhead percent, empty-mile fuel and break-even empty miles">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Deadhead miles calculator for hotshot loads">
   <meta name="twitter:description" content="The fuel cost of empty miles and the break-even deadhead for your minimum. Free, no signup.">
@@ -74,7 +74,8 @@
 
       <button class="run-btn" type="submit">CALCULATE</button>
 
-      <section class="readout-card" id="tool-result" aria-live="polite" aria-label="Result">
+      <section class="readout-card" id="tool-result" aria-label="Result">
+        <p class="visually-hidden" id="result-announce" aria-live="polite"></p>
         <p class="readout-label" id="result-label">MOST EMPTY MILES THIS LOAD CAN CARRY</p>
         <p class="readout-main" id="result-main">109 MI</p>
         <p class="readout-status warn" id="result-status">Under your $1.30/mi minimum at 150 empty miles</p>

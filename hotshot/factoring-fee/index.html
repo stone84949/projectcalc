@@ -14,7 +14,7 @@
   <meta property="og:image" content="https://projectcalc-tools.pages.dev/hotshot/og.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="Hotshot Math load panel showing a TAKE IT verdict">
+  <meta property="og:image:alt" content="Hotshot Math factoring fee calculator: what factoring really costs per invoice and per month">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Factoring fee calculator: what factoring really costs">
   <meta name="twitter:description" content="The factor fee in dollars, the effective rate with flat fees, and the monthly cost of factoring. Free, no signup.">
@@ -71,7 +71,8 @@
 
       <button class="run-btn" type="submit">CALCULATE</button>
 
-      <section class="readout-card" id="tool-result" aria-live="polite" aria-label="Result">
+      <section class="readout-card" id="tool-result" aria-label="Result">
+        <p class="visually-hidden" id="result-announce" aria-live="polite"></p>
         <p class="readout-label" id="result-label">TOTAL FEE ON THIS INVOICE</p>
         <p class="readout-main" id="result-main">$69.00</p>
         <p class="readout-status" id="result-status">Every 1% on $21,600.00/month of revenue = $216.00/month</p>
@@ -95,7 +96,7 @@
       </div>
       <p><strong>Every 1% on $21,600.00/month of revenue = $216.00/month.</strong> That's the number to have in mind when you compare factor rates: a half-point difference on this volume is $108 a month.</p>
       <p>The cost of factoring formula: <code>fee = invoice x factor rate + flat fees</code>, and <code>effective rate = fee / invoice</code>. Flat fees matter most on small invoices - a $25 fee is 1.4% of an $1,800 invoice but 5% of a $500 one.</p>
-      <p class="fine">This calculator takes all fees out of the advance. Some factors take them out of the reserve instead; then cash today is higher and the reserve lower by the same amount, and the total you receive is the same. On the <a href="../index.html">load panel</a>, enter the effective rate (3.83% here) in FACTORING so the flat fees get counted on every load.</p>
+      <p class="fine">This calculator takes all fees out of the advance. Some factors take them out of the reserve instead; then cash today is higher and the reserve lower by the same amount, and the total you receive is the same. On the <a href="../index.html">load panel</a>, enter the effective rate (3.83% here) in FACTORING so the flat fees get counted on every load. Flat fees weigh more on small invoices, so use the effective rate for invoices about this size.</p>
     </section>
 
     <section class="tool-faq">

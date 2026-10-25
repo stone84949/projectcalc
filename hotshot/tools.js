@@ -13,6 +13,8 @@
   var mainEl = document.getElementById('result-main');
   var statusEl = document.getElementById('result-status');
   var rowsEl = document.getElementById('result-rows');
+  // Results redraw on every keystroke; only a Calculate press is announced to screen readers.
+  var announceEl = document.getElementById('result-announce');
 
   function track(name, props) {
     if (window.SiteTrack) window.SiteTrack.event(name, props);
@@ -165,7 +167,9 @@
   form.addEventListener('input', run);
   form.addEventListener('submit', function (event) {
     event.preventDefault();
-    if (run()) track('tool_run', { tool: tool });
+    var done = run();
+    if (announceEl) announceEl.textContent = labelEl.textContent + ': ' + mainEl.textContent + '. ' + statusEl.textContent;
+    if (done) track('tool_run', { tool: tool });
     if (card.scrollIntoView && card.getBoundingClientRect().top > window.innerHeight) card.scrollIntoView({ block: 'start' });
   });
   run();
