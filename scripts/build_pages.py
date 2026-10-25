@@ -437,12 +437,14 @@ GUIDE_PAGES = [
     },
     {
         "slug": "concrete-bags-for-a-pad",
-        "title": "How many concrete bags for a pad?",
-        "desc": "80 lb Quikrete bags for a 4-inch slab, using the published 0.60 cu ft yield.",
+        "title": "How many bags of concrete for a pad or walk?",
+        "desc": "80 lb Quikrete bags for a small 4-inch pad or walk, using the published 0.60 cu ft yield. A 4×8 pad takes 19 bags.",
         "tool": "concrete",
+        "preset": {"lengthFt": 4, "widthFt": 8, "thicknessIn": 4, "bagLb": "80", "wastePct": 5},
         "body": """
         <p>Quikrete’s data sheet for Concrete Mix 1101 says an 80 lb bag yields approximately 0.60 cubic feet. A 60 lb bag yields 0.45. Those are the numbers this calculator uses. Not a forum guess.</p>
-        <p>A 10×10 pad, 4 inches thick, is 33.33 cu ft. 33.33 ÷ 0.60 = 55.6 bags, which means 56 before waste. Five percent waste is 59. That is about 4,700 lb of mix. Plan a mixer.</p>
+        <p>A 4×8 pad or walk section, 4 inches thick, is 10.67 cu ft. 10.67 ÷ 0.60 = 17.8 bags, which means 18 before waste. Five percent waste brings it to 18.7, so you buy 19. That is about 1,520 lb of mix, a long afternoon by hand or an easy mixer job.</p>
+        <p>Pouring a full 10×10 slab? That size has <a href="how-many-bags-of-concrete-for-a-10x10-slab.html">its own guide</a> with 4, 5 and 6 inch tables.</p>
         <p>Do not use bagged mix for a structural footing unless a local code official and the product data both say you can. This page is for pads, walks, and similar pours.</p>
         """,
     },
@@ -931,7 +933,7 @@ GUIDE_PAGES = [
           </tbody>
         </table>
         <p>Every row uses 8 ft ceilings, one door, one window, two coats and 375 sq ft per gallon. The 6×8 walls come to 1.003 gallons, a hair over one, so the calculator rounds up to 2.</p>
-        <p>A bathroom is damp, so look for a paint whose label says it is made for bathrooms or moisture. The finish does not change the math here: coverage comes from the can, so type the number on your can into the coverage box. A single refresh coat on the 5×8 walls is 172 sq ft, 0.46 gallons, which rounds to 1 gallon. One coat of primer on the same walls at 250 sq ft per gallon, the middle of Sherwin-Williams’ 200–300 range, is 0.69 gallons, also 1 gallon. Taller ceilings change it: at 9 ft the same walls are 396 sq ft for two coats, 1.06 gallons, so you buy 2.</p>
+        <p>The finish you pick does not change the math here: coverage comes from the can, so type the number on your can into the coverage box. A single refresh coat on the 5×8 walls is 172 sq ft, 0.46 gallons, which rounds to 1 gallon. One coat of primer on the same walls at 250 sq ft per gallon, the middle of Sherwin-Williams’ 200–300 range, is 0.69 gallons, also 1 gallon. Taller ceilings change it: at 9 ft the same walls are 396 sq ft for two coats, 1.06 gallons, so you buy 2.</p>
         """,
         "faq": [
             ("Do I subtract the tub or the vanity?", "No. The calculator takes off doors and windows only. A tub surround or vanity is some wall you will not paint, but rounding up usually covers the difference."),
@@ -968,24 +970,23 @@ GUIDE_PAGES = [
     {
         "slug": "how-much-flooring-for-a-15x15-room",
         "title": "How much flooring for a 15×15 room?",
-        "desc": "13 boxes of flooring at 20 sq ft per box for a 15×15 room laid straight, or 14 boxes herringbone. Table from 10×10 to 1,000 sq ft.",
+        "desc": "13 boxes of flooring at 20 sq ft per box for a 15×15 room laid straight, or 14 boxes herringbone. Table for square rooms from 14×14 to 20×20.",
         "tool": "flooring",
         "preset": {"lengthFt": 15, "widthFt": 15, "pattern": "straight", "boxCoverageSqFt": 20},
         "body": """
         <p><strong>Buy 13 boxes</strong> at 20 sq ft per box for a 15×15 room laid straight. A herringbone layout needs <strong>14 boxes</strong>.</p>
         <p>15 × 15 is 225 sq ft. A straight layout adds 10% waste: 247.5 sq ft. 247.5 ÷ 20 = 12.4 boxes, so 13. Diagonal is 15% waste, 258.75 sq ft, still 13 boxes. Herringbone is 20%, 270 sq ft, which is 14.</p>
         <table>
-          <thead><tr><th>Room or total area</th><th>Straight (10%)</th><th>Diagonal (15%)</th><th>Straight, 24 sq ft boxes</th></tr></thead>
+          <thead><tr><th>Square room</th><th>Straight (10%)</th><th>Diagonal (15%)</th><th>Straight, 24 sq ft boxes</th></tr></thead>
           <tbody>
-            <tr><td>10×10 (100 sq ft)</td><td>110 sq ft, 6 boxes</td><td>6 boxes</td><td>5 boxes</td></tr>
-            <tr><td>12×12 (144 sq ft)</td><td>158.4 sq ft, 8 boxes</td><td>9 boxes</td><td>7 boxes</td></tr>
+            <tr><td>14×14 (196 sq ft)</td><td>215.6 sq ft, 11 boxes</td><td>12 boxes</td><td>9 boxes</td></tr>
             <tr><td>15×15 (225 sq ft)</td><td>247.5 sq ft, 13 boxes</td><td>13 boxes</td><td>11 boxes</td></tr>
+            <tr><td>16×16 (256 sq ft)</td><td>281.6 sq ft, 15 boxes</td><td>15 boxes</td><td>12 boxes</td></tr>
+            <tr><td>18×18 (324 sq ft)</td><td>356.4 sq ft, 18 boxes</td><td>19 boxes</td><td>15 boxes</td></tr>
             <tr><td>20×20 (400 sq ft)</td><td>440 sq ft, 22 boxes</td><td>23 boxes</td><td>19 boxes</td></tr>
-            <tr><td>800 sq ft (20×40)</td><td>880 sq ft, 44 boxes</td><td>46 boxes</td><td>37 boxes</td></tr>
-            <tr><td>1,000 sq ft (25×40)</td><td>1,100 sq ft, 55 boxes</td><td>58 boxes</td><td>46 boxes</td></tr>
           </tbody>
         </table>
-        <p>The first four rows are a single room. The last two are whole-floor totals, entered as a length and width that multiply to the area. The straight and diagonal columns assume 20 sq ft per box, and the last column shows 24 sq ft boxes. Laminate, LVP and engineered hardwood boxes often hold 18 to 24 sq ft, so check the number printed on yours. For the 15×15 room laid straight, 18 sq ft boxes means 14 boxes and 24 sq ft boxes means 11.</p>
+        <p>For a whole floor by total square footage, see <a href="flooring-boxes-by-square-feet.html">flooring boxes by square feet</a>; smaller rooms are in the <a href="flooring-for-a-12x12-room.html">12×12 guide</a>. The straight and diagonal columns assume 20 sq ft per box, and the last column shows 24 sq ft boxes. Laminate, LVP and engineered hardwood boxes often hold 18 to 24 sq ft, so check the number printed on yours. For the 15×15 room laid straight, 18 sq ft boxes means 14 boxes and 24 sq ft boxes means 11.</p>
         <p>Closets and doorways count. Add them as extra area in the square footage calculator first, and keep a spare box from the same lot.</p>
         """,
         "faq": [
@@ -996,7 +997,7 @@ GUIDE_PAGES = [
     },
     {
         "slug": "how-much-paint-for-a-10x12-room",
-        "title": "How much paint for a 10×12 room?",
+        "title": "How much paint for a 10×12 room (bedroom, office or nursery)?",
         "desc": "2 gallons for two coats on the walls of a 10×12 room with 8 ft ceilings, one door and two windows. 3 gallons with the ceiling.",
         "tool": "paint",
         "preset": {"lengthFt": 10, "widthFt": 12, "heightFt": 8, "doors": 1, "windows": 2, "coats": "2", "coverageSqFtPerGal": 375, "includeCeiling": False},
@@ -1016,7 +1017,7 @@ GUIDE_PAGES = [
           </tbody>
         </table>
         <p>Ceiling height is what pushes it up: at 10 ft the walls alone cross two gallons. Three coats on the base walls is 903 sq ft, 2.41 gallons, so 3 gallons. Type your own door and window counts, ceiling height and the coverage printed on the can into the calculator.</p>
-        <p>Related sizes have their own guides: 10×10, 12×12, and a bedroom table that runs 10×10 to 14×16.</p>
+        <p>Related sizes have their own guides: <a href="how-much-paint-for-a-10x10-room.html">10×10</a>, <a href="how-much-paint-for-a-12x12-room.html">12×12</a>, and a <a href="how-much-paint-for-a-bedroom.html">bedroom table</a> that runs 10×10 to 14×16.</p>
         """,
         "faq": [
             ("Does this match the bedroom guide?", "Yes. The bedroom guide table lists the same 10×12 room at 2 gallons for the walls and 3 gallons with the ceiling."),

@@ -410,6 +410,16 @@ test('concrete bags for a 10x10 slab', () => {
   assert.match(p.html, /59 bags of 80 lb concrete/);
 });
 
+test('concrete pad guide uses a 4x8 example and points to the 10x10 page', () => {
+  const p = preset('concrete-bags-for-a-pad');
+  assert.equal(p.tool, 'concrete');
+  const r = v('concrete', p.input);
+  assert.deepEqual([r.volumeCuFt, r.volumeWithWasteCuFt, r.bagsExact, r.bagsToBuy], [10.667, 11.2, 18.667, 19]);
+  assert.equal(v('concrete', { ...p.input, wastePct: 0 }).bagsToBuy, 18);
+  assert.match(p.html, /how-many-bags-of-concrete-for-a-10x10-slab\.html/);
+  assert.doesNotMatch(p.html, /10×10 pad/);
+});
+
 test('flooring for a 15x15 room', () => {
   const p = preset('how-much-flooring-for-a-15x15-room');
   assert.equal(p.tool, 'flooring');
@@ -422,12 +432,11 @@ test('flooring for a 15x15 room', () => {
   assert.equal(v('flooring', { ...p.input, boxCoverageSqFt: 18 }).boxesToBuy, 14);
   assert.equal(v('flooring', { ...p.input, boxCoverageSqFt: 24 }).boxesToBuy, 11);
   const rows = [
-    [10, 10, 110, 6, 6, 5],
-    [12, 12, 158.4, 8, 9, 7],
+    [14, 14, 215.6, 11, 12, 9],
     [15, 15, 247.5, 13, 13, 11],
+    [16, 16, 281.6, 15, 15, 12],
+    [18, 18, 356.4, 18, 19, 15],
     [20, 20, 440, 22, 23, 19],
-    [20, 40, 880, 44, 46, 37],
-    [25, 40, 1100, 55, 58, 46],
   ];
   for (const [l, w, sq, boxes, dBoxes, b24] of rows) {
     const s = v('flooring', { lengthFt: l, widthFt: w, pattern: 'straight', boxCoverageSqFt: 20 });
