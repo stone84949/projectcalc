@@ -223,7 +223,6 @@ def homepage() -> None:
     popular = "".join(f'<li><a href="guides/{g["slug"]}.html">{g["title"]}</a></li>' for g in GUIDE_PAGES)
     body = f"""
     <div class="wrap hero">
-      <div class="kicker">Home DIY materials</div>
       <h1>How much do I need, and what will it cost?</h1>
       <p class="lede">Ten free calculators for paint, tile, flooring, mulch, concrete, drywall, wallpaper, moving boxes, square footage, and room renovation cost. Every buy quantity rounds up. Coverage numbers are cited.</p>
     </div>
