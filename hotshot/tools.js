@@ -135,8 +135,8 @@
         rows.push(['Truck GVWR, no trailer', lb(v.truckGvwr), 'net']);
       }
       rows.push(['CDL by the federal weight test', v.cdl === 'none' ? 'Not required' : 'Class ' + v.cdl, 'key']);
-      rows.push(['10,001 lb+ across state lines', v.isCmv ? 'USDOT no., med card, HOS' : 'Under 10,001 lb']);
-      rows.push(['Truck payload, before hitch weight and driver', lb(v.truckPayload)]);
+      rows.push(['10,001 lb+ across state lines', v.isCmv ? 'Generally USDOT no., med card, HOS (for-hire may also need MC authority)' : 'Under 10,001 lb']);
+      rows.push(['Truck payload left (driver and trailer pin weight not counted)', lb(v.truckPayload)]);
       if (v.towing) rows.push(['Trailer payload', lb(v.trailerPayload)]);
       rows.push(['Most cargo the ratings allow', lb(v.maxCargo), 'key']);
       if (v.hasCargo) {
@@ -156,7 +156,7 @@
       if (v.overRating) status = 'Over a weight rating. ' + status;
       return {
         label: 'CDL BY THE FEDERAL WEIGHT TEST',
-        main: v.cdl === 'none' ? 'NO CDL' : 'CLASS ' + v.cdl,
+        main: v.cdl === 'none' ? 'NO CDL BY THIS TEST' : 'LIKELY CLASS ' + v.cdl,
         status: status,
         tone: v.overRating ? 'warn' : '',
         rows: rows,
