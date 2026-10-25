@@ -1,6 +1,6 @@
 'use strict';
 
-/* Hotshot Math single-calculator pages (cost per mile, factoring, deadhead).
+/* Hotshot Math single-calculator pages (cost per mile, factoring, deadhead, weight).
    The form names its engine tool in data-hotshot-tool. Results recalculate
    silently as you type; each CALCULATE press is a deliberate run and sends one
    tool_run event with the tool slug only. Typed numbers never leave the page. */
@@ -32,6 +32,10 @@
 
   function pct(n) {
     return String(n) + '%';
+  }
+
+  function lb(n) {
+    return num(n) + ' lb';
   }
 
   var RENDER = {
@@ -117,6 +121,44 @@
         main: num(v.breakEvenDeadheadMiles) + ' MI',
         status: status,
         tone: tone,
+        rows: rows,
+      };
+    },
+    'hotshot-weight': function (v) {
+      var rows = [];
+      if (v.towing) {
+        rows.push(['Truck GVWR + trailer GVWR', lb(v.sumGvwr)]);
+        if (v.labelGcwr > 0) rows.push(['GCWR on the truck label', lb(v.labelGcwr)]);
+        rows.push(['GCWR for the CDL test (' + (v.gcwrBasis === 'label' ? 'the label' : 'the sum') + ')', lb(v.gcwr), 'net']);
+        rows.push(['Trailer rated over 10,000 lb?', v.trailerGvwr > 10000 ? 'Yes' : 'No']);
+      } else {
+        rows.push(['Truck GVWR, no trailer', lb(v.truckGvwr), 'net']);
+      }
+      rows.push(['CDL by the federal weight test', v.cdl === 'none' ? 'Not required' : 'Class ' + v.cdl, 'key']);
+      rows.push(['10,001 lb+ across state lines', v.isCmv ? 'USDOT no., med card, HOS' : 'Under 10,001 lb']);
+      rows.push(['Truck payload, before hitch weight and driver', lb(v.truckPayload)]);
+      if (v.towing) rows.push(['Trailer payload', lb(v.trailerPayload)]);
+      rows.push(['Most cargo the ratings allow', lb(v.maxCargo), 'key']);
+      if (v.hasCargo) {
+        if (v.towing) {
+          rows.push(['Loaded trailer', lb(v.loadedTrailer)]);
+          rows.push(['Trailer headroom', lb(v.trailerHeadroom)]);
+        }
+        rows.push(['Loaded combined weight', lb(v.grossCombined)]);
+        rows.push(['Combined headroom', lb(v.combinedHeadroom)]);
+      }
+      var status;
+      if (v.cdl === 'A') status = 'Likely required: ' + (v.hasCargo && v.grossCombined > v.gcwr ? 'loaded weight' : 'GCWR') + ' 26,001+ with a trailer over 10,000 lb';
+      else if (v.cdl === 'B') status = 'Likely required: the truck alone is rated 26,001+';
+      else if (v.towing && v.towedOverLine) status = 'Not required by this test: ' + lb(v.poundsUnderCdlLine) + ' under the 26,001 lb line';
+      else if (v.towing) status = 'Not required by this test: trailer rated 10,000 lb or less';
+      else status = 'Not required by this test: under 26,001 lb';
+      if (v.overRating) status = 'Over a weight rating. ' + status;
+      return {
+        label: 'CDL BY THE FEDERAL WEIGHT TEST',
+        main: v.cdl === 'none' ? 'NO CDL' : 'CLASS ' + v.cdl,
+        status: status,
+        tone: v.overRating ? 'warn' : '',
         rows: rows,
       };
     },

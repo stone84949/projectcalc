@@ -867,6 +867,98 @@
     );
   }
 
+  // Hotshot weight / CDL line, from the federal definitions (49 CFR 383.5, 383.91, 390.5):
+  // - GCWR is the GREATER of the power unit's GCWR (only if printed on its FMVSS
+  //   certification label) and the sum of the truck and trailer GVWRs. The label GCWR
+  //   is not used when the truck isn't towing.
+  // - Class A (Group A): GCWR or actual combined weight, whichever is greater, of
+  //   26,001 lb or more AND a towed unit rated or weighing over 10,000 lb.
+  // - Class B (Group B): a single vehicle rated 26,001 lb or more (towing up to 10,000 lb).
+  // - 10,001 lb or more (rating or weight) makes it a CMV in interstate commerce.
+  // Weights are whole pounds. Cargo is assumed to ride on the trailer (on the truck
+  // when there is no trailer); hitch/pin weight on the truck is not modelled.
+  const CDL_LINE = 26001;
+  const TOWED_LINE = 10000; // Class A needs the towed unit OVER this
+  const CMV_LINE = 10001;
+
+  function hotshotWeight(input) {
+    const truckGvwr = readNumber(input.truckGvwr, 'truck GVWR', { min: 1000, max: 80000 });
+    const truckEmpty = readNumber(input.truckEmpty, 'truck empty weight', { min: 500, max: 80000 });
+    const trailerGvwr = readNumber(input.trailerGvwr, 'trailer GVWR', { min: 0, max: 80000, required: false });
+    const trailerEmpty = readNumber(input.trailerEmpty, 'trailer empty weight', { min: 0, max: 80000, required: false });
+    const labelGcwr = readNumber(input.gcwr, 'GCWR', { min: 0, max: 160000, required: false });
+    const hasCargo = !(input.cargoWeight === '' || input.cargoWeight == null);
+    const cargo = readNumber(input.cargoWeight, 'cargo weight', { min: 0, max: 100000, required: false });
+
+    if (truckEmpty > truckGvwr) return fail('Truck empty weight is more than its GVWR. Check the door sticker.');
+    const towing = trailerGvwr > 0;
+    if (towing && trailerEmpty > trailerGvwr) return fail('Trailer empty weight is more than its GVWR. Check the trailer VIN plate.');
+
+    const sumGvwr = truckGvwr + (towing ? trailerGvwr : 0);
+    const gcwr = towing ? Math.max(labelGcwr, sumGvwr) : truckGvwr;
+    const gcwrBasis = !towing ? 'truck' : (labelGcwr > sumGvwr ? 'label' : 'sum');
+    // Heaviest the rig is rated to scale: every rating has to hold, so a label GCWR
+    // below the sum of GVWRs is the real limit.
+    const maxGross = towing && labelGcwr > 0 ? Math.min(labelGcwr, sumGvwr) : sumGvwr;
+    const truckPayload = truckGvwr - truckEmpty;
+    const trailerPayload = towing ? trailerGvwr - trailerEmpty : 0;
+    const emptyWeight = truckEmpty + (towing ? trailerEmpty : 0);
+    const maxCargo = towing
+      ? Math.max(0, Math.min(trailerPayload, maxGross - emptyWeight))
+      : Math.max(0, truckPayload);
+
+    const loadedTrailer = towing ? trailerEmpty + cargo : 0;
+    const grossCombined = emptyWeight + cargo;
+    const trailerHeadroom = towing ? trailerGvwr - loadedTrailer : 0;
+    const combinedHeadroom = maxGross - grossCombined;
+    const overRating = hasCargo && (combinedHeadroom < 0 || (towing && trailerHeadroom < 0));
+
+    // "whichever is greater": a loaded weight over the rating counts too.
+    const combinedForTest = hasCargo ? Math.max(gcwr, grossCombined) : gcwr;
+    const towedForTest = towing ? (hasCargo ? Math.max(trailerGvwr, loadedTrailer) : trailerGvwr) : 0;
+    const truckForTest = !towing && hasCargo ? Math.max(truckGvwr, grossCombined) : truckGvwr;
+    const classA = towing && combinedForTest >= CDL_LINE && towedForTest > TOWED_LINE;
+    const classB = !classA && truckForTest >= CDL_LINE;
+    const cdl = classA ? 'A' : (classB ? 'B' : 'none');
+    const isCmv = Math.max(combinedForTest, truckForTest) >= CMV_LINE;
+
+    return ok(
+      {
+        truckGvwr: truckGvwr,
+        trailerGvwr: towing ? trailerGvwr : 0,
+        labelGcwr: labelGcwr,
+        towing: towing,
+        sumGvwr: round(sumGvwr, 0),
+        gcwr: round(gcwr, 0),
+        gcwrBasis: gcwrBasis,
+        cdl: cdl,
+        classA: classA,
+        classB: classB,
+        towedOverLine: towedForTest > TOWED_LINE,
+        poundsUnderCdlLine: classA || combinedForTest >= CDL_LINE ? 0 : round(CDL_LINE - combinedForTest, 0),
+        isCmv: isCmv,
+        truckPayload: round(truckPayload, 0),
+        trailerPayload: round(trailerPayload, 0),
+        maxGross: round(maxGross, 0),
+        maxCargo: round(maxCargo, 0),
+        hasCargo: hasCargo,
+        cargo: round(cargo, 0),
+        loadedTrailer: round(loadedTrailer, 0),
+        grossCombined: round(grossCombined, 0),
+        trailerHeadroom: round(trailerHeadroom, 0),
+        combinedHeadroom: round(combinedHeadroom, 0),
+        overRating: overRating,
+      },
+      [
+        { label: towing ? 'GCWR for the CDL test' : 'Truck GVWR', value: round(gcwr, 0), unit: 'lb' },
+        { label: 'CDL by the federal weight test', value: cdl === 'none' ? 'NOT REQUIRED' : 'CLASS ' + cdl, unit: '' },
+        towing ? { label: 'Trailer payload', value: round(trailerPayload, 0), unit: 'lb' } : null,
+        { label: 'Truck payload', value: round(truckPayload, 0), unit: 'lb' },
+        hasCargo ? { label: 'Loaded combined weight', value: round(grossCombined, 0), unit: 'lb' } : null,
+      ].filter(Boolean),
+    );
+  }
+
   const TOOLS = {
     paint: paint,
     'square-footage': squareFootage,
@@ -882,6 +974,7 @@
     'hotshot-cost-per-mile': hotshotCostPerMile,
     'hotshot-factoring': hotshotFactoring,
     'hotshot-deadhead': hotshotDeadhead,
+    'hotshot-weight': hotshotWeight,
   };
 
   function compute(tool, input) {

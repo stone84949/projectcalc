@@ -27,6 +27,7 @@ HOTSHOT_TOOLS = {
     "cost-per-mile": "hotshot-cost-per-mile",
     "factoring-fee": "hotshot-factoring",
     "deadhead": "hotshot-deadhead",
+    "weight": "hotshot-weight",
 }
 
 GUIDES = [
@@ -72,6 +73,7 @@ REQUIRED = [
     ROOT / "hotshot" / "guides" / "how-to-start-hotshot-trucking.html",
     ROOT / "hotshot" / "tools.js",
     *[ROOT / "hotshot" / slug / "index.html" for slug in HOTSHOT_TOOLS],
+    ROOT / "hotshot" / "rates-2026" / "index.html",
     *[ROOT / "calculators" / f"{slug}.html" for slug in TOOLS],
     *[ROOT / "guides" / f"{slug}.html" for slug in GUIDES],
 ]
@@ -328,6 +330,48 @@ class SiteContract(unittest.TestCase):
         script = (ROOT / "hotshot" / "tools.js").read_text(encoding="utf-8")
         self.assertIn("track('tool_run', { tool: tool })", script)
         self.assertIn("window.SiteTrack", script)
+
+    def test_hotshot_rates_page_is_sourced_and_tracked_as_a_guide(self) -> None:
+        path = ROOT / "hotshot" / "rates-2026" / "index.html"
+        html = path.read_text(encoding="utf-8")
+        doc = parse(path)
+        url = "https://projectcalc-tools.pages.dev/hotshot/rates-2026/"
+        self.assertIn(f'<link rel="canonical" href="{url}">', html)
+        self.assertIn(f'<meta property="og:url" content="{url}">', html)
+        self.assertIn('data-guide="rates-2026"', html)
+        self.assertTrue(doc.attrs.get("h1"))
+        # guide_view comes from hotshot.js, after site config and analytics
+        order = [html.find(s) for s in ('src="../config.js"', 'src="../../assets/track.js"', 'src="../hotshot.js"')]
+        self.assertNotIn(-1, order)
+        self.assertEqual(order, sorted(order))
+        # links to the panel and every tool
+        self.assertIn('href="../index.html"', html)
+        for slug in HOTSHOT_TOOLS:
+            self.assertIn(f'href="../{slug}/index.html"', html, slug)
+        # every market figure is cited: each source is linked on the page and listed in SOURCES.md
+        notes = (ROOT / "SOURCES.md").read_text(encoding="utf-8")
+        for source in (
+            "freightwaves.com/checkpoint/what-is-hotshot-trucking",
+            "porterfreightfunding.com/blog/hot-shot-rates-per-mile",
+            "matrackinc.com/how-to-set-best-hot-shot-rates-per-mile",
+            "truckstop.com/blog/hot-shot-rate-per-mile",
+            "dat.com/blog/flatbed-report-the-only-load-to-truck-ratio-to-rise",
+            "eia.gov/petroleum/gasdiesel",
+        ):
+            self.assertRegex(html, r'href="https://(www\.)?' + re.escape(source), source)
+            self.assertIn(source, notes, source)
+        self.assertNotIn("is this load worth it", html.lower())
+        panel = (ROOT / "hotshot" / "index.html").read_text(encoding="utf-8")
+        self.assertIn('href="rates-2026/index.html"', panel)
+        guide = (ROOT / "hotshot" / "guides" / "how-to-start-hotshot-trucking.html").read_text(encoding="utf-8")
+        self.assertIn('href="../rates-2026/index.html"', guide)
+
+    def test_hotshot_weight_page_cites_the_federal_rules(self) -> None:
+        html = (ROOT / "hotshot" / "weight" / "index.html").read_text(encoding="utf-8")
+        for section in ("383.5", "383.91", "390.5", "391.41", "395.3"):
+            self.assertIn(f"https://www.ecfr.gov/current/title-49/section-{section}", html, section)
+        self.assertIn("https://www.fmcsa.dot.gov/registration/do-i-need-usdot-number", html)
+        self.assertIn("not legal advice", html)
 
     def test_robots_allows_indexing(self) -> None:
         robots = (ROOT / "robots.txt").read_text(encoding="utf-8")

@@ -703,3 +703,166 @@ test('hotshot pages print the engine worked examples', () => {
     usd(d.netPerTotalMile), d.breakEvenDeadheadMiles + ' empty miles']
     .forEach((s) => assert.ok(dh.includes(s), 'deadhead missing ' + s));
 });
+
+// Hotshot weight / CDL line (49 CFR 383.5, 383.91, 390.5). Example rig printed on /hotshot/weight/.
+const WEIGHT_EXAMPLE = {
+  truckGvwr: 14000,
+  truckEmpty: 8000,
+  trailerGvwr: 24000,
+  trailerEmpty: 7500,
+  gcwr: '',
+  cargoWeight: 15000,
+};
+
+function weight(over) {
+  const result = compute('hotshot-weight', { ...WEIGHT_EXAMPLE, ...over });
+  assert.equal(result.ok, true, result.error);
+  return result.values;
+}
+
+test('hotshot-weight: worked example - gooseneck rig is Class A, with payloads and headroom', () => {
+  const v = weight({});
+  assert.equal(v.sumGvwr, 38000);
+  assert.equal(v.gcwr, 38000);
+  assert.equal(v.gcwrBasis, 'sum');
+  assert.equal(v.cdl, 'A');
+  assert.equal(v.isCmv, true);
+  assert.equal(v.truckPayload, 6000); // 14,000 - 8,000
+  assert.equal(v.trailerPayload, 16500); // 24,000 - 7,500
+  assert.equal(v.maxGross, 38000);
+  assert.equal(v.maxCargo, 16500); // trailer payload binds before the combined rating
+  assert.equal(v.loadedTrailer, 22500);
+  assert.equal(v.grossCombined, 30500);
+  assert.equal(v.trailerHeadroom, 1500);
+  assert.equal(v.combinedHeadroom, 7500);
+  assert.equal(v.overRating, false);
+});
+
+test('hotshot-weight: 26,000 vs 26,001 combined rating with a trailer over 10,000', () => {
+  const under = weight({ truckGvwr: 14000, trailerGvwr: 12000, trailerEmpty: 4000, cargoWeight: '' });
+  assert.equal(under.gcwr, 26000);
+  assert.equal(under.cdl, 'none');
+  assert.equal(under.towedOverLine, true);
+  assert.equal(under.poundsUnderCdlLine, 1);
+  const at = weight({ truckGvwr: 14001, trailerGvwr: 12000, trailerEmpty: 4000, cargoWeight: '' });
+  assert.equal(at.gcwr, 26001);
+  assert.equal(at.cdl, 'A');
+  assert.equal(at.poundsUnderCdlLine, 0);
+});
+
+test('hotshot-weight: towed 10,000 vs 10,001 with a 26,001 combined rating', () => {
+  const at10000 = weight({ truckGvwr: 16001, trailerGvwr: 10000, trailerEmpty: 3000, cargoWeight: '' });
+  assert.equal(at10000.gcwr, 26001);
+  assert.equal(at10000.towedOverLine, false);
+  assert.equal(at10000.cdl, 'none'); // Class A needs the towed unit OVER 10,000; truck alone is under 26,001
+  const at10001 = weight({ truckGvwr: 16000, trailerGvwr: 10001, trailerEmpty: 3000, cargoWeight: '' });
+  assert.equal(at10001.gcwr, 26001);
+  assert.equal(at10001.towedOverLine, true);
+  assert.equal(at10001.cdl, 'A');
+});
+
+test('hotshot-weight: GCWR is the greater of the label GCWR and the sum of GVWRs', () => {
+  const labelHigher = weight({ truckGvwr: 14000, trailerGvwr: 12000, trailerEmpty: 4000, gcwr: 30000, cargoWeight: '' });
+  assert.equal(labelHigher.gcwr, 30000);
+  assert.equal(labelHigher.gcwrBasis, 'label');
+  assert.equal(labelHigher.cdl, 'A');
+  assert.equal(labelHigher.maxGross, 26000); // each GVWR still caps the scale weight
+  const labelLower = weight({ truckGvwr: 14000, trailerGvwr: 12000, trailerEmpty: 4000, gcwr: 20000, cargoWeight: '' });
+  assert.equal(labelLower.gcwr, 26000);
+  assert.equal(labelLower.gcwrBasis, 'sum');
+  assert.equal(labelLower.cdl, 'none');
+  assert.equal(labelLower.maxGross, 20000); // the label GCWR is the towing limit
+  assert.equal(labelLower.maxCargo, 8000); // 20,000 - 8,000 truck - 4,000 trailer
+  // the power unit's GCWR is not used when it isn't towing
+  const solo = weight({ truckGvwr: 14000, trailerGvwr: 0, trailerEmpty: '', gcwr: 30000, cargoWeight: '' });
+  assert.equal(solo.gcwr, 14000);
+  assert.equal(solo.gcwrBasis, 'truck');
+  assert.equal(solo.cdl, 'none');
+});
+
+test('hotshot-weight: loaded weight over the ratings counts and is flagged', () => {
+  const v = weight({ truckGvwr: 14000, trailerGvwr: 12000, trailerEmpty: 4000, cargoWeight: 14500 });
+  assert.equal(v.gcwr, 26000);
+  assert.equal(v.loadedTrailer, 18500);
+  assert.equal(v.grossCombined, 26500);
+  assert.equal(v.trailerHeadroom, -6500);
+  assert.equal(v.combinedHeadroom, -500);
+  assert.equal(v.overRating, true);
+  assert.equal(v.cdl, 'A'); // gross combination weight of 26,001+ with a towed unit weighing over 10,000
+  const legal = weight({ truckGvwr: 14000, trailerGvwr: 12000, trailerEmpty: 4000, cargoWeight: 8000 });
+  assert.equal(legal.overRating, false);
+  assert.equal(legal.trailerHeadroom, 0);
+  assert.equal(legal.cdl, 'none');
+});
+
+test('hotshot-weight: Class B is a single vehicle rated 26,001+ towing 10,000 or less', () => {
+  assert.equal(weight({ truckGvwr: 26001, truckEmpty: 12000, trailerGvwr: 10000, trailerEmpty: 3000, cargoWeight: '' }).cdl, 'B');
+  assert.equal(weight({ truckGvwr: 26001, truckEmpty: 12000, trailerGvwr: 0, trailerEmpty: '', cargoWeight: '' }).cdl, 'B');
+  assert.equal(weight({ truckGvwr: 26000, truckEmpty: 12000, trailerGvwr: 0, trailerEmpty: '', cargoWeight: '' }).cdl, 'none');
+  assert.equal(weight({ truckGvwr: 26001, truckEmpty: 12000, trailerGvwr: 10001, trailerEmpty: 3000, cargoWeight: '' }).cdl, 'A');
+});
+
+test('hotshot-weight: 10,001 lb makes it a commercial motor vehicle in interstate commerce', () => {
+  assert.equal(weight({ truckGvwr: 9000, truckEmpty: 6000, trailerGvwr: 1000, trailerEmpty: 500, cargoWeight: '' }).isCmv, false);
+  assert.equal(weight({ truckGvwr: 9000, truckEmpty: 6000, trailerGvwr: 1001, trailerEmpty: 500, cargoWeight: '' }).isCmv, true);
+  assert.equal(weight({ truckGvwr: 9000, truckEmpty: 6000, trailerGvwr: 0, trailerEmpty: '', cargoWeight: '' }).isCmv, false);
+  // loaded weight over the rating counts too
+  assert.equal(weight({ truckGvwr: 9000, truckEmpty: 6000, trailerGvwr: 1000, trailerEmpty: 500, cargoWeight: 3600 }).isCmv, true);
+});
+
+test('hotshot-weight: rejects empty weights over the rating and a missing truck GVWR', () => {
+  const truck = compute('hotshot-weight', { ...WEIGHT_EXAMPLE, truckEmpty: 15000 });
+  assert.equal(truck.ok, false);
+  assert.match(truck.error, /truck empty weight/i);
+  const trailer = compute('hotshot-weight', { ...WEIGHT_EXAMPLE, trailerEmpty: 25000 });
+  assert.equal(trailer.ok, false);
+  assert.match(trailer.error, /trailer empty weight/i);
+  const none = compute('hotshot-weight', { ...WEIGHT_EXAMPLE, truckGvwr: '' });
+  assert.equal(none.ok, false);
+  assert.match(none.error, /truck GVWR/i);
+});
+
+test('weight and 2026 rates pages print the engine numbers', () => {
+  const lbs = (n) => Number(n).toLocaleString('en-US') + ' lb';
+  const w = compute('hotshot-weight', WEIGHT_EXAMPLE).values;
+  const wp = hotshotPage('weight');
+  [lbs(w.sumGvwr), lbs(w.gcwr), lbs(w.truckPayload), lbs(w.trailerPayload), lbs(w.maxCargo), lbs(w.loadedTrailer),
+    lbs(w.grossCombined), lbs(w.trailerHeadroom), lbs(w.combinedHeadroom), 'Class ' + w.cdl]
+    .forEach((s) => assert.ok(wp.includes(s), 'weight missing ' + s));
+  assert.ok(wp.includes('id="result-main">CLASS ' + w.cdl + '<'), 'weight readout should start on the example verdict');
+
+  // Rates page examples: EIA U.S. diesel, week of 2026-10-19 ($6.276), at 10 mpg, 3% factoring, $1.30 minimum.
+  const rp = hotshotPage('rates-2026');
+  const LOAD = { fuelPrice: 6.28, truckMpg: 10, tolls: 0, factoringPct: 3, minNetPerMile: 1.3 };
+  [
+    { miles: 500, ratePerMile: 1.75, deadheadMiles: 100, verdict: 'pass' },
+    { miles: 500, ratePerMile: 2.5, deadheadMiles: 100, verdict: 'take' },
+    { miles: 250, flatRate: 900, deadheadMiles: 50, verdict: 'take' },
+  ].forEach((ex) => {
+    const v = compute('hotshot-load', { ...LOAD, ...ex }).values;
+    assert.equal(v.verdict, ex.verdict);
+    [usd(v.grossPay), '-' + usd(v.fuelCost), '-' + usd(v.factoringFee), usd(v.netToTruck), usd(v.netPerTotalMile)]
+      .forEach((s) => assert.ok(rp.includes(s), 'rates-2026 missing ' + s));
+    assert.ok(rp.includes(ex.verdict === 'take' ? 'TAKE IT</span><span>' + usd(v.netPerTotalMile) : 'PASS</span><span>' + usd(v.netPerTotalMile)));
+  });
+
+  const cpm = compute('hotshot-cost-per-mile', { ...CPM_EXAMPLE, fuelPrice: 6.28 }).values;
+  [usd(cpm.fixedPerMile, 3), usd(cpm.fuelPerMile, 3), usd(cpm.costPerMile, 3), usd(cpm.minRatePerLoadedMile)]
+    .forEach((s) => assert.ok(rp.includes(s), 'rates-2026 missing ' + s));
+  // the same operator at $3.65 diesel is the cost per mile page's own example
+  assert.ok(rp.includes(usd(compute('hotshot-cost-per-mile', CPM_EXAMPLE).values.minRatePerLoadedMile)));
+
+  // a week: 2,000 total miles, 20% deadhead, costs without driver pay or profit
+  const owner = compute('hotshot-cost-per-mile', { ...CPM_EXAMPLE, fuelPrice: 6.28, driverPayPerMile: 0, profitPerMile: 0 }).values;
+  const weekMiles = 2000;
+  const loaded = weekMiles * (1 - CPM_EXAMPLE.deadheadPct / 100);
+  const weekCost = Math.round(owner.costPerMile * weekMiles);
+  assert.ok(rp.includes(usd(owner.costPerMile, 3).replace(/0$/, '')), 'rates-2026 missing cost per mile');
+  assert.ok(rp.includes(usd(weekCost, 0) + ' a week'));
+  const years = [1.5, 2, 2.5].map((rate) => {
+    const left = Math.round(rate * loaded - weekCost);
+    assert.ok(rp.includes(usd(left, 0) + ' a week'), 'rates-2026 missing week at ' + rate);
+    return usd(left * 48, 0);
+  });
+  assert.ok(rp.includes(years.join(' / ')), 'rates-2026 missing year line ' + years.join(' / '));
+});
