@@ -49,7 +49,8 @@ Coverage and waste figures used by `engine/calc-engine.js`. The site restates th
 ## Room cost
 
 - 2025–2026 published remodel writeups: roughly **$15–$30 / sq ft** cosmetic, much higher for wet rooms and gut work (Angi / HomeAdvisor summaries).
-- Kitchen intensity multiplier (2.5×) is a ProjectCalc planning factor, labeled as such. Not a bid.
+- Mid ($40–$80 / sq ft) and full ($100–$200 / sq ft) bands and the kitchen intensity multiplier (2.5×) are ProjectCalc planning numbers, labeled as such. Not a bid.
+- Larger-bath context cited in the guides: Fixr (updated 2026-01-27) $7,000–$40,000 for a 10×10 bath, https://www.fixr.com/costs/bathroom-remodeling ; HomeAdvisor $7,000–$30,000 primary bath, https://www.homeadvisor.com/cost/bathrooms/remodel-a-bathroom/ ; JLC 2025 Cost vs. Value upscale bath remodel (100 sq ft) $81,612, https://www.jlconline.com/cost-vs-value/2025/national/ (not re-read 2026-10-24: the site blocks automated reads).
 - Bathrooms (recalibrated 2026-10-21, reshaped 2026-10-22) no longer use a multiplier (was 2.2×, which put a 5×8 mid remodel at $3,520–$7,040, well below published figures). They use a fixed base (fixtures, plumbing, waterproofing, permits) plus a per-sq-ft part, so small baths cost more per sq ft and large primary baths less:
   - cosmetic: $2,000–$4,000 + $25–$100 / sq ft
   - mid: $5,000–$10,000 + $100–$200 / sq ft
