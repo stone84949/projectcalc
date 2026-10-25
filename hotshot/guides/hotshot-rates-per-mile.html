@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hotshot rates per mile: how to find YOUR number — Hotshot Math</title>
+  <meta name="description" content="Stop chasing average rates. Compute your all-in cost per mile and minimum rate - the only per-mile number that decides if a load pays.">
+  <link rel="canonical" href="https://projectcalc-tools.pages.dev/hotshot/guides/hotshot-rates-per-mile">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Hotshot Math">
+  <meta property="og:title" content="Hotshot rates per mile: how to find YOUR number - Hotshot Math">
+  <meta property="og:description" content="Stop chasing average rates. Compute your all-in cost per mile and minimum rate - the only per-mile number that decides if a load pays.">
+  <meta property="og:url" content="https://projectcalc-tools.pages.dev/hotshot/guides/hotshot-rates-per-mile">
+  <meta property="og:image" content="https://projectcalc-tools.pages.dev/hotshot/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Hotshot Math load panel showing a TAKE IT verdict">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://projectcalc-tools.pages.dev/hotshot/og.png">
+  <link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../hotshot.css">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="panel-bar">
+    <p class="panel-name">HOTSHOT MATH</p>
+    <p class="panel-sub">LOAD DECISION PANEL</p>
+  </header>
+
+  <main id="main" class="panel guide">
+    <h1>Hotshot rates per mile: how to find YOUR number</h1>
+    <p class="guide-lede">Every week somebody posts an "average hotshot rate" and every week operators take bad loads because of it. Averages describe a fleet of trucks you don't own. This is how to find the per-mile number that actually decides your loads.</p>
+
+    <section id="why-averages">
+      <h2>Why average rates lie</h2>
+      <p>An average blends diesel pickups and semi-converters, new authorities and ten-year fleets, Florida lanes and Montana lanes. Two operators can run the same load at the same rate and one loses money while the other banks it, because their cost per mile is different. The market rate is irrelevant until you know your own floor.</p>
+      <p class="guide-note">The panel asks for YOUR minimum $/mi for exactly this reason - it is the number the take-it-or-pass stamp is measured against.</p>
+    </section>
+
+    <section id="step-1">
+      <h2>Step 1: Your fixed cost per mile</h2>
+      <p>Add the yearly costs that exist whether you roll or sit: insurance premium, truck and trailer payments, registration, permits, accounting, and a maintenance reserve (tires, brakes, the transmission you hope never happens). Divide the total by the miles you will realistically run in a year - be honest; most new hotshots plan 100,000 and run 60,000. A $1,539-per-month fixed stack at 60,000 miles is about $0.31 per mile before you burn a drop of fuel.</p>
+    </section>
+
+    <section id="step-2">
+      <h2>Step 2: Your variable cost per mile</h2>
+      <p>Fuel is the big one: take your real truck's MPG, not the brochure's. At 8.4 MPG and $3.65/gal, every mile costs $0.43 in fuel. Add tolls per mile from your lanes, and the factoring cut on the loads you factor. These move with the load - which is why the panel computes them per load instead of guessing an average.</p>
+      <div class="worked">
+        <p><span>Fuel - $3.65/gal / 8.4 mpg</span><span>$0.43/mi</span></p>
+        <p><span>Tolls - typical run</span><span>$0.08/mi</span></p>
+        <p><span>Factoring - 3% on a $2.85/mi load</span><span>$0.09/mi</span></p>
+        <p class="worked-net"><span>Variable total</span><span>$0.60/mi</span></p>
+      </div>
+    </section>
+
+    <section id="step-3">
+      <h2>Step 3: Your minimum, and your margin</h2>
+      <p>Fixed + variable = your break-even per mile. Add the profit you're in business for and that is your minimum. If your stack lands at $0.91 break-even and you want $0.35, your minimum is $1.26/mi all-in. Enter it once in the panel; every load gets stamped against it.</p>
+      <p>Here's the check on a real-shaped load - 540 loaded miles at $2.85/mi, 80 deadhead, $45 tolls, 3% factoring:</p>
+      <div class="worked">
+        <p><span>Gross linehaul</span><span>$1,539.00</span></p>
+        <p><span>Fuel - 620 total mi / 8.4 mpg x $3.65</span><span>-$269.40</span></p>
+        <p><span>Tolls</span><span>-$45.00</span></p>
+        <p><span>Factoring - 3% of gross</span><span>-$46.17</span></p>
+        <p class="worked-net"><span>Net to truck</span><span>$1,178.43 - $1.90/mi</span></p>
+      </div>
+      <p>$1.90/mi net against a $1.26/mi floor leaves real margin - and note the panel's $1.90 counts fuel, tolls, and factoring but not your fixed stack. That's why the minimum field exists: your floor covers the rest.</p>
+    </section>
+
+    <section id="when-rates-change">
+      <h2>When your number changes</h2>
+      <p>Recompute when insurance renews, when fuel moves more than about $0.50/gal from your baseline, when the truck payment changes, and after any big repair. A floor computed once in January is fiction by July. The market will offer you every rate under your floor eventually - the stamp exists so you can say no in two seconds instead of agonizing at every pickup.</p>
+      <p><a class="guide-cta" href="../index.html">Run a load through the panel - free, no signup</a></p>
+    </section>
+
+    <section class="guide-faq">
+      <h2>Common questions</h2>
+      <details>
+        <summary>What's the average hotshot rate per mile?</summary>
+        <p>Wrong question - averages mix trucks, lanes, and cost structures that have nothing to do with yours. Two drivers at the same rate can have opposite outcomes. Compute your own minimum; that number decides loads.</p>
+      </details>
+      <details>
+        <summary>Why does the panel use total miles, not loaded miles?</summary>
+        <p>Because deadhead burns the same diesel. A rate quoted on loaded miles flatters every load with a long pickup. Net per TOTAL mile is the honest number, and it's what the stamp measures.</p>
+      </details>
+      <details>
+        <summary>Should I take a cheap load to reposition?</summary>
+        <p>Sometimes - if it beats deadheading to a better lane empty. Run it through the panel with the deadhead you'd otherwise burn; the stamp doesn't care about your reasoning, only the math.</p>
+      </details>
+    </section>
+
+    <section class="kit-strip">
+      <h2>OPERATOR KIT</h2>
+      <p class="kit-lede">The full load-math kit includes the minimum-rate worksheet: fixed costs, variable costs, and your floor - printed like everything else on this site.</p>
+      <p class="kit-note"><a href="../index.html">Back to the panel</a></p>
+    </section>
+
+    <footer class="panel-foot">
+      <p>Hotshot Math is a planning tool, not financial advice. Your costs are your own - compute them, don't borrow them.</p>
+      <nav aria-label="Footer">
+        <ul>
+          <li><a href="../index.html">The panel</a></li>
+          <li><a href="how-to-start-hotshot-trucking.html">Start here guide</a></li>
+          <li><a href="../../about.html">About</a></li>
+          <li><a href="../../privacy.html">Privacy</a></li>
+        </ul>
+      </nav>
+    </footer>
+  </main>
+
+  <script src="../config.js"></script>
+  <script src="../../assets/track.js"></script>
+  <script src="../../engine/calc-engine.js"></script>
+  <script src="../hotshot.js"></script>
+</body>
+</html>
