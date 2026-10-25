@@ -911,6 +911,173 @@ GUIDE_PAGES = [
             ("Does the count include a closet?", "No. Add a closet as its own small room and add the sheets."),
         ],
     },
+    {
+        "slug": "how-much-paint-for-a-small-bathroom",
+        "title": "How much paint for a small bathroom?",
+        "desc": "1 gallon covers two coats on the walls of a 5×8 bathroom with 8 ft ceilings, one door and one window. Add the ceiling and buy 2.",
+        "tool": "paint",
+        "preset": {"lengthFt": 5, "widthFt": 8, "heightFt": 8, "doors": 1, "windows": 1, "coats": "2", "coverageSqFtPerGal": 375, "includeCeiling": False},
+        "body": """
+        <p><strong>Buy 1 gallon</strong> for two coats on the walls of a 5×8 bathroom with 8 ft ceilings, one door and one window. Painting the ceiling too takes <strong>2 gallons</strong>.</p>
+        <p>The walls are 2 × (5 + 8) × 8 = 208 sq ft. Take off one 3×7 door (21 sq ft) and one 3×5 window (15 sq ft) and 172 sq ft is left. Two coats is 344 sq ft. At 375 sq ft per gallon, the middle of Sherwin-Williams’ 350–400 range, that is 0.92 gallons, so 1 gallon covers it. The 40 sq ft ceiling adds 80 sq ft across two coats: 424 sq ft, or 1.13 gallons, so you buy 2.</p>
+        <table>
+          <thead><tr><th>Bathroom</th><th>Walls only (2 coats)</th><th>Walls + ceiling (2 coats)</th></tr></thead>
+          <tbody>
+            <tr><td>5×6</td><td>1 gallon (280 sq ft)</td><td>1 gallon (340 sq ft)</td></tr>
+            <tr><td>5×7</td><td>1 gallon (312 sq ft)</td><td>2 gallons (382 sq ft)</td></tr>
+            <tr><td>5×8</td><td>1 gallon (344 sq ft)</td><td>2 gallons (424 sq ft)</td></tr>
+            <tr><td>6×8</td><td>2 gallons (376 sq ft)</td><td>2 gallons (472 sq ft)</td></tr>
+            <tr><td>8×10</td><td>2 gallons (504 sq ft)</td><td>2 gallons (664 sq ft)</td></tr>
+          </tbody>
+        </table>
+        <p>Every row uses 8 ft ceilings, one door, one window, two coats and 375 sq ft per gallon. The 6×8 walls come to 1.003 gallons, a hair over one, so the calculator rounds up to 2.</p>
+        <p>A bathroom is damp, so look for a paint whose label says it is made for bathrooms or moisture. The finish does not change the math here: coverage comes from the can, so type the number on your can into the coverage box. A single refresh coat on the 5×8 walls is 172 sq ft, 0.46 gallons, which rounds to 1 gallon. One coat of primer on the same walls at 250 sq ft per gallon, the middle of Sherwin-Williams’ 200–300 range, is 0.69 gallons, also 1 gallon. Taller ceilings change it: at 9 ft the same walls are 396 sq ft for two coats, 1.06 gallons, so you buy 2.</p>
+        """,
+        "faq": [
+            ("Do I subtract the tub or the vanity?", "No. The calculator takes off doors and windows only. A tub surround or vanity is some wall you will not paint, but rounding up usually covers the difference."),
+            ("Can I buy a quart instead of a gallon?", "Not for two coats. The 5×8 walls need 0.92 gallons, and a quart is a quarter of a gallon. A single refresh coat needs 0.46 gallons, which is still more than one quart."),
+            ("What if my bathroom has no window?", "Set windows to 0. The 5×8 walls then come to 374 sq ft for two coats, 0.997 gallons, which still rounds to 1 gallon, with almost nothing to spare."),
+        ],
+    },
+    {
+        "slug": "how-many-bags-of-concrete-for-a-10x10-slab",
+        "title": "How many bags of concrete for a 10×10 slab?",
+        "desc": "A 10×10 slab 4 inches thick takes 59 bags of 80 lb concrete with 5% waste. 6 inches takes 88. Table for 60 and 80 lb bags.",
+        "tool": "concrete",
+        "preset": {"lengthFt": 10, "widthFt": 10, "thicknessIn": 4, "bagLb": "80", "wastePct": 5},
+        "body": """
+        <p><strong>A 10×10 slab 4 inches thick takes 59 bags of 80 lb concrete</strong> with 5% waste. At 6 inches thick it takes <strong>88 bags</strong>.</p>
+        <p>10 × 10 × (4 ÷ 12) = 33.33 cu ft. Five percent waste brings it to 35 cu ft. Quikrete’s data sheet for Concrete Mix 1101 lists about 0.60 cu ft per 80 lb bag, so 35 ÷ 0.60 = 58.3 bags, rounded up to 59.</p>
+        <table>
+          <thead><tr><th>10×10 slab</th><th>Volume</th><th>Cubic yards (5% waste)</th><th>80 lb bags</th><th>60 lb bags</th></tr></thead>
+          <tbody>
+            <tr><td>4 in</td><td>33.33 cu ft</td><td>1.30</td><td>59</td><td>78</td></tr>
+            <tr><td>5 in</td><td>41.67 cu ft</td><td>1.62</td><td>73</td><td>98</td></tr>
+            <tr><td>6 in</td><td>50 cu ft</td><td>1.94</td><td>88</td><td>117</td></tr>
+          </tbody>
+        </table>
+        <p>That is a lot of dry mix. 59 bags of 80 lb is 4,720 lb, and 88 bags is 7,040 lb. At 1.3 to 1.9 cubic yards, compare the price of a ready-mix delivery before you mix by hand.</p>
+        <p>This is slab volume only. Gravel base, forms, rebar or mesh, and any thickened edge or footing are separate. Check local code and the product data before you pour. The calculator uses the same published yields on every slab: 0.45 cu ft per 60 lb bag and 0.60 per 80 lb bag.</p>
+        """,
+        "faq": [
+            ("How thick should a 10×10 slab be?", "Four inches is common for a patio-sized pad. Heavier loads often use more. Follow local code and the plans for your project."),
+            ("Does the count include waste?", "Yes, 5%. It covers spillage and an uneven base. With 0% waste a 4-inch 10×10 slab is 56 bags of 80 lb, and a 6-inch slab is 84."),
+            ("Is a 10×10 slab about one cubic yard?", "A 4-inch slab is 1.23 cubic yards before waste and 1.30 with 5% waste. A 6-inch slab is 1.85 before waste."),
+        ],
+    },
+    {
+        "slug": "how-much-flooring-for-a-15x15-room",
+        "title": "How much flooring for a 15×15 room?",
+        "desc": "13 boxes of flooring at 20 sq ft per box for a 15×15 room laid straight, or 14 boxes herringbone. Table from 10×10 to 1,000 sq ft.",
+        "tool": "flooring",
+        "preset": {"lengthFt": 15, "widthFt": 15, "pattern": "straight", "boxCoverageSqFt": 20},
+        "body": """
+        <p><strong>Buy 13 boxes</strong> at 20 sq ft per box for a 15×15 room laid straight. A herringbone layout needs <strong>14 boxes</strong>.</p>
+        <p>15 × 15 is 225 sq ft. A straight layout adds 10% waste: 247.5 sq ft. 247.5 ÷ 20 = 12.4 boxes, so 13. Diagonal is 15% waste, 258.75 sq ft, still 13 boxes. Herringbone is 20%, 270 sq ft, which is 14.</p>
+        <table>
+          <thead><tr><th>Room or total area</th><th>Straight (10%)</th><th>Diagonal (15%)</th><th>Straight, 24 sq ft boxes</th></tr></thead>
+          <tbody>
+            <tr><td>10×10 (100 sq ft)</td><td>110 sq ft, 6 boxes</td><td>6 boxes</td><td>5 boxes</td></tr>
+            <tr><td>12×12 (144 sq ft)</td><td>158.4 sq ft, 8 boxes</td><td>9 boxes</td><td>7 boxes</td></tr>
+            <tr><td>15×15 (225 sq ft)</td><td>247.5 sq ft, 13 boxes</td><td>13 boxes</td><td>11 boxes</td></tr>
+            <tr><td>20×20 (400 sq ft)</td><td>440 sq ft, 22 boxes</td><td>23 boxes</td><td>19 boxes</td></tr>
+            <tr><td>800 sq ft (20×40)</td><td>880 sq ft, 44 boxes</td><td>46 boxes</td><td>37 boxes</td></tr>
+            <tr><td>1,000 sq ft (25×40)</td><td>1,100 sq ft, 55 boxes</td><td>58 boxes</td><td>46 boxes</td></tr>
+          </tbody>
+        </table>
+        <p>The first four rows are a single room. The last two are whole-floor totals, entered as a length and width that multiply to the area. The straight and diagonal columns assume 20 sq ft per box, and the last column shows 24 sq ft boxes. Laminate, LVP and engineered hardwood boxes often hold 18 to 24 sq ft, so check the number printed on yours. For the 15×15 room laid straight, 18 sq ft boxes means 14 boxes and 24 sq ft boxes means 11.</p>
+        <p>Closets and doorways count. Add them as extra area in the square footage calculator first, and keep a spare box from the same lot.</p>
+        """,
+        "faq": [
+            ("How many square feet is a 15×15 room?", "225 sq ft. With 10% waste for a straight layout you buy 247.5 sq ft of flooring."),
+            ("Is 10% waste enough for a square room?", "For a straight lay, usually. Diagonal is 15% and herringbone 20%. A room with closets, jogs or lots of doorways leans higher."),
+            ("What if my room is not a perfect square?", "Split it into rectangles, add their areas, and enter any length and width that multiply to the total. Only the area and the layout change the answer."),
+        ],
+    },
+    {
+        "slug": "how-much-paint-for-a-10x12-room",
+        "title": "How much paint for a 10×12 room?",
+        "desc": "2 gallons for two coats on the walls of a 10×12 room with 8 ft ceilings, one door and two windows. 3 gallons with the ceiling.",
+        "tool": "paint",
+        "preset": {"lengthFt": 10, "widthFt": 12, "heightFt": 8, "doors": 1, "windows": 2, "coats": "2", "coverageSqFtPerGal": 375, "includeCeiling": False},
+        "body": """
+        <p><strong>Buy 2 gallons</strong> for two coats on the walls of a 10×12 room with 8 ft ceilings, one door and two windows. Painting the ceiling too takes <strong>3 gallons</strong>.</p>
+        <p>The walls are 2 × (10 + 12) × 8 = 352 sq ft. Take off one 3×7 door (21 sq ft) and two 3×5 windows (30 sq ft) and 301 sq ft is left. Two coats is 602 sq ft. At 375 sq ft per gallon, the middle of Sherwin-Williams’ 350–400 range, that is 1.61 gallons, so you buy 2. The 120 sq ft ceiling brings two coats to 842 sq ft, which is 2.25 gallons, so you buy 3.</p>
+        <p>This table changes one thing at a time on the same 10×12 room, so you can see what moves the answer:</p>
+        <table>
+          <thead><tr><th>Change</th><th>Paint area</th><th>Exact gallons</th><th>Buy</th></tr></thead>
+          <tbody>
+            <tr><td>Walls, 2 coats (the base case)</td><td>602 sq ft</td><td>1.61</td><td>2 gallons</td></tr>
+            <tr><td>Walls, 1 coat</td><td>301 sq ft</td><td>0.80</td><td>1 gallon</td></tr>
+            <tr><td>Walls, 2 coats, 9 ft ceilings</td><td>690 sq ft</td><td>1.84</td><td>2 gallons</td></tr>
+            <tr><td>Walls, 2 coats, 10 ft ceilings</td><td>778 sq ft</td><td>2.08</td><td>3 gallons</td></tr>
+            <tr><td>Walls, 2 coats, 350 sq ft per gallon</td><td>602 sq ft</td><td>1.72</td><td>2 gallons</td></tr>
+            <tr><td>Walls + ceiling, 2 coats</td><td>842 sq ft</td><td>2.25</td><td>3 gallons</td></tr>
+          </tbody>
+        </table>
+        <p>Ceiling height is what pushes it up: at 10 ft the walls alone cross two gallons. Three coats on the base walls is 903 sq ft, 2.41 gallons, so 3 gallons. Type your own door and window counts, ceiling height and the coverage printed on the can into the calculator.</p>
+        <p>Related sizes have their own guides: 10×10, 12×12, and a bedroom table that runs 10×10 to 14×16.</p>
+        """,
+        "faq": [
+            ("Does this match the bedroom guide?", "Yes. The bedroom guide table lists the same 10×12 room at 2 gallons for the walls and 3 gallons with the ceiling."),
+            ("Do I need primer?", "New drywall or a big color change usually does. Primer covers less than topcoat: Sherwin-Williams lists about 200–300 sq ft per gallon, so enter 250 and one coat for a primer coat."),
+            ("What if I leave out the door and windows?", "With no door or windows the walls come to 352 sq ft, or 704 sq ft for two coats, 1.88 gallons, still 2 gallons. Set the counts to what you really have so a tight job does not run short."),
+        ],
+    },
+    {
+        "slug": "concrete-bags-for-a-4x4-slab",
+        "title": "How many bags of concrete for a 4×4 slab?",
+        "desc": "A 4×4 slab 4 inches thick takes 10 bags of 80 lb concrete with 5% waste, or 13 bags of 60 lb. 6 inches takes 14 bags of 80 lb.",
+        "tool": "concrete",
+        "preset": {"lengthFt": 4, "widthFt": 4, "thicknessIn": 4, "bagLb": "80", "wastePct": 5},
+        "body": """
+        <p><strong>A 4×4 slab 4 inches thick takes 10 bags of 80 lb concrete</strong> with 5% waste, or 13 bags of 60 lb. At 6 inches thick it takes <strong>14 bags</strong> of 80 lb.</p>
+        <p>4 × 4 × (4 ÷ 12) = 5.33 cu ft. Five percent waste brings it to 5.6 cu ft. Quikrete’s data sheet for Concrete Mix 1101 lists about 0.60 cu ft per 80 lb bag, so 5.6 ÷ 0.60 = 9.3 bags, rounded up to 10. At 0.45 cu ft for a 60 lb bag it is 12.4, which is 13.</p>
+        <table>
+          <thead><tr><th>Small slab (4 in thick)</th><th>Volume</th><th>80 lb bags (5% waste)</th><th>60 lb bags (5% waste)</th></tr></thead>
+          <tbody>
+            <tr><td>3×3</td><td>3 cu ft</td><td>6</td><td>7</td></tr>
+            <tr><td>4×4</td><td>5.33 cu ft</td><td>10</td><td>13</td></tr>
+            <tr><td>4×6</td><td>8 cu ft</td><td>14</td><td>19</td></tr>
+            <tr><td>5×5</td><td>8.33 cu ft</td><td>15</td><td>20</td></tr>
+            <tr><td>6×6</td><td>12 cu ft</td><td>21</td><td>28</td></tr>
+          </tbody>
+        </table>
+        <p>The 4×4 slab at 6 inches is 8 cu ft: 14 bags of 80 lb and 19 bags of 60 lb. 10 bags of 80 lb is 800 lb of dry mix.</p>
+        <p>This is slab volume only: length × width × thickness. A post hole or a round footing is a cylinder, not a slab, so this calculator does not size it. Gravel base, forms and any reinforcement are also separate. Check local code and the product data before you pour.</p>
+        """,
+        "faq": [
+            ("How many 60 lb bags for a 4×4 slab?", "13 bags with 5% waste at 4 inches thick, and 19 at 6 inches. The 60 lb bag yields about 0.45 cu ft."),
+            ("Does the count include waste?", "Yes, 5%. With 0% waste a 4-inch 4×4 slab is 9 bags of 80 lb, and a 6-inch slab is 14."),
+            ("Can I use this for a fence post?", "No. A post hole is a cylinder, and this calculator sizes rectangular slabs. Follow the post maker’s or a fence installer’s guidance for post footings."),
+        ],
+    },
+    {
+        "slug": "mulch-for-a-10x10-bed",
+        "title": "How much mulch for a 10×10 bed?",
+        "desc": "A 10×10 bed 3 inches deep takes 13 bags of 2 cu ft mulch, or 1 cubic yard in bulk. Table for 2, 3 and 4 inches.",
+        "tool": "mulch",
+        "preset": {"lengthFt": 10, "widthFt": 10, "depthIn": 3, "bagCuFt": 2},
+        "body": """
+        <p><strong>A 10×10 bed 3 inches deep takes 13 bags</strong> of 2 cu ft mulch, or <strong>1 cubic yard</strong> in bulk.</p>
+        <p>10 × 10 is 100 sq ft. 100 × 3 ÷ 12 = 25 cu ft. Divide by the 2 cu ft on the bag to get 12.5, and round up to 13. In bulk, 25 ÷ 27 = 0.93 cubic yards, so you order 1.</p>
+        <table>
+          <thead><tr><th>Depth</th><th>Cubic feet</th><th>2 cu ft bags</th><th>3 cu ft bags</th><th>Bulk to order</th></tr></thead>
+          <tbody>
+            <tr><td>2 in</td><td>16.67</td><td>9</td><td>6</td><td>1 cu yd (0.62 exact)</td></tr>
+            <tr><td>3 in</td><td>25</td><td>13</td><td>9</td><td>1 cu yd (0.93 exact)</td></tr>
+            <tr><td>4 in</td><td>33.33</td><td>17</td><td>12</td><td>2 cu yd (1.23 exact)</td></tr>
+          </tbody>
+        </table>
+        <p>With 1.5 cu ft bags the 3-inch bed is 17 bags. The calculator rounds bags and bulk yards up, because a partial bag is still a full bag at the register. At 4 inches the bed passes one yard, which doubles the bulk order. At 3 inches it stays just under.</p>
+        <p>Most beds want 2–3 inches. Keep mulch pulled back from stems and trunks. A bed that is not a rectangle can be split into rectangles, with the totals added.</p>
+        """,
+        "faq": [
+            ("How many square feet does one bag cover?", "A 2 cu ft bag covers 8 sq ft at 3 inches deep. The 10×10 bed is 100 sq ft, so 12.5 bags, and you buy 13."),
+            ("Bulk or bags for a 10×10 bed?", "At 3 inches the bed takes 0.93 cubic yards. Compare the bulk price for one yard with 13 bags of the size you like. The calculator takes a bulk price per yard if you want to compare."),
+            ("How deep should the mulch be?", "Most beds want 2–3 inches. Deeper than 4 inches can smother roots."),
+        ],
+    },
 ]
 
 

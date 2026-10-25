@@ -348,3 +348,159 @@ test('drywall sheets by room size', () => {
     assert.deepEqual([c.netAreaSqFt, c.sheetsToBuy, wallsOnly, twelve], [net, sheets, walls, tall], l + 'x' + w);
   }
 });
+
+// Guides added 2026-10-25 (autocomplete gap guides).
+
+test('paint for a small bathroom', () => {
+  const p = preset('how-much-paint-for-a-small-bathroom');
+  assert.equal(p.tool, 'paint');
+  const hero = v('paint', p.input);
+  assert.deepEqual([hero.wallAreaSqFt, hero.netAreaSqFt, hero.coatedAreaSqFt, hero.gallonsExact, hero.gallonsToBuy], [208, 172, 344, 0.917, 1]);
+  const ceil = v('paint', { ...p.input, includeCeiling: true });
+  assert.deepEqual([ceil.coatedAreaSqFt, ceil.gallonsExact, ceil.gallonsToBuy], [424, 1.131, 2]);
+  const BATH = { heightFt: 8, doors: 1, windows: 1, coats: 2, coverageSqFtPerGal: 375 };
+  const rows = [
+    [5, 6, 280, 1, 340, 1],
+    [5, 7, 312, 1, 382, 2],
+    [5, 8, 344, 1, 424, 2],
+    [6, 8, 376, 2, 472, 2],
+    [8, 10, 504, 2, 664, 2],
+  ];
+  for (const [l, w, sq, gal, cSq, cGal] of rows) {
+    const a = v('paint', { ...BATH, lengthFt: l, widthFt: w });
+    const c = v('paint', { ...BATH, lengthFt: l, widthFt: w, includeCeiling: true });
+    assert.deepEqual([a.coatedAreaSqFt, a.gallonsToBuy, c.coatedAreaSqFt, c.gallonsToBuy], [sq, gal, cSq, cGal], l + 'x' + w);
+  }
+  assert.equal(v('paint', { ...BATH, lengthFt: 6, widthFt: 8 }).gallonsExact, 1.003);
+  const one = v('paint', { ...p.input, coats: 1 });
+  assert.deepEqual([one.gallonsExact, one.gallonsToBuy], [0.459, 1]);
+  const primer = v('paint', { ...p.input, coats: 1, coverageSqFtPerGal: 250 });
+  assert.deepEqual([primer.gallonsExact, primer.gallonsToBuy], [0.688, 1]);
+  const tall = v('paint', { ...p.input, heightFt: 9 });
+  assert.deepEqual([tall.coatedAreaSqFt, tall.gallonsExact, tall.gallonsToBuy], [396, 1.056, 2]);
+  const noWindow = v('paint', { ...p.input, windows: 0 });
+  assert.deepEqual([noWindow.coatedAreaSqFt, noWindow.gallonsExact, noWindow.gallonsToBuy], [374, 0.997, 1]);
+  assert.match(p.html, /Buy 1 gallon/);
+});
+
+test('concrete bags for a 10x10 slab', () => {
+  const p = preset('how-many-bags-of-concrete-for-a-10x10-slab');
+  assert.equal(p.tool, 'concrete');
+  const hero = v('concrete', p.input);
+  assert.deepEqual([hero.volumeCuFt, hero.volumeWithWasteCuFt, hero.bagsExact, hero.bagsToBuy], [33.333, 35, 58.333, 59]);
+  const rows = [
+    [4, 33.333, 1.3, 59, 78],
+    [5, 41.667, 1.62, 73, 98],
+    [6, 50, 1.94, 88, 117],
+  ];
+  for (const [t, vol, yd, b80, b60] of rows) {
+    const base = { lengthFt: 10, widthFt: 10, thicknessIn: t, wastePct: 5 };
+    const a = v('concrete', { ...base, bagLb: 80 });
+    const b = v('concrete', { ...base, bagLb: 60 });
+    assert.deepEqual([a.volumeCuFt, Math.round((a.volumeWithWasteCuFt / 27) * 100) / 100, a.bagsToBuy, b.bagsToBuy], [vol, yd, b80, b60], t + ' in');
+  }
+  // Weights quoted on the page: 80 lb × bags.
+  assert.equal(59 * 80, 4720);
+  assert.equal(88 * 80, 7040);
+  // Cubic yards before waste, and the 0% waste counts quoted in the FAQ.
+  assert.equal(Math.round((v('concrete', { ...p.input, wastePct: 0 }).volumeCuFt / 27) * 100) / 100, 1.23);
+  assert.equal(Math.round((v('concrete', { ...p.input, thicknessIn: 6, wastePct: 0 }).volumeCuFt / 27) * 100) / 100, 1.85);
+  assert.equal(v('concrete', { ...p.input, wastePct: 0 }).bagsToBuy, 56);
+  assert.equal(v('concrete', { ...p.input, thicknessIn: 6, wastePct: 0 }).bagsToBuy, 84);
+  assert.match(p.html, /59 bags of 80 lb concrete/);
+});
+
+test('flooring for a 15x15 room', () => {
+  const p = preset('how-much-flooring-for-a-15x15-room');
+  assert.equal(p.tool, 'flooring');
+  const hero = v('flooring', p.input);
+  assert.deepEqual([hero.areaSqFt, hero.neededSqFt, hero.boxesToBuy], [225, 247.5, 13]);
+  const diag = v('flooring', { ...p.input, pattern: 'diagonal' });
+  assert.deepEqual([diag.neededSqFt, diag.boxesToBuy], [258.75, 13]);
+  const her = v('flooring', { ...p.input, pattern: 'herringbone' });
+  assert.deepEqual([her.neededSqFt, her.boxesToBuy], [270, 14]);
+  assert.equal(v('flooring', { ...p.input, boxCoverageSqFt: 18 }).boxesToBuy, 14);
+  assert.equal(v('flooring', { ...p.input, boxCoverageSqFt: 24 }).boxesToBuy, 11);
+  const rows = [
+    [10, 10, 110, 6, 6, 5],
+    [12, 12, 158.4, 8, 9, 7],
+    [15, 15, 247.5, 13, 13, 11],
+    [20, 20, 440, 22, 23, 19],
+    [20, 40, 880, 44, 46, 37],
+    [25, 40, 1100, 55, 58, 46],
+  ];
+  for (const [l, w, sq, boxes, dBoxes, b24] of rows) {
+    const s = v('flooring', { lengthFt: l, widthFt: w, pattern: 'straight', boxCoverageSqFt: 20 });
+    const d = v('flooring', { lengthFt: l, widthFt: w, pattern: 'diagonal', boxCoverageSqFt: 20 });
+    const big = v('flooring', { lengthFt: l, widthFt: w, pattern: 'straight', boxCoverageSqFt: 24 });
+    assert.deepEqual([s.neededSqFt, s.boxesToBuy, d.boxesToBuy, big.boxesToBuy], [sq, boxes, dBoxes, b24], l + 'x' + w);
+  }
+  assert.match(p.html, /Buy 13 boxes/);
+});
+
+test('paint for a 10x12 room', () => {
+  const p = preset('how-much-paint-for-a-10x12-room');
+  assert.equal(p.tool, 'paint');
+  const hero = v('paint', p.input);
+  assert.deepEqual([hero.wallAreaSqFt, hero.netAreaSqFt, hero.coatedAreaSqFt, hero.gallonsExact, hero.gallonsToBuy], [352, 301, 602, 1.605, 2]);
+  const ceil = v('paint', { ...p.input, includeCeiling: true });
+  assert.deepEqual([ceil.coatedAreaSqFt, ceil.gallonsExact, ceil.gallonsToBuy], [842, 2.245, 3]);
+  const rows = [
+    [{ coats: 1 }, 301, 0.803, 1],
+    [{ heightFt: 9 }, 690, 1.84, 2],
+    [{ heightFt: 10 }, 778, 2.075, 3],
+    [{ coverageSqFtPerGal: 350 }, 602, 1.72, 2],
+    [{ coats: 3 }, 903, 2.408, 3],
+    [{ doors: 0, windows: 0 }, 704, 1.877, 2],
+  ];
+  for (const [change, sq, exact, gal] of rows) {
+    const r = v('paint', { ...p.input, ...change });
+    assert.deepEqual([r.coatedAreaSqFt, r.gallonsExact, r.gallonsToBuy], [sq, exact, gal], JSON.stringify(change));
+  }
+  // The bedroom guide table lists the same room.
+  const bed = { heightFt: 8, doors: 1, windows: 2, coats: 2, coverageSqFtPerGal: 375, lengthFt: 10, widthFt: 12 };
+  assert.deepEqual([v('paint', bed).gallonsToBuy, v('paint', { ...bed, includeCeiling: true }).gallonsToBuy], [2, 3]);
+  assert.match(p.html, /Buy 2 gallons/);
+});
+
+test('concrete bags for a 4x4 slab', () => {
+  const p = preset('concrete-bags-for-a-4x4-slab');
+  assert.equal(p.tool, 'concrete');
+  const hero = v('concrete', p.input);
+  assert.deepEqual([hero.volumeCuFt, hero.volumeWithWasteCuFt, hero.bagsExact, hero.bagsToBuy], [5.333, 5.6, 9.333, 10]);
+  const sixty = v('concrete', { ...p.input, bagLb: 60 });
+  assert.deepEqual([sixty.bagsExact, sixty.bagsToBuy], [12.444, 13]);
+  const six = v('concrete', { ...p.input, thicknessIn: 6 });
+  assert.deepEqual([six.volumeCuFt, six.bagsToBuy, v('concrete', { ...p.input, thicknessIn: 6, bagLb: 60 }).bagsToBuy], [8, 14, 19]);
+  assert.equal(v('concrete', { ...p.input, wastePct: 0 }).bagsToBuy, 9);
+  assert.equal(v('concrete', { ...p.input, thicknessIn: 6, wastePct: 0 }).bagsToBuy, 14);
+  const rows = [[3, 3, 3, 6, 7], [4, 4, 5.333, 10, 13], [4, 6, 8, 14, 19], [5, 5, 8.333, 15, 20], [6, 6, 12, 21, 28]];
+  for (const [l, w, vol, b80, b60] of rows) {
+    const base = { lengthFt: l, widthFt: w, thicknessIn: 4, wastePct: 5 };
+    const a = v('concrete', { ...base, bagLb: 80 });
+    assert.deepEqual([a.volumeCuFt, a.bagsToBuy, v('concrete', { ...base, bagLb: 60 }).bagsToBuy], [vol, b80, b60], l + 'x' + w);
+  }
+  assert.equal(10 * 80, 800);
+  assert.match(p.html, /cylinder/);
+});
+
+test('mulch for a 10x10 bed', () => {
+  const p = preset('mulch-for-a-10x10-bed');
+  assert.equal(p.tool, 'mulch');
+  const hero = v('mulch', p.input);
+  assert.deepEqual([hero.areaSqFt, hero.cubicFeet, hero.cubicYardsExact, hero.cubicYardsToBuy, hero.bagsToBuy], [100, 25, 0.926, 1, 13]);
+  const rows = [
+    [2, 16.667, 9, 6, 0.617, 1],
+    [3, 25, 13, 9, 0.926, 1],
+    [4, 33.333, 17, 12, 1.235, 2],
+  ];
+  for (const [d, cuFt, b2, b3, yd, buyYd] of rows) {
+    const a = v('mulch', { ...p.input, depthIn: d });
+    const b = v('mulch', { ...p.input, depthIn: d, bagCuFt: 3 });
+    assert.deepEqual([a.cubicFeet, a.bagsToBuy, b.bagsToBuy, a.cubicYardsExact, a.cubicYardsToBuy], [cuFt, b2, b3, yd, buyYd], d + ' in');
+  }
+  assert.equal(v('mulch', { ...p.input, bagCuFt: 1.5 }).bagsToBuy, 17);
+  // One 2 cu ft bag covers 8 sq ft at 3 inches.
+  assert.equal(v('mulch', { lengthFt: 2, widthFt: 4, depthIn: 3, bagCuFt: 2 }).bagsToBuy, 1);
+  assert.equal(v('mulch', { lengthFt: 2, widthFt: 4, depthIn: 3, bagCuFt: 2 }).cubicFeet, 2);
+});

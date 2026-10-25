@@ -48,6 +48,12 @@ GUIDES = [
     "how-much-tile-for-a-backsplash",
     "flooring-boxes-by-square-feet",
     "drywall-sheets-by-room-size",
+    "how-much-paint-for-a-small-bathroom",
+    "how-many-bags-of-concrete-for-a-10x10-slab",
+    "how-much-flooring-for-a-15x15-room",
+    "how-much-paint-for-a-10x12-room",
+    "concrete-bags-for-a-4x4-slab",
+    "mulch-for-a-10x10-bed",
 ]
 
 # Guides added 2026-10-22 carry a FAQ block (every guide carries the disclaimer).
