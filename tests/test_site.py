@@ -334,6 +334,13 @@ class SiteContract(unittest.TestCase):
         self.assertIn("Sitemap:", robots)
         self.assertNotIn("Disallow: /", robots)
 
+    def test_hotshot_makes_no_operator_experience_claims(self) -> None:
+        """Hotshot Math is faceless (Josh, 2026-10-25): no first-person driving claims."""
+        banned = re.compile(r"driver[’']s seat|running hotshot|read by an operator|pulled a rate con|content farm", re.I)
+        for path in sorted((ROOT / "hotshot").rglob("*.html")):
+            text = path.read_text(encoding="utf-8")
+            self.assertIsNone(banned.search(text), f"{path.relative_to(ROOT)}: {banned.search(text)}")
+
     def test_hotshot_page_mounts_engine_with_gated_kit(self) -> None:
         path = ROOT / "hotshot" / "index.html"
         html = path.read_text(encoding="utf-8")
