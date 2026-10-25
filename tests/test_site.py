@@ -371,7 +371,10 @@ class SiteContract(unittest.TestCase):
         self.assertEqual(target, (ROOT / "hotshot" / "downloads" / "hotshot-math-ifta-worksheet.xlsx").resolve())
         self.assertLess(html.find(match.group(0)), html.find("<form"), "download must not sit inside the calculator form")
         self.assertNotIn("type=\"email\"", html)
-        # the reminder line links to the panel's existing kit sign-up, which really has that id
+        # nothing sends IFTA deadline reminders, so the page must not promise them (review 2026-10-25)
+        self.assertNotIn('Get a reminder', html)
+        self.assertIn('Nothing here sends deadline reminders', html)
+        # the kit link points at the panel's existing sign-up, which really has that id
         self.assertIn('href="../index.html#kit-form"', html)
         self.assertIn('id="kit-form"', (ROOT / "hotshot" / "index.html").read_text(encoding="utf-8"))
         # no download event exists in track.js, so none may be sent
