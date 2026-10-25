@@ -130,7 +130,7 @@
         rows.push(['Truck GVWR + trailer GVWR', lb(v.sumGvwr)]);
         if (v.labelGcwr > 0) rows.push(['GCWR on the truck label', lb(v.labelGcwr)]);
         rows.push(['GCWR for the CDL test (' + (v.gcwrBasis === 'label' ? 'the label' : 'the sum') + ')', lb(v.gcwr), 'net']);
-        rows.push(['Trailer rated over 10,000 lb?', v.trailerGvwr > 10000 ? 'Yes' : 'No']);
+        rows.push([v.hasCargo ? 'Trailer over 10,000 lb, rated or loaded?' : 'Trailer rated over 10,000 lb?', v.towedOverLine ? 'Yes' : 'No']);
       } else {
         rows.push(['Truck GVWR, no trailer', lb(v.truckGvwr), 'net']);
       }

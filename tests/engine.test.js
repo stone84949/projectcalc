@@ -817,6 +817,10 @@ test('hotshot-weight: rejects empty weights over the rating and a missing truck 
   const trailer = compute('hotshot-weight', { ...WEIGHT_EXAMPLE, trailerEmpty: 25000 });
   assert.equal(trailer.ok, false);
   assert.match(trailer.error, /trailer empty weight/i);
+  // a trailer rating with no empty weight would overstate the payload
+  const blankTrailer = compute('hotshot-weight', { ...WEIGHT_EXAMPLE, trailerEmpty: '' });
+  assert.equal(blankTrailer.ok, false);
+  assert.match(blankTrailer.error, /trailer empty weight/i);
   const none = compute('hotshot-weight', { ...WEIGHT_EXAMPLE, truckGvwr: '' });
   assert.equal(none.ok, false);
   assert.match(none.error, /truck GVWR/i);

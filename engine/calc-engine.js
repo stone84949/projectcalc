@@ -892,6 +892,7 @@
 
     if (truckEmpty > truckGvwr) return fail('Truck empty weight is more than its GVWR. Check the door sticker.');
     const towing = trailerGvwr > 0;
+    if (towing && (input.trailerEmpty === '' || input.trailerEmpty == null)) return fail('Enter trailer empty weight.');
     if (towing && trailerEmpty > trailerGvwr) return fail('Trailer empty weight is more than its GVWR. Check the trailer VIN plate.');
 
     const sumGvwr = truckGvwr + (towing ? trailerGvwr : 0);
