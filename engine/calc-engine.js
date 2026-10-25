@@ -132,6 +132,11 @@
     return round(n, 2);
   }
 
+  // Minimums round UP to the cent so a quoted minimum never lands under the real one.
+  function ceilCents(n) {
+    return Math.ceil(Number(n) * 100 - 1e-9) / 100;
+  }
+
   function wallArea(lengthFt, widthFt, heightFt) {
     return 2 * (lengthFt + widthFt) * heightFt;
   }
@@ -671,6 +676,193 @@
     );
   }
 
+  // Hotshot cost per mile: monthly fixed costs spread over ALL monthly miles
+  // (loaded + empty), plus per-mile variable costs. Deadhead % is empty ÷ total.
+  // Both minimums round up to the cent; the *Exact values keep 3 decimals.
+  // panelMinNetPerMile excludes fuel because hotshot-load already subtracts fuel,
+  // so it is the number for the panel's MIN $/MI NET (both are per total mile).
+  function hotshotCostPerMile(input) {
+    const optMoney = function (raw, label) {
+      return readNumber(raw, label, { min: 0, max: 100000, required: false });
+    };
+    const truckPayment = optMoney(input.truckPayment, 'truck payment');
+    const insurance = optMoney(input.insurance, 'insurance');
+    const trailerPayment = optMoney(input.trailerPayment, 'trailer payment');
+    const subscriptions = optMoney(input.subscriptions, 'phone, ELD and subscriptions');
+    const otherFixed = optMoney(input.otherFixed, 'other monthly costs');
+    const monthlyMiles = readNumber(input.monthlyMiles, 'monthly miles', { min: 1, max: 50000 });
+    const fuelPrice = readNumber(input.fuelPrice, 'fuel price', { min: 0.01, max: 15 });
+    const mpg = readNumber(input.truckMpg, 'truck MPG', { min: 1, max: 30 });
+    const maintenance = readNumber(input.maintenancePerMile, 'maintenance and tires per mile', {
+      min: 0,
+      max: 5,
+      required: false,
+    });
+    const driverPay = readNumber(input.driverPayPerMile, 'driver pay per mile', { min: 0, max: 10, required: false });
+    const deadheadPct = readNumber(input.deadheadPct, 'deadhead percent', { min: 0, max: 90, required: false });
+    const profit = readNumber(input.profitPerMile, 'target profit per mile', { min: 0, max: 10, required: false });
+
+    const fixedMonthly = truckPayment + insurance + trailerPayment + subscriptions + otherFixed;
+    const fixedPerMile = fixedMonthly / monthlyMiles;
+    const fuelPerMile = fuelPrice / mpg;
+    const variablePerMile = fuelPerMile + maintenance + driverPay;
+    const costPerMile = fixedPerMile + variablePerMile;
+    const loadedShare = 1 - deadheadPct / 100;
+    const minRatePerLoadedMile = (costPerMile + profit) / loadedShare;
+    const panelMin = fixedPerMile + maintenance + driverPay + profit;
+
+    return ok(
+      {
+        fixedMonthly: money(fixedMonthly),
+        monthlyMiles: monthlyMiles,
+        loadedMilesPerMonth: round(monthlyMiles * loadedShare, 0),
+        fixedPerMile: round(fixedPerMile, 3),
+        fuelPerMile: round(fuelPerMile, 3),
+        maintenancePerMile: round(maintenance, 3),
+        driverPayPerMile: round(driverPay, 3),
+        variablePerMile: round(variablePerMile, 3),
+        costPerMile: round(costPerMile, 3),
+        monthlyCost: money(costPerMile * monthlyMiles),
+        deadheadPct: round(deadheadPct, 2),
+        profitPerMile: round(profit, 3),
+        minRatePerLoadedMileExact: round(minRatePerLoadedMile, 3),
+        minRatePerLoadedMile: ceilCents(minRatePerLoadedMile),
+        panelMinNetPerMileExact: round(panelMin, 3),
+        panelMinNetPerMile: ceilCents(panelMin),
+      },
+      [
+        { label: 'Fixed costs per month', value: money(fixedMonthly), unit: 'USD', money: true },
+        { label: 'Fixed cost per mile', value: round(fixedPerMile, 3), unit: 'USD/mi', money: true },
+        { label: 'Variable cost per mile', value: round(variablePerMile, 3), unit: 'USD/mi', money: true },
+        { label: 'All-in cost per mile', value: round(costPerMile, 3), unit: 'USD/mi', money: true },
+        { label: 'Minimum rate per loaded mile', value: ceilCents(minRatePerLoadedMile), unit: 'USD/mi', money: true },
+        { label: 'Panel MIN $/MI NET', value: ceilCents(panelMin), unit: 'USD/mi', money: true },
+      ],
+    );
+  }
+
+  // Factoring cost on one invoice, plus the monthly view. Convention: all fees
+  // come out of the advance; the reserve is the un-advanced part of the invoice.
+  // (If a factor takes fees from the reserve instead, the total is the same.)
+  function hotshotFactoring(input) {
+    const invoice = readNumber(input.invoiceAmount, 'invoice amount', { min: 1, max: 100000 });
+    const pct = readNumber(input.factoringPct, 'factoring percent', { min: 0, max: 15 });
+    const invoiceFee = readNumber(input.invoiceFee, 'per-invoice fee', { min: 0, max: 500, required: false });
+    const transferFee = readNumber(input.transferFee, 'ACH or wire fee', { min: 0, max: 500, required: false });
+    const advancePct = readNumber(input.advancePct, 'advance percent', {
+      min: 50,
+      max: 100,
+      required: false,
+      fallback: 100,
+    });
+    const invoicesPerMonth = readNumber(input.invoicesPerMonth, 'invoices per month', {
+      min: 0,
+      max: 500,
+      required: false,
+    });
+
+    const pctFee = invoice * (pct / 100);
+    const flatFees = invoiceFee + transferFee;
+    const totalFee = pctFee + flatFees;
+    const advance = invoice * (advancePct / 100);
+    if (totalFee > advance) {
+      return fail('Fees are larger than the advance. Check the percent and flat fees.');
+    }
+    const cashToday = advance - totalFee;
+    const reserve = invoice - advance;
+    const monthlyRevenue = invoice * invoicesPerMonth;
+    const monthlyFees = totalFee * invoicesPerMonth;
+    const perPointBase = invoicesPerMonth > 0 ? monthlyRevenue : invoice;
+
+    return ok(
+      {
+        invoiceAmount: money(invoice),
+        factoringPct: round(pct, 2),
+        pctFee: money(pctFee),
+        flatFees: money(flatFees),
+        totalFee: money(totalFee),
+        effectivePct: round((totalFee / invoice) * 100, 2),
+        advancePct: round(advancePct, 2),
+        advance: money(advance),
+        cashToday: money(cashToday),
+        reserveLater: money(reserve),
+        netReceived: money(invoice - totalFee),
+        invoicesPerMonth: invoicesPerMonth,
+        monthlyRevenue: money(monthlyRevenue),
+        monthlyFees: money(monthlyFees),
+        perPointBasis: invoicesPerMonth > 0 ? 'month' : 'invoice',
+        perPointBase: money(perPointBase),
+        perPointCost: money(perPointBase * 0.01),
+      },
+      [
+        { label: 'Percent fee', value: money(pctFee), unit: 'USD', money: true },
+        flatFees > 0 ? { label: 'Flat fees', value: money(flatFees), unit: 'USD', money: true } : null,
+        { label: 'Total fee', value: money(totalFee), unit: 'USD', money: true },
+        { label: 'Effective rate', value: round((totalFee / invoice) * 100, 2), unit: '%' },
+        { label: 'Cash today', value: money(cashToday), unit: 'USD', money: true },
+        reserve > 0 ? { label: 'Reserve later', value: money(reserve), unit: 'USD', money: true } : null,
+        invoicesPerMonth > 0 ? { label: 'Factoring cost per month', value: money(monthlyFees), unit: 'USD', money: true } : null,
+      ].filter(Boolean),
+    );
+  }
+
+  // Deadhead: what the empty miles cost and how many a load can carry.
+  // Net here is after fuel only (no tolls or factoring) and per TOTAL mile, the
+  // same basis as the panel's MIN $/MI NET. Break-even deadhead is the most empty
+  // miles before net per total mile drops below the minimum (0 = net after fuel
+  // stays above zero), floored to whole miles.
+  function hotshotDeadhead(input) {
+    const loaded = readNumber(input.loadedMiles, 'loaded miles', { min: 1, max: 5000 });
+    const deadhead = readNumber(input.deadheadMiles, 'deadhead miles', { min: 0, max: 5000, required: false });
+    const flatRate = readNumber(input.flatRate, 'flat rate', { min: 0, max: 100000, required: false });
+    const rate = flatRate > 0
+      ? flatRate / loaded
+      : readNumber(input.ratePerMile, 'rate per loaded mile', { min: 0.01, max: 30 });
+    const fuelPrice = readNumber(input.fuelPrice, 'fuel price', { min: 0.01, max: 15 });
+    const mpg = readNumber(input.truckMpg, 'truck MPG', { min: 1, max: 30 });
+    const minNet = readNumber(input.minNetPerMile, 'minimum net per mile', { min: 0, max: 10, required: false });
+
+    const gross = rate * loaded;
+    const totalMi = loaded + deadhead;
+    const fuelPerMile = fuelPrice / mpg;
+    const deadheadFuel = deadhead * fuelPerMile;
+    const fuelCost = totalMi * fuelPerMile;
+    const net = gross - fuelCost;
+    const netPerTotal = net / totalMi;
+    const maxTotal = gross / (minNet + fuelPerMile);
+    const rawBreakEven = maxTotal - loaded;
+    const breakEven = rawBreakEven > 0 ? Math.floor(rawBreakEven + 1e-9) : 0;
+
+    return ok(
+      {
+        grossPay: money(gross),
+        loadedMiles: loaded,
+        deadheadMiles: deadhead,
+        totalMiles: totalMi,
+        deadheadPct: round((deadhead / totalMi) * 100, 1),
+        fuelPerMile: round(fuelPerMile, 3),
+        deadheadFuelCost: money(deadheadFuel),
+        fuelCost: money(fuelCost),
+        ratePerLoadedMile: round(rate, 2),
+        ratePerTotalMile: round(gross / totalMi, 2),
+        netAfterFuel: money(net),
+        netPerTotalMile: round(netPerTotal, 2),
+        minNetPerMile: round(minNet, 2),
+        meetsMinimum: netPerTotal >= minNet,
+        breakEvenDeadheadMiles: breakEven,
+        failsWithNoDeadhead: rawBreakEven < 0,
+      },
+      [
+        { label: 'Deadhead share of total miles', value: round((deadhead / totalMi) * 100, 1), unit: '%' },
+        { label: 'Fuel for the empty miles', value: money(deadheadFuel), unit: 'USD', money: true },
+        { label: 'Rate per loaded mile', value: round(rate, 2), unit: 'USD/mi', money: true },
+        { label: 'Rate per total mile', value: round(gross / totalMi, 2), unit: 'USD/mi', money: true },
+        { label: 'Net after fuel per total mile', value: round(netPerTotal, 2), unit: 'USD/mi', money: true },
+        { label: 'Break-even deadhead', value: breakEven, unit: 'mi' },
+      ],
+    );
+  }
+
   const TOOLS = {
     paint: paint,
     'square-footage': squareFootage,
@@ -683,6 +875,9 @@
     'moving-boxes': movingBoxes,
     'room-cost': roomCost,
     'hotshot-load': hotshotLoad,
+    'hotshot-cost-per-mile': hotshotCostPerMile,
+    'hotshot-factoring': hotshotFactoring,
+    'hotshot-deadhead': hotshotDeadhead,
   };
 
   function compute(tool, input) {

@@ -422,3 +422,243 @@ test('hotshot-load: verdict stays neutral with no minimum set', () => {
   assert.equal(result.values.verdict, '');
   assert.equal(result.values.netToTruck, 468.75);
 });
+
+// ---- Hotshot landing calculators (hand-computed golden values) ----
+
+const CPM_EXAMPLE = {
+  truckPayment: 1200,
+  insurance: 1100,
+  trailerPayment: 450,
+  subscriptions: 250,
+  otherFixed: 200,
+  monthlyMiles: 8000,
+  fuelPrice: 3.65,
+  truckMpg: 10,
+  maintenancePerMile: 0.15,
+  driverPayPerMile: 0.5,
+  deadheadPct: 20,
+  profitPerMile: 0.25,
+};
+
+const FACTORING_EXAMPLE = {
+  invoiceAmount: 1800,
+  factoringPct: 3,
+  invoiceFee: 0,
+  transferFee: 15,
+  advancePct: 90,
+  invoicesPerMonth: 12,
+};
+
+const DEADHEAD_EXAMPLE = {
+  loadedMiles: 420,
+  deadheadMiles: 150,
+  ratePerMile: 2.1,
+  fuelPrice: 3.65,
+  truckMpg: 10,
+  minNetPerMile: 1.3,
+};
+
+test('hotshot-cost-per-mile: worked example splits fixed and variable cost per total mile', () => {
+  const result = compute('hotshot-cost-per-mile', CPM_EXAMPLE);
+  assert.equal(result.ok, true);
+  const v = result.values;
+  // fixed: 1200 + 1100 + 450 + 250 + 200 = 3200 / 8000 mi = 0.400
+  assert.equal(v.fixedMonthly, 3200);
+  assert.equal(v.fixedPerMile, 0.4);
+  // fuel: 3.65 / 10 = 0.365; variable: 0.365 + 0.15 + 0.50 = 1.015
+  assert.equal(v.fuelPerMile, 0.365);
+  assert.equal(v.variablePerMile, 1.015);
+  assert.equal(v.costPerMile, 1.415);
+  assert.equal(v.monthlyCost, 11320);
+  assert.equal(v.loadedMilesPerMonth, 6400);
+  // (1.415 + 0.25) / (1 - 0.20) = 2.08125 -> rounded UP to $2.09
+  assert.equal(v.minRatePerLoadedMileExact, 2.081);
+  assert.equal(v.minRatePerLoadedMile, 2.09);
+  // panel minimum leaves fuel out: 0.40 + 0.15 + 0.50 + 0.25 = 1.30
+  assert.equal(v.panelMinNetPerMileExact, 1.3);
+  assert.equal(v.panelMinNetPerMile, 1.3);
+});
+
+test('hotshot-cost-per-mile: a load at the minimum rate clears the panel minimum it reports', () => {
+  const cpm = compute('hotshot-cost-per-mile', CPM_EXAMPLE).values;
+  // 20% deadhead: 800 loaded + 200 empty
+  const load = compute('hotshot-load', {
+    ratePerMile: cpm.minRatePerLoadedMile,
+    miles: 800,
+    deadheadMiles: 200,
+    fuelPrice: 3.65,
+    truckMpg: 10,
+    minNetPerMile: cpm.panelMinNetPerMile,
+  });
+  assert.equal(load.ok, true);
+  assert.equal(load.values.verdict, 'take');
+  // at the exact (unrounded) minimum rate the panel net equals the panel minimum
+  const exact = compute('hotshot-load', {
+    ratePerMile: (cpm.costPerMile + 0.25) / 0.8,
+    miles: 800,
+    deadheadMiles: 200,
+    fuelPrice: 3.65,
+    truckMpg: 10,
+  });
+  assert.ok(Math.abs(exact.values.netPerTotalMile - cpm.panelMinNetPerMileExact) < 0.01);
+});
+
+test('hotshot-cost-per-mile: blank fixed costs and no deadhead fall back to variable cost + profit', () => {
+  const result = compute('hotshot-cost-per-mile', {
+    monthlyMiles: 10000,
+    fuelPrice: 4,
+    truckMpg: 8,
+    profitPerMile: 0.3,
+  });
+  assert.equal(result.ok, true);
+  assert.equal(result.values.fixedPerMile, 0);
+  assert.equal(result.values.costPerMile, 0.5);
+  assert.equal(result.values.minRatePerLoadedMile, 0.8);
+  assert.equal(result.values.panelMinNetPerMile, 0.3);
+});
+
+test('hotshot-cost-per-mile: zero monthly miles and impossible deadhead are rejected', () => {
+  const zero = compute('hotshot-cost-per-mile', { ...CPM_EXAMPLE, monthlyMiles: 0 });
+  assert.equal(zero.ok, false);
+  assert.match(zero.error, /monthly miles/i);
+  const missing = compute('hotshot-cost-per-mile', { ...CPM_EXAMPLE, monthlyMiles: '' });
+  assert.equal(missing.ok, false);
+  const huge = compute('hotshot-cost-per-mile', { ...CPM_EXAMPLE, deadheadPct: 95 });
+  assert.equal(huge.ok, false);
+  assert.match(huge.error, /deadhead/i);
+  // at the 90% bound, every paid mile carries ten total miles of cost
+  const max = compute('hotshot-cost-per-mile', { ...CPM_EXAMPLE, deadheadPct: 90 });
+  assert.equal(max.ok, true);
+  assert.equal(max.values.minRatePerLoadedMile, 16.65);
+});
+
+test('hotshot-factoring: worked example with a wire fee, 90% advance and 12 invoices a month', () => {
+  const result = compute('hotshot-factoring', FACTORING_EXAMPLE);
+  assert.equal(result.ok, true);
+  const v = result.values;
+  assert.equal(v.pctFee, 54); // 3% of 1,800
+  assert.equal(v.flatFees, 15);
+  assert.equal(v.totalFee, 69);
+  assert.equal(v.effectivePct, 3.83); // 69 / 1,800
+  assert.equal(v.advance, 1620);
+  assert.equal(v.cashToday, 1551); // 1,620 - 69
+  assert.equal(v.reserveLater, 180);
+  assert.equal(v.netReceived, 1731);
+  assert.equal(v.monthlyRevenue, 21600);
+  assert.equal(v.monthlyFees, 828);
+  assert.equal(v.perPointBasis, 'month');
+  assert.equal(v.perPointCost, 216);
+});
+
+test('hotshot-factoring: 0% with no flat fees costs nothing; full advance leaves no reserve', () => {
+  const result = compute('hotshot-factoring', { invoiceAmount: 2500, factoringPct: 0 });
+  assert.equal(result.ok, true);
+  assert.equal(result.values.totalFee, 0);
+  assert.equal(result.values.effectivePct, 0);
+  assert.equal(result.values.advancePct, 100);
+  assert.equal(result.values.cashToday, 2500);
+  assert.equal(result.values.reserveLater, 0);
+  assert.equal(result.values.monthlyFees, 0);
+  // no invoice count: the 1% line is per invoice
+  assert.equal(result.values.perPointBasis, 'invoice');
+  assert.equal(result.values.perPointCost, 25);
+});
+
+test('hotshot-factoring: flat fees push the effective rate above the quoted percent', () => {
+  const result = compute('hotshot-factoring', { invoiceAmount: 500, factoringPct: 2.5, invoiceFee: 5, transferFee: 20 });
+  assert.equal(result.ok, true);
+  assert.equal(result.values.totalFee, 37.5);
+  assert.equal(result.values.effectivePct, 7.5);
+});
+
+test('hotshot-factoring: rejects fees larger than the advance and a missing invoice', () => {
+  const big = compute('hotshot-factoring', { invoiceAmount: 100, factoringPct: 5, transferFee: 60, advancePct: 50 });
+  assert.equal(big.ok, false);
+  assert.match(big.error, /larger than the advance/i);
+  const none = compute('hotshot-factoring', { factoringPct: 3 });
+  assert.equal(none.ok, false);
+  assert.match(none.error, /invoice/i);
+});
+
+test('hotshot-deadhead: worked example finds the break-even empty miles', () => {
+  const result = compute('hotshot-deadhead', DEADHEAD_EXAMPLE);
+  assert.equal(result.ok, true);
+  const v = result.values;
+  assert.equal(v.grossPay, 882); // 420 x 2.10
+  assert.equal(v.totalMiles, 570);
+  assert.equal(v.deadheadPct, 26.3); // 150 / 570
+  assert.equal(v.deadheadFuelCost, 54.75); // 150 x 0.365
+  assert.equal(v.fuelCost, 208.05);
+  assert.equal(v.ratePerLoadedMile, 2.1);
+  assert.equal(v.ratePerTotalMile, 1.55);
+  assert.equal(v.netAfterFuel, 673.95);
+  assert.equal(v.netPerTotalMile, 1.18);
+  assert.equal(v.meetsMinimum, false);
+  // 882 / (1.30 + 0.365) = 529.73 total mi -> 109 empty miles max
+  assert.equal(v.breakEvenDeadheadMiles, 109);
+  assert.equal(v.failsWithNoDeadhead, false);
+  const atBreakEven = compute('hotshot-deadhead', { ...DEADHEAD_EXAMPLE, deadheadMiles: 109 }).values;
+  assert.equal(atBreakEven.meetsMinimum, true);
+  const oneMore = compute('hotshot-deadhead', { ...DEADHEAD_EXAMPLE, deadheadMiles: 110 }).values;
+  assert.equal(oneMore.meetsMinimum, false);
+});
+
+test('hotshot-deadhead: zero deadhead, flat rate and no minimum', () => {
+  const result = compute('hotshot-deadhead', { loadedMiles: 300, flatRate: 600, fuelPrice: 4, truckMpg: 8 });
+  assert.equal(result.ok, true);
+  assert.equal(result.values.deadheadPct, 0);
+  assert.equal(result.values.deadheadFuelCost, 0);
+  assert.equal(result.values.ratePerLoadedMile, 2);
+  assert.equal(result.values.ratePerTotalMile, 2);
+  // no minimum: break-even is where fuel eats the whole gross. 600 / 0.5 = 1,200 total mi
+  assert.equal(result.values.breakEvenDeadheadMiles, 900);
+});
+
+test('hotshot-deadhead: huge deadhead goes negative and a weak load fails with none at all', () => {
+  const huge = compute('hotshot-deadhead', { loadedMiles: 100, deadheadMiles: 5000, ratePerMile: 2, fuelPrice: 3.65, truckMpg: 10, minNetPerMile: 1 });
+  assert.equal(huge.ok, true);
+  assert.equal(huge.values.deadheadPct, 98);
+  assert.ok(huge.values.netAfterFuel < 0);
+  assert.equal(huge.values.meetsMinimum, false);
+  const weak = compute('hotshot-deadhead', { loadedMiles: 400, deadheadMiles: 0, ratePerMile: 1.5, fuelPrice: 3.65, truckMpg: 10, minNetPerMile: 1.3 });
+  assert.equal(weak.values.breakEvenDeadheadMiles, 0);
+  assert.equal(weak.values.failsWithNoDeadhead, true);
+  const zero = compute('hotshot-deadhead', { ...DEADHEAD_EXAMPLE, loadedMiles: 0 });
+  assert.equal(zero.ok, false);
+  assert.match(zero.error, /loaded miles/i);
+  const over = compute('hotshot-deadhead', { ...DEADHEAD_EXAMPLE, deadheadMiles: 5001 });
+  assert.equal(over.ok, false);
+});
+
+// The worked examples printed on the Hotshot pages must be the engine's numbers.
+const fs = require('node:fs');
+const path = require('node:path');
+
+function usd(n, digits) {
+  const d = digits == null ? 2 : digits;
+  return '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
+}
+
+function hotshotPage(slug) {
+  return fs.readFileSync(path.join(__dirname, '..', 'hotshot', slug, 'index.html'), 'utf8');
+}
+
+test('hotshot pages print the engine worked examples', () => {
+  const c = compute('hotshot-cost-per-mile', CPM_EXAMPLE).values;
+  const cpm = hotshotPage('cost-per-mile');
+  [usd(c.fixedMonthly), usd(c.fixedPerMile, 3), usd(c.fuelPerMile, 3), usd(c.variablePerMile, 3), usd(c.costPerMile, 3),
+    usd(c.minRatePerLoadedMile), usd(c.panelMinNetPerMile), usd(c.minRatePerLoadedMileExact, 3)]
+    .forEach((s) => assert.ok(cpm.includes(s), 'cost-per-mile missing ' + s));
+
+  const f = compute('hotshot-factoring', FACTORING_EXAMPLE).values;
+  const fac = hotshotPage('factoring-fee');
+  [usd(f.pctFee), usd(f.totalFee), f.effectivePct + '%', usd(f.cashToday), usd(f.reserveLater), usd(f.monthlyFees),
+    usd(f.monthlyRevenue), usd(f.perPointCost)]
+    .forEach((s) => assert.ok(fac.includes(s), 'factoring-fee missing ' + s));
+
+  const d = compute('hotshot-deadhead', DEADHEAD_EXAMPLE).values;
+  const dh = hotshotPage('deadhead');
+  [d.deadheadPct + '%', usd(d.deadheadFuelCost), usd(d.ratePerLoadedMile), usd(d.ratePerTotalMile), usd(d.netAfterFuel),
+    usd(d.netPerTotalMile), d.breakEvenDeadheadMiles + ' empty miles']
+    .forEach((s) => assert.ok(dh.includes(s), 'deadhead missing ' + s));
+});

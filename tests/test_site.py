@@ -23,6 +23,12 @@ TOOLS = [
     "room-cost",
 ]
 
+HOTSHOT_TOOLS = {
+    "cost-per-mile": "hotshot-cost-per-mile",
+    "factoring-fee": "hotshot-factoring",
+    "deadhead": "hotshot-deadhead",
+}
+
 GUIDES = [
     "how-much-paint-for-a-12x12-room",
     "tile-calculator-with-waste",
@@ -64,6 +70,8 @@ REQUIRED = [
     ROOT / "hotshot" / "config.js",
     ROOT / "hotshot" / "og.png",
     ROOT / "hotshot" / "guides" / "how-to-start-hotshot-trucking.html",
+    ROOT / "hotshot" / "tools.js",
+    *[ROOT / "hotshot" / slug / "index.html" for slug in HOTSHOT_TOOLS],
     *[ROOT / "calculators" / f"{slug}.html" for slug in TOOLS],
     *[ROOT / "guides" / f"{slug}.html" for slug in GUIDES],
 ]
@@ -278,8 +286,48 @@ class SiteContract(unittest.TestCase):
             after = locs(copy / "sitemap.xml")
         self.assertEqual(sorted(before - after), [], "rebuild dropped sitemap routes")
         self.assertIn("https://projectcalc-tools.pages.dev/hotshot/", after)
+        # nested hand-built folders publish as /hotshot/<slug>/, never /hotshot/<slug>/index
+        for slug in HOTSHOT_TOOLS:
+            self.assertIn(f"https://projectcalc-tools.pages.dev/hotshot/{slug}/", after)
+        self.assertFalse(any(loc.endswith("/index") for loc in after), "sitemap lists an /index route")
         for folder in ("assets", "engine", "scripts", "tests"):
             self.assertFalse(any(f"/{folder}/" in loc for loc in after), folder)
+
+    def test_hotshot_tool_pages_mount_their_engine_tool(self) -> None:
+        panel = (ROOT / "hotshot" / "index.html").read_text(encoding="utf-8")
+        guide = (ROOT / "hotshot" / "guides" / "how-to-start-hotshot-trucking.html").read_text(encoding="utf-8")
+        engine = (ROOT / "engine" / "calc-engine.js").read_text(encoding="utf-8")
+        for slug, tool in HOTSHOT_TOOLS.items():
+            path = ROOT / "hotshot" / slug / "index.html"
+            html = path.read_text(encoding="utf-8")
+            doc = parse(path)
+            url = f"https://projectcalc-tools.pages.dev/hotshot/{slug}/"
+            self.assertIn(f'<link rel="canonical" href="{url}">', html, slug)
+            self.assertIn(f'<meta property="og:url" content="{url}">', html, slug)
+            self.assertIn('<meta property="og:site_name" content="Hotshot Math">', html, slug)
+            self.assertIn('property="og:image:alt"', html, slug)
+            self.assertIn(f'data-hotshot-tool="{tool}"', html, slug)
+            self.assertIn(f"'{tool}': hotshot", engine, slug)
+            self.assertTrue(doc.attrs.get("h1"), f"{slug} missing h1")
+            self.assertIn('aria-live="polite"', html, slug)
+            self.assertIn("The math, printed", doc.text, slug)
+            # script order: site config, analytics, engine, then the page script
+            order = [html.find(s) for s in ('src="../config.js"', 'src="../../assets/track.js"', 'src="../../engine/calc-engine.js"', 'src="../tools.js"')]
+            self.assertNotIn(-1, order, slug)
+            self.assertEqual(order, sorted(order), slug)
+            self.assertNotIn("hotshot.js", html, slug)
+            # links back to the panel and across to the other two tools
+            self.assertIn('href="../index.html"', html, slug)
+            for other in HOTSHOT_TOOLS:
+                if other != slug:
+                    self.assertIn(f'href="../{other}/index.html"', html, slug)
+            self.assertIn(f'href="{slug}/index.html"', panel, slug)
+            self.assertIn(f'href="../{slug}/index.html"', guide, slug)
+            self.assertNotIn("driver's seat", html.lower(), slug)
+            self.assertNotIn("is this load worth it", html.lower(), slug)
+        script = (ROOT / "hotshot" / "tools.js").read_text(encoding="utf-8")
+        self.assertIn("track('tool_run', { tool: tool })", script)
+        self.assertIn("window.SiteTrack", script)
 
     def test_robots_allows_indexing(self) -> None:
         robots = (ROOT / "robots.txt").read_text(encoding="utf-8")
