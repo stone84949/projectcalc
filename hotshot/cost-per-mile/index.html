@@ -69,7 +69,7 @@
         <legend>PER MILE</legend>
         <div class="mini">
           <label for="fuelPrice">FUEL $/GAL</label>
-          <input id="fuelPrice" name="fuelPrice" type="number" inputmode="decimal" step="any" min="0" value="3.65" required>
+          <input id="fuelPrice" name="fuelPrice" type="number" inputmode="decimal" step="any" min="0" value="6.28" required>
         </div>
         <div class="mini">
           <label for="truckMpg">TRUCK MPG</label>
@@ -113,22 +113,22 @@
 
     <section class="how">
       <h2>The math, printed</h2>
-      <p class="example-label">EXAMPLE - $1,200 truck, $1,100 insurance, $450 trailer, $250 phone/ELD/boards, $200 other; 8,000 mi a month; $3.65 fuel at 10 mpg; $0.15/mi maintenance and tires; $0.50/mi driver pay; 20% deadhead; $0.25/mi profit:</p>
-      <p class="fine">Example fuel is $3.65 a gallon. The U.S. average on-highway diesel price was $6.28 in the week of Oct 19, 2026 (<a href="https://www.eia.gov/petroleum/gasdiesel/">EIA</a>), so type the price you actually pay.</p>
+      <p class="example-label">EXAMPLE - $1,200 truck, $1,100 insurance, $450 trailer, $250 phone/ELD/boards, $200 other; 8,000 mi a month; $6.28 fuel at 10 mpg; $0.15/mi maintenance and tires; $0.50/mi driver pay; 20% deadhead; $0.25/mi profit:</p>
+      <p class="fine">Example fuel is $6.28 a gallon, the U.S. average on-highway diesel price for the week of Oct 19, 2026 (<a href="https://www.eia.gov/petroleum/gasdiesel/">EIA</a>). Type the price you actually pay.</p>
       <div class="worked">
         <p><span>Fixed costs per month</span><span>$3,200.00</span></p>
         <p><span>Fixed cost per mile - $3,200 / 8,000 mi</span><span>$0.400</span></p>
-        <p><span>Fuel per mile - $3.65 / 10 mpg</span><span>$0.365</span></p>
+        <p><span>Fuel per mile - $6.28 / 10 mpg</span><span>$0.628</span></p>
         <p><span>Maintenance and tires</span><span>$0.150</span></p>
         <p><span>Driver pay</span><span>$0.500</span></p>
-        <p><span>Variable cost per mile</span><span>$1.015</span></p>
-        <p class="worked-net"><span>All-in cost per mile</span><span>$1.415</span></p>
-        <p><span>Plus profit - ($1.415 + $0.250) / (1 - 20%)</span><span>$2.081</span></p>
-        <p class="key"><span>Minimum rate per loaded mile, rounded up</span><span>$2.09</span></p>
+        <p><span>Variable cost per mile</span><span>$1.278</span></p>
+        <p class="worked-net"><span>All-in cost per mile</span><span>$1.678</span></p>
+        <p><span>Plus profit - ($1.678 + $0.250) / (1 - 20%)</span><span>$2.410</span></p>
+        <p class="key"><span>Minimum rate per loaded mile, rounded up</span><span>$2.41</span></p>
         <p class="key"><span>Panel MIN $/MI NET - $0.400 + $0.150 + $0.500 + $0.250</span><span>$1.30</span></p>
       </div>
       <p>Fixed costs are spread over every mile you drive, loaded or empty, because the truck payment doesn't care which. Deadhead is the share of total miles that are empty; the minimum rate divides by the loaded share, since only loaded miles get paid.</p>
-      <p><strong>Which number goes in the panel?</strong> Type <code>$1.30</code> into the panel's MIN $/MI NET, not $1.415. The panel already subtracts fuel, tolls and factoring from each load before it compares, so its minimum is your cost per mile without fuel, plus profit: fixed + maintenance + driver pay + profit. Both are per total mile, so they line up. If you factor, quote a little above the minimum rate: the panel also takes your factoring percent off the top, and this calculator doesn't know it.</p>
+      <p><strong>Which number goes in the panel?</strong> Type <code>$1.30</code> into the panel's MIN $/MI NET, not $1.678. The panel already subtracts fuel, tolls and factoring from each load before it compares, so its minimum is your cost per mile without fuel, plus profit: fixed + maintenance + driver pay + profit. Both are per total mile, so they line up. If you factor, quote a little above the minimum rate: the panel also takes your factoring percent off the top, and this calculator doesn't know it.</p>
       <p class="fine">The minimum rate per loaded mile leaves out tolls and factoring, because they change load to load. The <a href="../index.html">load panel</a> counts them. Minimums round up to the cent, and the rate is worked out from the rounded panel minimum, so a load at the quoted rate and your usual deadhead clears the panel (before tolls and factoring).</p>
     </section>
 
@@ -159,6 +159,7 @@
         <li><a href="../factoring-fee/index.html">Factoring cost<span>The real fee on an invoice, flat fees included.</span></a></li>
         <li><a href="../deadhead/index.html">Deadhead miles<span>What the empty miles cost and how many a load can carry.</span></a></li>
         <li><a href="../weight/index.html">Weight / CDL<span>Your ratings against the 26,001 lb CDL line.</span></a></li>
+        <li><a href="../ifta/index.html">IFTA worksheet<span>Quarter math by state, plus a free Excel download.</span></a></li>
         <li><a href="../rates-2026/index.html">2026 rates<span>Rates per mile from dated sources, and what's left after costs.</span></a></li>
       </ul>
     </section>

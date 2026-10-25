@@ -684,8 +684,23 @@ function hotshotPage(slug) {
   return fs.readFileSync(path.join(__dirname, '..', 'hotshot', slug, 'index.html'), 'utf8');
 }
 
+// Pages print their examples at one dated diesel price; the engine goldens above stay at $3.65.
+const PAGE_DIESEL = 6.28; // EIA U.S. average on-highway diesel, week of Oct 19, 2026
+
+test('hotshot panel and guide print the engine example at the page diesel price', () => {
+  const v = compute('hotshot-load', { ratePerMile: 2.85, miles: 540, deadheadMiles: 80, fuelPrice: PAGE_DIESEL, truckMpg: 8.4, tolls: 45, factoringPct: 3, minNetPerMile: 1.25 }).values;
+  assert.deepEqual([v.fuelCost, v.factoringFee, v.netToTruck, v.netPerTotalMile, v.verdict], [463.52, 46.17, 984.31, 1.59, 'take']);
+  const panel = fs.readFileSync(path.join(__dirname, '..', 'hotshot', 'index.html'), 'utf8');
+  const guide = fs.readFileSync(path.join(__dirname, '..', 'hotshot', 'guides', 'how-to-start-hotshot-trucking.html'), 'utf8');
+  for (const [name, html] of [['panel', panel], ['guide', guide]]) {
+    ['$6.28', '-$463.52', '-$46.17', '$984.31', '$1.59/mi'].forEach((t) => assert.ok(html.includes(t), name + ' missing ' + t));
+    assert.ok(!html.includes('$3.65') && !html.includes('1,178.43') && !html.includes('$1.90'), name + ' still prints the old $3.65 example');
+  }
+  assert.ok(panel.includes('$1.59/MI NET'), 'panel flag');
+});
+
 test('hotshot pages print the engine worked examples', () => {
-  const c = compute('hotshot-cost-per-mile', CPM_EXAMPLE).values;
+  const c = compute('hotshot-cost-per-mile', { ...CPM_EXAMPLE, fuelPrice: PAGE_DIESEL }).values;
   const cpm = hotshotPage('cost-per-mile');
   [usd(c.fixedMonthly), usd(c.fixedPerMile, 3), usd(c.fuelPerMile, 3), usd(c.variablePerMile, 3), usd(c.costPerMile, 3),
     usd(c.minRatePerLoadedMile), usd(c.panelMinNetPerMile), usd(c.minRatePerLoadedMileExact, 3)]
@@ -697,7 +712,7 @@ test('hotshot pages print the engine worked examples', () => {
     usd(f.monthlyRevenue), usd(f.perPointCost)]
     .forEach((s) => assert.ok(fac.includes(s), 'factoring-fee missing ' + s));
 
-  const d = compute('hotshot-deadhead', DEADHEAD_EXAMPLE).values;
+  const d = compute('hotshot-deadhead', { ...DEADHEAD_EXAMPLE, fuelPrice: PAGE_DIESEL }).values;
   const dh = hotshotPage('deadhead');
   [d.deadheadPct + '%', usd(d.deadheadFuelCost), usd(d.ratePerLoadedMile), usd(d.ratePerTotalMile), usd(d.netAfterFuel),
     usd(d.netPerTotalMile), d.breakEvenDeadheadMiles + ' empty miles']

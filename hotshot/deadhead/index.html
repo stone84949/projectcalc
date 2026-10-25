@@ -59,7 +59,7 @@
         <legend>TRUCK + MINIMUM</legend>
         <div class="mini">
           <label for="fuelPrice">FUEL $/GAL</label>
-          <input id="fuelPrice" name="fuelPrice" type="number" inputmode="decimal" step="any" min="0" value="3.65" required>
+          <input id="fuelPrice" name="fuelPrice" type="number" inputmode="decimal" step="any" min="0" value="6.28" required>
         </div>
         <div class="mini">
           <label for="truckMpg">TRUCK MPG</label>
@@ -85,20 +85,20 @@
 
     <section class="how">
       <h2>The math, printed</h2>
-      <p class="example-label">EXAMPLE - 420 loaded mi at $2.10/loaded mi, 150 deadhead mi, $3.65 fuel at 10 mpg, $1.30/mi minimum:</p>
-      <p class="fine">Example fuel is $3.65 a gallon. The U.S. average on-highway diesel price was $6.28 in the week of Oct 19, 2026 (<a href="https://www.eia.gov/petroleum/gasdiesel/">EIA</a>), so type the price you actually pay.</p>
+      <p class="example-label">EXAMPLE - 420 loaded mi at $2.10/loaded mi, 150 deadhead mi, $6.28 fuel at 10 mpg, $1.30/mi minimum:</p>
+      <p class="fine">Example fuel is $6.28 a gallon, the U.S. average on-highway diesel price for the week of Oct 19, 2026 (<a href="https://www.eia.gov/petroleum/gasdiesel/">EIA</a>). Type the price you actually pay.</p>
       <div class="worked">
         <p><span>Gross - 420 x $2.10</span><span>$882.00</span></p>
         <p><span>Deadhead share - 150 / 570 total mi</span><span>26.3%</span></p>
-        <p><span>Fuel for the empty miles - 150 x $3.65 / 10 mpg</span><span>$54.75</span></p>
-        <p><span>Fuel for the whole trip - 570 x $0.365</span><span>$208.05</span></p>
+        <p><span>Fuel for the empty miles - 150 x $6.28 / 10 mpg</span><span>$94.20</span></p>
+        <p><span>Fuel for the whole trip - 570 x $0.628</span><span>$357.96</span></p>
         <p><span>Rate per loaded mile</span><span>$2.10</span></p>
         <p><span>Rate per total mile - $882 / 570</span><span>$1.55</span></p>
-        <p><span>Net after fuel - $882 - $208.05</span><span>$673.95</span></p>
-        <p class="worked-net"><span>Net after fuel per total mile</span><span>$1.18</span></p>
-        <p class="key"><span>Break-even - $882 / ($1.30 + $0.365) - 420</span><span>109 empty miles</span></p>
+        <p><span>Net after fuel - $882 - $357.96</span><span>$524.04</span></p>
+        <p class="worked-net"><span>Net after fuel per total mile</span><span>$0.92</span></p>
+        <p class="key"><span>Break-even - $882 / ($1.30 + $0.628) - 420</span><span>37 empty miles</span></p>
       </div>
-      <p>At 150 empty miles this load nets $1.18 per mile driven, under the $1.30 minimum. It carries up to 109 empty miles before it drops below. The break-even is the most total miles the gross can cover at your minimum plus fuel, minus the loaded miles, rounded down to a whole mile.</p>
+      <p>At 150 empty miles this load nets $0.92 per mile driven, well under the $1.30 minimum. At $6.28 diesel it carries only 37 empty miles before it drops below. The break-even is the most total miles the gross can cover at your minimum plus fuel, minus the loaded miles, rounded down to a whole mile.</p>
       <p>Deadhead % here is empty miles divided by total miles (loaded + empty). Some people divide by loaded miles instead, which gives a bigger number for the same trip - 150 / 420 is 35.7%.</p>
       <p class="fine">Net here is after fuel only, per total mile - the same basis as the panel's MIN $/MI NET. Tolls and factoring are left out; run the load through the <a href="../index.html">load panel</a> for the full take-it-or-pass with those counted.</p>
     </section>
@@ -130,6 +130,7 @@
         <li><a href="../cost-per-mile/index.html">Cost per mile<span>Your all-in cost per mile and minimum rate.</span></a></li>
         <li><a href="../factoring-fee/index.html">Factoring cost<span>The real fee on an invoice, flat fees included.</span></a></li>
         <li><a href="../weight/index.html">Weight / CDL<span>Your ratings against the 26,001 lb CDL line.</span></a></li>
+        <li><a href="../ifta/index.html">IFTA worksheet<span>Quarter math by state, plus a free Excel download.</span></a></li>
         <li><a href="../rates-2026/index.html">2026 rates<span>Rates per mile from dated sources, and what's left after costs.</span></a></li>
       </ul>
     </section>
