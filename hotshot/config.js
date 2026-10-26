@@ -7,6 +7,6 @@
    analytics: GA4 property "Hotshot Math"; same shape as assets/config.js (ANALYTICS.md).
    Add the Hotshot domain to hosts when it moves. */
 window.HotshotConfig = {
-  kitFormUrl: '',
+  kitFormUrl: 'https://script.google.com/macros/s/AKfycbyKvT2aXhdxrNJTuc1cxaYZgaHyu5od9czeenITW_SPbJmp7bbob06wYdZka8Mf5zESUw/exec',
   analytics: { provider: 'ga4', measurementId: 'G-NLRYCRRB2H', hosts: ['projectcalc-tools.pages.dev'] },
 };

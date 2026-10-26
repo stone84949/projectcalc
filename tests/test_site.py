@@ -295,11 +295,14 @@ class SiteContract(unittest.TestCase):
         self.assertIn('id="load-form"', html)
         self.assertIn('aria-live="polite"', html)
         self.assertTrue(doc.attrs.get("h1"), "hotshot missing h1")
-        # kit capture stays disabled until a real endpoint is configured
+        # kit capture: live since 2026-10-25 - config carries the deployed Apps Script URL
+        # (markup keeps disabled attrs; hotshot.js enables the form at runtime when the
+        # endpoint matches the Apps Script pattern, so the static assertions still hold)
         config = (ROOT / "hotshot" / "config.js").read_text(encoding="utf-8")
         self.assertIn("kitFormUrl", config)
+        self.assertRegex(config, r"kitFormUrl: 'https://script\.google\.com/macros/s/[A-Za-z0-9_-]+/exec'")
         self.assertRegex(html, r'disabled>')
-        self.assertIn("The list opens at launch", html)
+        self.assertIn("id=\"kit-email\"", html)
         # sign-up form posts email + consent + source page, with a honeypot
         self.assertIn('id="kit-consent"', html)
         self.assertIn('name="company_fax"', html)
