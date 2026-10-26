@@ -437,12 +437,14 @@ GUIDE_PAGES = [
     },
     {
         "slug": "concrete-bags-for-a-pad",
-        "title": "How many concrete bags for a pad?",
-        "desc": "80 lb Quikrete bags for a 4-inch slab, using the published 0.60 cu ft yield.",
+        "title": "How many bags of concrete for a pad or walk?",
+        "desc": "80 lb Quikrete bags for a small 4-inch pad or walk, using the published 0.60 cu ft yield. A 4×8 pad takes 19 bags.",
         "tool": "concrete",
+        "preset": {"lengthFt": 4, "widthFt": 8, "thicknessIn": 4, "bagLb": "80", "wastePct": 5},
         "body": """
         <p>Quikrete’s data sheet for Concrete Mix 1101 says an 80 lb bag yields approximately 0.60 cubic feet. A 60 lb bag yields 0.45. Those are the numbers this calculator uses. Not a forum guess.</p>
-        <p>A 10×10 pad, 4 inches thick, is 33.33 cu ft. 33.33 ÷ 0.60 = 55.6 bags, which means 56 before waste. Five percent waste is 59. That is about 4,700 lb of mix. Plan a mixer.</p>
+        <p>A 4×8 pad or walk section, 4 inches thick, is 10.67 cu ft. 10.67 ÷ 0.60 = 17.8 bags, which means 18 before waste. Five percent waste brings it to 18.7, so you buy 19. That is about 1,520 lb of mix, a long afternoon by hand or an easy mixer job.</p>
+        <p>Pouring a full 10×10 slab? That size has <a href="how-many-bags-of-concrete-for-a-10x10-slab.html">its own guide</a> with 4, 5 and 6 inch tables.</p>
         <p>Do not use bagged mix for a structural footing unless a local code official and the product data both say you can. This page is for pads, walks, and similar pours.</p>
         """,
     },
@@ -656,7 +658,434 @@ GUIDE_PAGES = [
         <p>Use the tile calculator for the box count and this one for a budget envelope. Then get a local bid.</p>
         """,
     },
+    {
+        "slug": "cost-to-remodel-a-kitchen",
+        "title": "2026 cost to remodel a kitchen",
+        "desc": "ProjectCalc planning bands for a 10×10 to 15×20 kitchen at cosmetic, mid and full finish. A 10×12 mid-range kitchen plans at $12,000–$24,000.",
+        "tool": "room-cost",
+        "preset": {"lengthFt": 10, "widthFt": 12, "roomType": "kitchen", "finish": "mid"},
+        "body": """
+        <p><strong>A 10×12 kitchen plans at $12,000–$24,000</strong> for a mid remodel on ProjectCalc’s bands: new surfaces plus some trades. A cosmetic refresh of the same room plans at $4,500–$9,000 and a full gut at $30,000–$60,000.</p>
+        <p>The math is floor area × a per-square-foot band × a kitchen factor. 10 × 12 is 120 sq ft. The mid band is $40–$80 per sq ft, which is $4,800–$9,600 for a plain room. Kitchens carry plumbing, cabinets, counters and appliance circuits, so the calculator applies a 2.5× kitchen factor: $12,000–$24,000.</p>
+        <table>
+          <thead><tr><th>Kitchen</th><th>Cosmetic</th><th>Mid remodel</th><th>Full gut</th></tr></thead>
+          <tbody>
+            <tr><td>10×10 (100 sq ft)</td><td>$3,750–$7,500</td><td>$10,000–$20,000</td><td>$25,000–$50,000</td></tr>
+            <tr><td>10×12 (120 sq ft)</td><td>$4,500–$9,000</td><td>$12,000–$24,000</td><td>$30,000–$60,000</td></tr>
+            <tr><td>12×12 (144 sq ft)</td><td>$5,400–$10,800</td><td>$14,400–$28,800</td><td>$36,000–$72,000</td></tr>
+            <tr><td>12×15 (180 sq ft)</td><td>$6,750–$13,500</td><td>$18,000–$36,000</td><td>$45,000–$90,000</td></tr>
+            <tr><td>15×20 (300 sq ft)</td><td>$11,250–$22,500</td><td>$30,000–$60,000</td><td>$75,000–$150,000</td></tr>
+          </tbody>
+        </table>
+        <p>The cosmetic band ($15–$30 per sq ft) follows 2025–2026 published remodel summaries from Angi and HomeAdvisor. The mid and full bands and the 2.5× kitchen factor are ProjectCalc’s own planning numbers, listed on the sources page. Neither is a quote. Cabinet grade and whether the sink, range or walls move change the number more than the room size does.</p>
+        <p>Use this as a starting budget envelope. Then get at least two local bids that list the cabinets, counters and trades they include.</p>
+        """,
+        "faq": [
+            ("Is this what a contractor will charge me?", "No. These are national planning bands. Local labor, permits, cabinet choice and what is behind the walls move the real number."),
+            ("Why does a kitchen cost more than a bedroom of the same size?", "Plumbing, cabinets, counters, appliance circuits and ventilation. The calculator models that with a 2.5× factor on the general bands. The factor is our planning number, not a published figure."),
+            ("Does a bigger kitchen always cost more per job?", "On these bands, yes, because the cost scales with floor area. Real kitchens do not scale that cleanly: a long wall of cabinets costs more than open floor."),
+        ],
+    },
+    {
+        "slug": "cost-to-renovate-a-bedroom",
+        "title": "2026 cost to renovate a bedroom",
+        "desc": "Planning bands for a 10×10 to 14×16 bedroom. A 12×12 bedroom plans at $2,160–$4,320 cosmetic and $5,760–$11,520 for a mid remodel.",
+        "tool": "room-cost",
+        "preset": {"lengthFt": 12, "widthFt": 12, "roomType": "bedroom", "finish": "cosmetic"},
+        "body": """
+        <p><strong>A 12×12 bedroom plans at $2,160–$4,320</strong> for a cosmetic refresh: paint, fixtures and light flooring. A mid remodel with new surfaces and some trades plans at $5,760–$11,520.</p>
+        <p>12 × 12 is 144 sq ft. The cosmetic band is $15–$30 per sq ft, so 144 × $15 = $2,160 and 144 × $30 = $4,320. The mid band is $40–$80 and the full gut band is $100–$200 per sq ft. Bedrooms and living rooms use the bands as they are, with no room factor.</p>
+        <table>
+          <thead><tr><th>Bedroom</th><th>Cosmetic</th><th>Mid remodel</th><th>Full gut</th></tr></thead>
+          <tbody>
+            <tr><td>10×10 (100 sq ft)</td><td>$1,500–$3,000</td><td>$4,000–$8,000</td><td>$10,000–$20,000</td></tr>
+            <tr><td>10×12 (120 sq ft)</td><td>$1,800–$3,600</td><td>$4,800–$9,600</td><td>$12,000–$24,000</td></tr>
+            <tr><td>12×12 (144 sq ft)</td><td>$2,160–$4,320</td><td>$5,760–$11,520</td><td>$14,400–$28,800</td></tr>
+            <tr><td>12×14 (168 sq ft)</td><td>$2,520–$5,040</td><td>$6,720–$13,440</td><td>$16,800–$33,600</td></tr>
+            <tr><td>14×16 (224 sq ft)</td><td>$3,360–$6,720</td><td>$8,960–$17,920</td><td>$22,400–$44,800</td></tr>
+          </tbody>
+        </table>
+        <p>The cosmetic band follows 2025–2026 published remodel summaries (Angi and HomeAdvisor). The mid and full bands are ProjectCalc planning numbers. Most bedroom jobs are cosmetic, and that part is mostly materials you can price yourself: run the paint and flooring calculators with the price on the shelf.</p>
+        """,
+        "faq": [
+            ("What does a cosmetic bedroom refresh include?", "Paint, light fixtures, outlets and switch plates, and light flooring work. Moving walls, windows or wiring runs is a mid or full job."),
+            ("Can I lower the cost by doing it myself?", "Yes, mostly labor. Use the paint and flooring calculators for the material count, then multiply by the price you see in the store."),
+            ("Is a living room the same?", "Yes. The calculator uses the same bands for bedrooms and living rooms. Pick “Living room” in the room type if you want the label to match."),
+        ],
+    },
+    {
+        "slug": "cost-to-remodel-a-primary-bathroom",
+        "title": "2026 cost to remodel a primary bathroom",
+        "desc": "A 10×10 primary bathroom plans at $15,000–$30,000 for a mid-range update and $31,000–$54,000 for a full remodel, next to 2026 published ranges.",
+        "tool": "room-cost",
+        "preset": {"lengthFt": 10, "widthFt": 10, "roomType": "bathroom", "finish": "mid"},
+        "body": """
+        <p><strong>A 10×10 primary bathroom plans at $15,000–$30,000</strong> for a mid-range update that keeps the layout. Replacing every fixture, the tub or shower, and the tile plans at $31,000–$54,000.</p>
+        <p>Bathrooms use their own bands: a fixed base for fixtures, plumbing, waterproofing and permits, plus a per-sq-ft part. For a mid update that is $5,000–$10,000 plus $100–$200 per sq ft. A 10×10 bath is 100 sq ft, so $5,000 + $10,000 = $15,000 low and $10,000 + $20,000 = $30,000 high. Because the base is fixed, a bigger bathroom costs less per square foot than a small one.</p>
+        <table>
+          <thead><tr><th>Bathroom</th><th>Cosmetic</th><th>Mid update</th><th>Full remodel</th></tr></thead>
+          <tbody>
+            <tr><td>8×10 (80 sq ft)</td><td>$4,000–$12,000</td><td>$13,000–$26,000</td><td>$26,000–$46,000</td></tr>
+            <tr><td>9×10 (90 sq ft)</td><td>$4,250–$13,000</td><td>$14,000–$28,000</td><td>$28,500–$50,000</td></tr>
+            <tr><td>10×10 (100 sq ft)</td><td>$4,500–$14,000</td><td>$15,000–$30,000</td><td>$31,000–$54,000</td></tr>
+            <tr><td>10×12 (120 sq ft)</td><td>$5,000–$16,000</td><td>$17,000–$34,000</td><td>$36,000–$62,000</td></tr>
+            <tr><td>12×12 (144 sq ft)</td><td>$5,600–$18,400</td><td>$19,400–$38,800</td><td>$42,000–$71,600</td></tr>
+          </tbody>
+        </table>
+        <h2>Published 2026 ranges</h2>
+        <p>HomeAdvisor’s True Cost Guide (updated June 17, 2026) lists $7,000–$30,000 for a primary bath (<a href="https://www.homeadvisor.com/cost/bathrooms/remodel-a-bathroom/">HomeAdvisor</a>). Fixr (updated January 27, 2026) lists $7,000–$40,000 for a 10×10 bathroom (<a href="https://www.fixr.com/costs/bathroom-remodeling">Fixr</a>). Our 10×10 mid band of $15,000–$30,000 sits inside both. The 2025 Cost vs. Value report’s upscale bath remodel, a 100 sq ft luxury job, is $81,612 (<a href="https://www.jlconline.com/cost-vs-value/2025/national/">JLC Cost vs. Value</a>). That is above our full tier on purpose: luxury finishes, layout changes and moved plumbing are beyond it.</p>
+        <p>The base and per-sq-ft split is ProjectCalc’s judgment between those sources, not a quote.</p>
+        """,
+        "faq": [
+            ("Why is a primary bathroom cheaper per square foot than a small one?", "The fixed base covers fixtures, plumbing, waterproofing and permits whatever the size. A 5×8 mid update is $9,000–$18,000 for 40 sq ft; a 10×10 is $15,000–$30,000 for 100 sq ft."),
+            ("What pushes a primary bath past the full tier?", "Moving the toilet, shower or drains, a curbless or steam shower, custom tile and luxury fixtures. Get bids for those."),
+            ("Which finish should I pick for a double vanity and a new shower?", "If the layout stays and you replace the vanity, toilet, flooring and some tile, pick mid. If the tub or shower, all the tile and every fixture go, pick full."),
+        ],
+    },
+    {
+        "slug": "how-much-paint-for-a-living-room",
+        "title": "How much paint for a living room?",
+        "desc": "3 gallons for two coats on the walls of a 15×20 living room with 8 ft ceilings, two doorways and three windows. 5 gallons with the ceiling.",
+        "tool": "paint",
+        "preset": {"lengthFt": 15, "widthFt": 20, "heightFt": 8, "doors": 2, "windows": 3, "coats": "2", "coverageSqFtPerGal": 375, "includeCeiling": False},
+        "body": """
+        <p><strong>Buy 3 gallons</strong> for two coats on the walls of a 15×20 living room with 8 ft ceilings, two doors and three windows. Painting the ceiling too takes <strong>5 gallons</strong>.</p>
+        <p>The walls are 2 × (15 + 20) × 8 = 560 sq ft. Two 3×7 doors (42 sq ft) and three 3×5 windows (45 sq ft) come off, leaving 473 sq ft. Two coats is 946 sq ft. At 375 sq ft per gallon, the middle of Sherwin-Williams’ 350–400 range, that is 2.52 gallons, so you buy 3.</p>
+        <table>
+          <thead><tr><th>Living room</th><th>Doors / windows</th><th>Walls only</th><th>Walls + ceiling</th></tr></thead>
+          <tbody>
+            <tr><td>12×16</td><td>2 / 3</td><td>2 gallons (722 sq ft)</td><td>3 gallons (1,106 sq ft)</td></tr>
+            <tr><td>14×18</td><td>2 / 3</td><td>3 gallons (850 sq ft)</td><td>4 gallons (1,354 sq ft)</td></tr>
+            <tr><td>15×20</td><td>2 / 3</td><td>3 gallons (946 sq ft)</td><td>5 gallons (1,546 sq ft)</td></tr>
+            <tr><td>16×20</td><td>2 / 4</td><td>3 gallons (948 sq ft)</td><td>5 gallons (1,588 sq ft)</td></tr>
+            <tr><td>18×22</td><td>2 / 4</td><td>3 gallons (1,076 sq ft)</td><td>5 gallons (1,868 sq ft)</td></tr>
+          </tbody>
+        </table>
+        <p>Every row uses 8 ft ceilings, two coats and 375 sq ft per gallon. The square footage is the paintable area times two coats.</p>
+        <p>Living rooms often have taller ceilings. At 9 ft the same 15×20 room is 1,086 sq ft for two coats, still 3 gallons. A single refresh coat on the 8 ft walls is 473 sq ft, or 1.26 gallons, so you still buy 2. Wide openings into a hallway or kitchen are wall you will not paint: raise the door count (or add a window) until the removed area matches the opening.</p>
+        """,
+        "faq": [
+            ("Should I paint the ceiling with the same paint?", "Many people use a separate ceiling paint. If you do, run the walls and the ceiling as two separate calculations so each product gets its own gallon count."),
+            ("What if my paint covers 350 sq ft per gallon?", "Type 350 into the coverage box. For the 15×20 walls that is 2.70 gallons, still 3."),
+            ("Do I count an open archway as a door?", "Count it as missing wall. A 3×7 door takes off 21 sq ft; a wide archway takes off more, so add a door or window to the count until the area matches."),
+        ],
+    },
+    {
+        "slug": "how-many-bags-of-mulch-in-a-yard",
+        "title": "How many bags of mulch in a yard?",
+        "desc": "One cubic yard of mulch is 27 cubic feet: 14 bags of 2 cu ft, 18 bags of 1.5 cu ft or 9 bags of 3 cu ft. It covers 108 sq ft at 3 inches.",
+        "tool": "mulch",
+        "preset": {"lengthFt": 9, "widthFt": 12, "depthIn": 3, "bagCuFt": 2},
+        "body": """
+        <p><strong>One cubic yard of mulch fills 14 bags of 2 cu ft</strong> (13.5 exact), 18 bags of 1.5 cu ft or 9 bags of 3 cu ft.</p>
+        <p>A cubic yard is 3 ft × 3 ft × 3 ft, or 27 cubic feet. Divide 27 by the bag size printed on the bag and round up. At 3 inches deep, one yard covers 108 sq ft: a 9×12 bed is exactly that, and it is the example loaded in the calculator.</p>
+        <table>
+          <thead><tr><th>Bag size</th><th>Bags per cubic yard</th><th>Exact</th></tr></thead>
+          <tbody>
+            <tr><td>1.5 cu ft</td><td>18</td><td>18</td></tr>
+            <tr><td>2 cu ft</td><td>14</td><td>13.5</td></tr>
+            <tr><td>3 cu ft</td><td>9</td><td>9</td></tr>
+          </tbody>
+        </table>
+        <p>Depth changes how far that yard goes. On the same 9×12 bed (108 sq ft):</p>
+        <table>
+          <thead><tr><th>Depth</th><th>Cubic feet</th><th>2 cu ft bags</th><th>Bulk to order</th></tr></thead>
+          <tbody>
+            <tr><td>2 in</td><td>18</td><td>9</td><td>1 cu yd (0.67 exact)</td></tr>
+            <tr><td>3 in</td><td>27</td><td>14</td><td>1 cu yd</td></tr>
+            <tr><td>4 in</td><td>36</td><td>18</td><td>2 cu yd (1.33 exact)</td></tr>
+          </tbody>
+        </table>
+        <p>The calculator rounds bulk mulch up to whole cubic yards and bags up to whole bags, because a partial bag is still a full bag at the register. To compare, type the bulk price per yard into the calculator and multiply the bag count by the price on the bag.</p>
+        """,
+        "faq": [
+            ("How many square feet does a yard of mulch cover?", "108 sq ft at 3 inches, 162 sq ft at 2 inches, and 81 sq ft at 4 inches. Formula: 324 ÷ depth in inches."),
+            ("Is a 2 cu ft bag the standard size?", "It is the most common, but 1.5 and 3 cu ft bags are sold too. Read the bag and type its size into the calculator."),
+            ("How deep should mulch be?", "Most beds want 2–3 inches. Deeper than 4 inches can smother roots, and mulch should stay pulled back from stems and trunks."),
+        ],
+    },
+    {
+        "slug": "concrete-for-a-shed-base",
+        "title": "How much concrete for a shed base?",
+        "desc": "An 8×10 shed slab 4 inches thick takes 47 bags of 80 lb concrete with 5% waste, about one cubic yard. Table for 8×8 to 12×16.",
+        "tool": "concrete",
+        "preset": {"lengthFt": 8, "widthFt": 10, "thicknessIn": 4, "bagLb": "80", "wastePct": 5},
+        "body": """
+        <p><strong>An 8×10 shed base 4 inches thick takes 47 bags of 80 lb concrete</strong> with 5% waste. That is about one cubic yard.</p>
+        <p>8 × 10 × (4 ÷ 12) = 26.67 cu ft. Five percent waste brings it to 28 cu ft. Quikrete’s data sheet for Concrete Mix 1101 lists about 0.60 cu ft per 80 lb bag, so 28 ÷ 0.60 = 46.7 bags, rounded up to 47.</p>
+        <table>
+          <thead><tr><th>Shed slab (4 in thick)</th><th>Volume</th><th>Cubic yards</th><th>80 lb bags (5% waste)</th><th>60 lb bags (5% waste)</th></tr></thead>
+          <tbody>
+            <tr><td>8×8</td><td>21.33 cu ft</td><td>0.79</td><td>38</td><td>50</td></tr>
+            <tr><td>8×10</td><td>26.67 cu ft</td><td>0.99</td><td>47</td><td>63</td></tr>
+            <tr><td>10×12</td><td>40 cu ft</td><td>1.48</td><td>70</td><td>94</td></tr>
+            <tr><td>12×16</td><td>64 cu ft</td><td>2.37</td><td>112</td><td>150</td></tr>
+          </tbody>
+        </table>
+        <p>A 6-inch slab for an 8×10 shed is 40 cu ft and 70 bags of 80 lb. 47 bags of 80 lb is 3,760 lb of dry mix, and 112 bags is almost 9,000 lb. Above about a yard, price a short-load ready-mix delivery before you mix by hand.</p>
+        <p>This is slab volume only. Gravel base, forms, rebar or mesh, and any thickened edge or footing are separate. Check local code and the shed maker’s foundation spec before you pour.</p>
+        """,
+        "faq": [
+            ("How thick should a shed slab be?", "Four inches is common for a garden shed. Heavier loads, like a workshop or a riding mower, often use more. Follow the shed maker’s foundation spec and local code."),
+            ("Do I need 5% waste?", "It covers spillage and an uneven base. If your forms are dead level on compacted gravel you can set waste lower in the calculator, but do not plan to run short mid-pour."),
+            ("60 lb or 80 lb bags?", "Same concrete, different yield: about 0.45 cu ft for 60 lb and 0.60 cu ft for 80 lb. 60 lb bags are easier to lift; you just need more of them."),
+        ],
+    },
+    {
+        "slug": "how-much-tile-for-a-backsplash",
+        "title": "How much tile for a kitchen backsplash?",
+        "desc": "A 15 ft run of backsplash 18 inches tall is 22.5 sq ft, or 24.75 sq ft with 10% waste: 3 boxes of 10 sq ft tile.",
+        "tool": "tile",
+        "preset": {"lengthFt": 1.5, "widthFt": 15, "tileIn": 4, "pattern": "straight", "boxCoverageSqFt": 10},
+        "body": """
+        <p><strong>A 15 ft backsplash 18 inches tall needs 3 boxes</strong> of 10 sq ft tile. That is 22.5 sq ft plus 10% waste, or 24.75 sq ft.</p>
+        <p>Measure the backsplash as a rectangle: run length × height. Most backsplashes run from the counter to the underside of the wall cabinets, about 18 inches, or 1.5 ft. 15 × 1.5 = 22.5 sq ft. A straight layout adds 10% for cuts: 24.75 sq ft, so 3 boxes. With 4-inch square tile that is 223 tiles.</p>
+        <table>
+          <thead><tr><th>Backsplash run (18 in tall)</th><th>Area</th><th>Straight (10%)</th><th>Diagonal (20%)</th></tr></thead>
+          <tbody>
+            <tr><td>10 ft</td><td>15 sq ft</td><td>16.5 sq ft, 2 boxes</td><td>18 sq ft, 2 boxes</td></tr>
+            <tr><td>15 ft</td><td>22.5 sq ft</td><td>24.75 sq ft, 3 boxes</td><td>27 sq ft, 3 boxes</td></tr>
+            <tr><td>20 ft</td><td>30 sq ft</td><td>33 sq ft, 4 boxes</td><td>36 sq ft, 4 boxes</td></tr>
+            <tr><td>25 ft</td><td>37.5 sq ft</td><td>41.25 sq ft, 5 boxes</td><td>45 sq ft, 5 boxes</td></tr>
+          </tbody>
+        </table>
+        <p>Box counts assume 10 sq ft per box. Subway and mosaic tile are sold by the square foot or the sheet, so read the coverage on your box and type it in. The tile count in the calculator assumes square tile; for 3×6 subway tile, go by square feet and boxes instead.</p>
+        <p>Do not subtract outlets. Subtract a window or a range hood wall only if the gap is large. Each extra wall section, like the strip behind the range, is its own rectangle: run it separately and add the totals.</p>
+        """,
+        "faq": [
+            ("How tall is a standard backsplash?", "Usually about 18 inches, from the counter to the bottom of the upper cabinets. Behind a range or on an open wall it is often taller, so measure each section."),
+            ("How much extra tile should I buy for a backsplash?", "10% for a straight or stacked layout and 20% for diagonal or herringbone. Small jobs leave no room for a cracked tile, so keep a spare box from the same lot."),
+            ("Does a herringbone subway backsplash need more?", "Yes. Use the 20% herringbone setting. Every edge of a herringbone layout gets an angled cut."),
+        ],
+    },
+    {
+        "slug": "flooring-boxes-by-square-feet",
+        "title": "How many boxes of flooring for 200, 500 or 1,000 sq ft?",
+        "desc": "500 sq ft of flooring laid straight takes 550 sq ft with 10% waste: 28 boxes at 20 sq ft per box. Table for 200 to 1,000 sq ft.",
+        "tool": "flooring",
+        "preset": {"lengthFt": 20, "widthFt": 25, "pattern": "straight", "boxCoverageSqFt": 20},
+        "body": """
+        <p><strong>500 sq ft of flooring takes 28 boxes</strong> at 20 sq ft per box, laid straight. That is 500 sq ft plus 10% waste, or 550 sq ft.</p>
+        <table>
+          <thead><tr><th>Floor area</th><th>Straight (10%)</th><th>Diagonal (15%)</th><th>Straight, 24 sq ft boxes</th></tr></thead>
+          <tbody>
+            <tr><td>200 sq ft</td><td>220 sq ft, 11 boxes</td><td>230 sq ft, 12 boxes</td><td>10 boxes</td></tr>
+            <tr><td>300 sq ft</td><td>330 sq ft, 17 boxes</td><td>345 sq ft, 18 boxes</td><td>14 boxes</td></tr>
+            <tr><td>500 sq ft</td><td>550 sq ft, 28 boxes</td><td>575 sq ft, 29 boxes</td><td>23 boxes</td></tr>
+            <tr><td>800 sq ft</td><td>880 sq ft, 44 boxes</td><td>920 sq ft, 46 boxes</td><td>37 boxes</td></tr>
+            <tr><td>1,000 sq ft</td><td>1,100 sq ft, 55 boxes</td><td>1,150 sq ft, 58 boxes</td><td>46 boxes</td></tr>
+          </tbody>
+        </table>
+        <p>The first two columns assume 20 sq ft per box. Laminate, LVP and engineered hardwood boxes often hold 18 to 24 sq ft, so the last column shows the straight layout with 24 sq ft boxes. The calculator loads 500 sq ft as a 20×25 floor; for a different area, enter any length and width that multiply to it.</p>
+        <p>The waste is for end cuts and offcuts you cannot reuse: 10% straight, 15% diagonal and 20% herringbone. A whole-house job with many rooms and doorways leans toward the high end, so add closets and hallways as their own areas in the square footage calculator first.</p>
+        """,
+        "faq": [
+            ("Is 10% waste enough for flooring?", "For a straight lay in simple rectangular rooms, usually. Diagonal is 15% and herringbone 20%. Lots of small rooms and doorways use more."),
+            ("Should I buy an extra box?", "Yes, from the same lot. A matching box for a repair later is hard to find once the lot or the style is gone."),
+            ("How do I enter 500 sq ft if my room is not 20×25?", "Enter your real length and width, or any pair that multiplies to the total, like 10 × 50. Only the area and the layout change the answer."),
+        ],
+    },
+    {
+        "slug": "drywall-sheets-by-room-size",
+        "title": "How many sheets of drywall for a room? 10×10 to 16×20",
+        "desc": "4×8 drywall sheet counts for walls and ceiling of a 10×10 to 16×20 room with 8 ft walls, one door, two windows and 15% waste.",
+        "tool": "drywall",
+        "preset": {"lengthFt": 10, "widthFt": 12, "heightFt": 8, "doors": 1, "windows": 2, "wastePct": 15, "includeCeiling": True},
+        "body": """
+        <p><strong>A 10×12 room takes 16 sheets of 4×8 drywall</strong> for the walls and ceiling, with 8 ft walls, one door, two windows and 15% waste.</p>
+        <p>The walls are 2 × (10 + 12) × 8 = 352 sq ft. Take off the 3×7 door (21) and two 3×5 windows (30), then add the 120 sq ft ceiling: 421 sq ft. Fifteen percent waste is 484.15 sq ft. A 4×8 sheet is 32 sq ft, so 15.1 sheets, rounded up to 16.</p>
+        <table>
+          <thead><tr><th>Room (8 ft walls)</th><th>Covered area</th><th>Walls + ceiling (4×8)</th><th>Walls only (4×8)</th><th>Walls + ceiling (4×12)</th></tr></thead>
+          <tbody>
+            <tr><td>10×10</td><td>369 sq ft</td><td>14 sheets</td><td>10 sheets</td><td>9 sheets</td></tr>
+            <tr><td>10×12</td><td>421 sq ft</td><td>16 sheets</td><td>11 sheets</td><td>11 sheets</td></tr>
+            <tr><td>12×14</td><td>533 sq ft</td><td>20 sheets</td><td>14 sheets</td><td>13 sheets</td></tr>
+            <tr><td>14×16</td><td>653 sq ft</td><td>24 sheets</td><td>16 sheets</td><td>16 sheets</td></tr>
+            <tr><td>16×20</td><td>845 sq ft</td><td>31 sheets</td><td>19 sheets</td><td>21 sheets</td></tr>
+          </tbody>
+        </table>
+        <p>Covered area is walls plus ceiling, minus one door and two windows. Every count includes 15% waste. The calculator also gives planning counts for the 10×12 job: 512 screws (32 per sheet) and 480 ft of tape (30 ft per sheet). Those are rough planning numbers, not a fastening schedule.</p>
+        <p>The 12×12 room has its own guide. CertainTeed’s public calculator does not subtract openings and does not add waste; ours does both, so the two often land close together.</p>
+        """,
+        "faq": [
+            ("Should I use 4×8 or 4×12 sheets?", "4×12 sheets mean fewer joints to tape, and fewer sheets in most rooms. They are heavy and hard to get up a staircase, so 4×8 is the usual DIY choice."),
+            ("Is 15% waste too much?", "It covers cut-outs, mistakes and the strip you throw away at the top of each wall. On a simple room you may have a sheet left over, which is cheaper than a second trip."),
+            ("Does the count include a closet?", "No. Add a closet as its own small room and add the sheets."),
+        ],
+    },
+    {
+        "slug": "how-much-paint-for-a-small-bathroom",
+        "title": "How much paint for a small bathroom?",
+        "desc": "1 gallon covers two coats on the walls of a 5×8 bathroom with 8 ft ceilings, one door and one window. Add the ceiling and buy 2.",
+        "tool": "paint",
+        "preset": {"lengthFt": 5, "widthFt": 8, "heightFt": 8, "doors": 1, "windows": 1, "coats": "2", "coverageSqFtPerGal": 375, "includeCeiling": False},
+        "body": """
+        <p><strong>Buy 1 gallon</strong> for two coats on the walls of a 5×8 bathroom with 8 ft ceilings, one door and one window. Painting the ceiling too takes <strong>2 gallons</strong>.</p>
+        <p>The walls are 2 × (5 + 8) × 8 = 208 sq ft. Take off one 3×7 door (21 sq ft) and one 3×5 window (15 sq ft) and 172 sq ft is left. Two coats is 344 sq ft. At 375 sq ft per gallon, the middle of Sherwin-Williams’ 350–400 range, that is 0.92 gallons, so 1 gallon covers it. The 40 sq ft ceiling adds 80 sq ft across two coats: 424 sq ft, or 1.13 gallons, so you buy 2.</p>
+        <table>
+          <thead><tr><th>Bathroom</th><th>Walls only (2 coats)</th><th>Walls + ceiling (2 coats)</th></tr></thead>
+          <tbody>
+            <tr><td>5×6</td><td>1 gallon (280 sq ft)</td><td>1 gallon (340 sq ft)</td></tr>
+            <tr><td>5×7</td><td>1 gallon (312 sq ft)</td><td>2 gallons (382 sq ft)</td></tr>
+            <tr><td>5×8</td><td>1 gallon (344 sq ft)</td><td>2 gallons (424 sq ft)</td></tr>
+            <tr><td>6×8</td><td>2 gallons (376 sq ft)</td><td>2 gallons (472 sq ft)</td></tr>
+            <tr><td>8×10</td><td>2 gallons (504 sq ft)</td><td>2 gallons (664 sq ft)</td></tr>
+          </tbody>
+        </table>
+        <p>Every row uses 8 ft ceilings, one door, one window, two coats and 375 sq ft per gallon. The 6×8 walls come to 1.003 gallons, a hair over one, so the calculator rounds up to 2.</p>
+        <p>The finish you pick does not change the math here: coverage comes from the can, so type the number on your can into the coverage box. A single refresh coat on the 5×8 walls is 172 sq ft, 0.46 gallons, which rounds to 1 gallon. One coat of primer on the same walls at 250 sq ft per gallon, the middle of Sherwin-Williams’ 200–300 range, is 0.69 gallons, also 1 gallon. Taller ceilings change it: at 9 ft the same walls are 396 sq ft for two coats, 1.06 gallons, so you buy 2.</p>
+        """,
+        "faq": [
+            ("Do I subtract the tub or the vanity?", "No. The calculator takes off doors and windows only. A tub surround or vanity is some wall you will not paint, but rounding up usually covers the difference."),
+            ("Can I buy a quart instead of a gallon?", "Not for two coats. The 5×8 walls need 0.92 gallons, and a quart is a quarter of a gallon. A single refresh coat needs 0.46 gallons, which is still more than one quart."),
+            ("What if my bathroom has no window?", "Set windows to 0. The 5×8 walls then come to 374 sq ft for two coats, 0.997 gallons, which still rounds to 1 gallon, with almost nothing to spare."),
+        ],
+    },
+    {
+        "slug": "how-many-bags-of-concrete-for-a-10x10-slab",
+        "title": "How many bags of concrete for a 10×10 slab?",
+        "desc": "A 10×10 slab 4 inches thick takes 59 bags of 80 lb concrete with 5% waste. 6 inches takes 88. Table for 60 and 80 lb bags.",
+        "tool": "concrete",
+        "preset": {"lengthFt": 10, "widthFt": 10, "thicknessIn": 4, "bagLb": "80", "wastePct": 5},
+        "body": """
+        <p><strong>A 10×10 slab 4 inches thick takes 59 bags of 80 lb concrete</strong> with 5% waste. At 6 inches thick it takes <strong>88 bags</strong>.</p>
+        <p>10 × 10 × (4 ÷ 12) = 33.33 cu ft. Five percent waste brings it to 35 cu ft. Quikrete’s data sheet for Concrete Mix 1101 lists about 0.60 cu ft per 80 lb bag, so 35 ÷ 0.60 = 58.3 bags, rounded up to 59.</p>
+        <table>
+          <thead><tr><th>10×10 slab</th><th>Volume</th><th>Cubic yards (5% waste)</th><th>80 lb bags</th><th>60 lb bags</th></tr></thead>
+          <tbody>
+            <tr><td>4 in</td><td>33.33 cu ft</td><td>1.30</td><td>59</td><td>78</td></tr>
+            <tr><td>5 in</td><td>41.67 cu ft</td><td>1.62</td><td>73</td><td>98</td></tr>
+            <tr><td>6 in</td><td>50 cu ft</td><td>1.94</td><td>88</td><td>117</td></tr>
+          </tbody>
+        </table>
+        <p>That is a lot of dry mix. 59 bags of 80 lb is 4,720 lb, and 88 bags is 7,040 lb. At 1.3 to 1.9 cubic yards, compare the price of a ready-mix delivery before you mix by hand.</p>
+        <p>This is slab volume only. Gravel base, forms, rebar or mesh, and any thickened edge or footing are separate. Check local code and the product data before you pour. The calculator uses the same published yields on every slab: 0.45 cu ft per 60 lb bag and 0.60 per 80 lb bag.</p>
+        """,
+        "faq": [
+            ("How thick should a 10×10 slab be?", "Four inches is common for a patio-sized pad. Heavier loads often use more. Follow local code and the plans for your project."),
+            ("Does the count include waste?", "Yes, 5%. It covers spillage and an uneven base. With 0% waste a 4-inch 10×10 slab is 56 bags of 80 lb, and a 6-inch slab is 84."),
+            ("Is a 10×10 slab about one cubic yard?", "A 4-inch slab is 1.23 cubic yards before waste and 1.30 with 5% waste. A 6-inch slab is 1.85 before waste."),
+        ],
+    },
+    {
+        "slug": "how-much-flooring-for-a-15x15-room",
+        "title": "How much flooring for a 15×15 room?",
+        "desc": "13 boxes of flooring at 20 sq ft per box for a 15×15 room laid straight, or 14 boxes herringbone. Table for square rooms from 14×14 to 20×20.",
+        "tool": "flooring",
+        "preset": {"lengthFt": 15, "widthFt": 15, "pattern": "straight", "boxCoverageSqFt": 20},
+        "body": """
+        <p><strong>Buy 13 boxes</strong> at 20 sq ft per box for a 15×15 room laid straight. A herringbone layout needs <strong>14 boxes</strong>.</p>
+        <p>15 × 15 is 225 sq ft. A straight layout adds 10% waste: 247.5 sq ft. 247.5 ÷ 20 = 12.4 boxes, so 13. Diagonal is 15% waste, 258.75 sq ft, still 13 boxes. Herringbone is 20%, 270 sq ft, which is 14.</p>
+        <table>
+          <thead><tr><th>Square room</th><th>Straight (10%)</th><th>Diagonal (15%)</th><th>Straight, 24 sq ft boxes</th></tr></thead>
+          <tbody>
+            <tr><td>14×14 (196 sq ft)</td><td>215.6 sq ft, 11 boxes</td><td>12 boxes</td><td>9 boxes</td></tr>
+            <tr><td>15×15 (225 sq ft)</td><td>247.5 sq ft, 13 boxes</td><td>13 boxes</td><td>11 boxes</td></tr>
+            <tr><td>16×16 (256 sq ft)</td><td>281.6 sq ft, 15 boxes</td><td>15 boxes</td><td>12 boxes</td></tr>
+            <tr><td>18×18 (324 sq ft)</td><td>356.4 sq ft, 18 boxes</td><td>19 boxes</td><td>15 boxes</td></tr>
+            <tr><td>20×20 (400 sq ft)</td><td>440 sq ft, 22 boxes</td><td>23 boxes</td><td>19 boxes</td></tr>
+          </tbody>
+        </table>
+        <p>For a whole floor by total square footage, see <a href="flooring-boxes-by-square-feet.html">flooring boxes by square feet</a>; smaller rooms are in the <a href="flooring-for-a-12x12-room.html">12×12 guide</a>. The straight and diagonal columns assume 20 sq ft per box, and the last column shows 24 sq ft boxes. Laminate, LVP and engineered hardwood boxes often hold 18 to 24 sq ft, so check the number printed on yours. For the 15×15 room laid straight, 18 sq ft boxes means 14 boxes and 24 sq ft boxes means 11.</p>
+        <p>Closets and doorways count. Add them as extra area in the square footage calculator first, and keep a spare box from the same lot.</p>
+        """,
+        "faq": [
+            ("How many square feet is a 15×15 room?", "225 sq ft. With 10% waste for a straight layout you buy 247.5 sq ft of flooring."),
+            ("Is 10% waste enough for a square room?", "For a straight lay, usually. Diagonal is 15% and herringbone 20%. A room with closets, jogs or lots of doorways leans higher."),
+            ("What if my room is not a perfect square?", "Split it into rectangles, add their areas, and enter any length and width that multiply to the total. Only the area and the layout change the answer."),
+        ],
+    },
+    {
+        "slug": "how-much-paint-for-a-10x12-room",
+        "title": "How much paint for a 10×12 room (bedroom, office or nursery)?",
+        "desc": "2 gallons for two coats on the walls of a 10×12 room with 8 ft ceilings, one door and two windows. 3 gallons with the ceiling.",
+        "tool": "paint",
+        "preset": {"lengthFt": 10, "widthFt": 12, "heightFt": 8, "doors": 1, "windows": 2, "coats": "2", "coverageSqFtPerGal": 375, "includeCeiling": False},
+        "body": """
+        <p><strong>Buy 2 gallons</strong> for two coats on the walls of a 10×12 room with 8 ft ceilings, one door and two windows. Painting the ceiling too takes <strong>3 gallons</strong>.</p>
+        <p>The walls are 2 × (10 + 12) × 8 = 352 sq ft. Take off one 3×7 door (21 sq ft) and two 3×5 windows (30 sq ft) and 301 sq ft is left. Two coats is 602 sq ft. At 375 sq ft per gallon, the middle of Sherwin-Williams’ 350–400 range, that is 1.61 gallons, so you buy 2. The 120 sq ft ceiling brings two coats to 842 sq ft, which is 2.25 gallons, so you buy 3.</p>
+        <p>This table changes one thing at a time on the same 10×12 room, so you can see what moves the answer:</p>
+        <table>
+          <thead><tr><th>Change</th><th>Paint area</th><th>Exact gallons</th><th>Buy</th></tr></thead>
+          <tbody>
+            <tr><td>Walls, 2 coats (the base case)</td><td>602 sq ft</td><td>1.61</td><td>2 gallons</td></tr>
+            <tr><td>Walls, 1 coat</td><td>301 sq ft</td><td>0.80</td><td>1 gallon</td></tr>
+            <tr><td>Walls, 2 coats, 9 ft ceilings</td><td>690 sq ft</td><td>1.84</td><td>2 gallons</td></tr>
+            <tr><td>Walls, 2 coats, 10 ft ceilings</td><td>778 sq ft</td><td>2.08</td><td>3 gallons</td></tr>
+            <tr><td>Walls, 2 coats, 350 sq ft per gallon</td><td>602 sq ft</td><td>1.72</td><td>2 gallons</td></tr>
+            <tr><td>Walls + ceiling, 2 coats</td><td>842 sq ft</td><td>2.25</td><td>3 gallons</td></tr>
+          </tbody>
+        </table>
+        <p>Ceiling height is what pushes it up: at 10 ft the walls alone cross two gallons. Three coats on the base walls is 903 sq ft, 2.41 gallons, so 3 gallons. Type your own door and window counts, ceiling height and the coverage printed on the can into the calculator.</p>
+        <p>Related sizes have their own guides: <a href="how-much-paint-for-a-10x10-room.html">10×10</a>, <a href="how-much-paint-for-a-12x12-room.html">12×12</a>, and a <a href="how-much-paint-for-a-bedroom.html">bedroom table</a> that runs 10×10 to 14×16.</p>
+        """,
+        "faq": [
+            ("Does this match the bedroom guide?", "Yes. The bedroom guide table lists the same 10×12 room at 2 gallons for the walls and 3 gallons with the ceiling."),
+            ("Do I need primer?", "New drywall or a big color change usually does. Primer covers less than topcoat: Sherwin-Williams lists about 200–300 sq ft per gallon, so enter 250 and one coat for a primer coat."),
+            ("What if I leave out the door and windows?", "With no door or windows the walls come to 352 sq ft, or 704 sq ft for two coats, 1.88 gallons, still 2 gallons. Set the counts to what you really have so a tight job does not run short."),
+        ],
+    },
+    {
+        "slug": "concrete-bags-for-a-4x4-slab",
+        "title": "How many bags of concrete for a 4×4 slab?",
+        "desc": "A 4×4 slab 4 inches thick takes 10 bags of 80 lb concrete with 5% waste, or 13 bags of 60 lb. 6 inches takes 14 bags of 80 lb.",
+        "tool": "concrete",
+        "preset": {"lengthFt": 4, "widthFt": 4, "thicknessIn": 4, "bagLb": "80", "wastePct": 5},
+        "body": """
+        <p><strong>A 4×4 slab 4 inches thick takes 10 bags of 80 lb concrete</strong> with 5% waste, or 13 bags of 60 lb. At 6 inches thick it takes <strong>14 bags</strong> of 80 lb.</p>
+        <p>4 × 4 × (4 ÷ 12) = 5.33 cu ft. Five percent waste brings it to 5.6 cu ft. Quikrete’s data sheet for Concrete Mix 1101 lists about 0.60 cu ft per 80 lb bag, so 5.6 ÷ 0.60 = 9.3 bags, rounded up to 10. At 0.45 cu ft for a 60 lb bag it is 12.4, which is 13.</p>
+        <table>
+          <thead><tr><th>Small slab (4 in thick)</th><th>Volume</th><th>80 lb bags (5% waste)</th><th>60 lb bags (5% waste)</th></tr></thead>
+          <tbody>
+            <tr><td>3×3</td><td>3 cu ft</td><td>6</td><td>7</td></tr>
+            <tr><td>4×4</td><td>5.33 cu ft</td><td>10</td><td>13</td></tr>
+            <tr><td>4×6</td><td>8 cu ft</td><td>14</td><td>19</td></tr>
+            <tr><td>5×5</td><td>8.33 cu ft</td><td>15</td><td>20</td></tr>
+            <tr><td>6×6</td><td>12 cu ft</td><td>21</td><td>28</td></tr>
+          </tbody>
+        </table>
+        <p>The 4×4 slab at 6 inches is 8 cu ft: 14 bags of 80 lb and 19 bags of 60 lb. 10 bags of 80 lb is 800 lb of dry mix.</p>
+        <p>This is slab volume only: length × width × thickness. A post hole or a round footing is a cylinder, not a slab, so this calculator does not size it. Gravel base, forms and any reinforcement are also separate. Check local code and the product data before you pour.</p>
+        """,
+        "faq": [
+            ("How many 60 lb bags for a 4×4 slab?", "13 bags with 5% waste at 4 inches thick, and 19 at 6 inches. The 60 lb bag yields about 0.45 cu ft."),
+            ("Does the count include waste?", "Yes, 5%. With 0% waste a 4-inch 4×4 slab is 9 bags of 80 lb, and a 6-inch slab is 14."),
+            ("Can I use this for a fence post?", "No. A post hole is a cylinder, and this calculator sizes rectangular slabs. Follow the post maker’s or a fence installer’s guidance for post footings."),
+        ],
+    },
+    {
+        "slug": "mulch-for-a-10x10-bed",
+        "title": "How much mulch for a 10×10 bed?",
+        "desc": "A 10×10 bed 3 inches deep takes 13 bags of 2 cu ft mulch, or 1 cubic yard in bulk. Table for 2, 3 and 4 inches.",
+        "tool": "mulch",
+        "preset": {"lengthFt": 10, "widthFt": 10, "depthIn": 3, "bagCuFt": 2},
+        "body": """
+        <p><strong>A 10×10 bed 3 inches deep takes 13 bags</strong> of 2 cu ft mulch, or <strong>1 cubic yard</strong> in bulk.</p>
+        <p>10 × 10 is 100 sq ft. 100 × 3 ÷ 12 = 25 cu ft. Divide by the 2 cu ft on the bag to get 12.5, and round up to 13. In bulk, 25 ÷ 27 = 0.93 cubic yards, so you order 1.</p>
+        <table>
+          <thead><tr><th>Depth</th><th>Cubic feet</th><th>2 cu ft bags</th><th>3 cu ft bags</th><th>Bulk to order</th></tr></thead>
+          <tbody>
+            <tr><td>2 in</td><td>16.67</td><td>9</td><td>6</td><td>1 cu yd (0.62 exact)</td></tr>
+            <tr><td>3 in</td><td>25</td><td>13</td><td>9</td><td>1 cu yd (0.93 exact)</td></tr>
+            <tr><td>4 in</td><td>33.33</td><td>17</td><td>12</td><td>2 cu yd (1.23 exact)</td></tr>
+          </tbody>
+        </table>
+        <p>With 1.5 cu ft bags the 3-inch bed is 17 bags. The calculator rounds bags and bulk yards up, because a partial bag is still a full bag at the register. At 4 inches the bed passes one yard, which doubles the bulk order. At 3 inches it stays just under.</p>
+        <p>Most beds want 2–3 inches. Keep mulch pulled back from stems and trunks. A bed that is not a rectangle can be split into rectangles, with the totals added.</p>
+        """,
+        "faq": [
+            ("How many square feet does one bag cover?", "A 2 cu ft bag covers 8 sq ft at 3 inches deep. The 10×10 bed is 100 sq ft, so 12.5 bags, and you buy 13."),
+            ("Bulk or bags for a 10×10 bed?", "At 3 inches the bed takes 0.93 cubic yards. Compare the bulk price for one yard with 13 bags of the size you like. The calculator takes a bulk price per yard if you want to compare."),
+            ("How deep should the mulch be?", "Most beds want 2–3 inches. Deeper than 4 inches can smother roots."),
+        ],
+    },
 ]
+
+
+GUIDE_DISCLAIMER = (
+    "Estimate only. This is a planning number, not a bid and not product advice. "
+    'Confirm coverage on the product you buy, and get local bids for labor. <a href="../disclaimer.html">Disclaimer</a>'
+)
 
 
 def guide_page(guide: dict) -> None:
@@ -672,6 +1101,10 @@ def guide_page(guide: dict) -> None:
     related = f"<h2>Next calculators</h2><ul>{next_tools}</ul>" if next_tools else ""
     if siblings:
         related += f"<h2>Related questions</h2><ul>{siblings}</ul>"
+    faq = ""
+    if guide.get("faq"):
+        items = "".join(f"<details><summary>{q}</summary><p>{a}</p></details>" for q, a in guide["faq"])
+        faq = f'<div class="faq"><h2>FAQ</h2>{items}</div>'
     body = f"""
     <div class="wrap hero">
       <div class="kicker">Guide</div>
@@ -680,11 +1113,14 @@ def guide_page(guide: dict) -> None:
     </div>
     <div class="wrap layout">
       <div class="prose" data-guide="{guide["slug"]}">{guide["body"]}
+        {faq}
         <p><a href="../calculators/{tool}.html">Open the full {tool.replace("-", " ")} calculator</a></p>
         {related}
         <p><a href="index.html">All guides</a> · <a href="../sources.html">Sources</a></p>
       </div>
-      <div>{calc_mount(tool, guide.get("preset"))}</div>
+      <div>{calc_mount(tool, guide.get("preset"))}
+        <p class="disclaimer" style="margin-top:16px">{GUIDE_DISCLAIMER}</p>
+      </div>
     </div>
     """
     write(
@@ -778,7 +1214,8 @@ def static_pages() -> None:
           <li>Drywall sheet area is geometry: 4×8 = 32 sq ft. Waste default 15%. CertainTeed’s public calculator does not subtract openings and does not include waste.</li>
           <li>Wallpaper: US double-roll listed area is commonly ~56 sq ft; this tool defaults to 80% usable after match and waste.</li>
           <li>Moving boxes: midpoints of published per-room ranges (kitchen / bedroom / living mixes).</li>
-          <li>Room cost: 2025–2026 published remodel bands of about $15–$30 / sq ft cosmetic and much higher for wet rooms (Angi / HomeAdvisor summaries). The kitchen multiplier (2.5×) is ours and is labeled as planning only.</li>
+          <li>Room cost: 2025–2026 published remodel bands of about $15–$30 / sq ft cosmetic and much higher for wet rooms (Angi / HomeAdvisor summaries). The mid ($40–$80 / sq ft) and full ($100–$200 / sq ft) bands and the kitchen multiplier (2.5×) are ProjectCalc planning numbers, labeled as planning only.</li>
+          <li>Larger-bath context used in the guides: Fixr (updated January 27, 2026) lists $7,000–$40,000 for a 10×10 bathroom (<a href="https://www.fixr.com/costs/bathroom-remodeling">fixr.com</a>); HomeAdvisor lists $7,000–$30,000 for a primary bath (<a href="https://www.homeadvisor.com/cost/bathrooms/remodel-a-bathroom/">homeadvisor.com</a>); the 2025 Cost vs. Value upscale bath remodel (100 sq ft) is $81,612 (<a href="https://www.jlconline.com/cost-vs-value/2025/national/">jlconline.com</a>).</li>
           <li>Bathroom cost bands (recalibrated October 2026): a fixed base plus a per-sq-ft part. Cosmetic $2,000–$4,000 + $25–$100 / sq ft, mid $5,000–$10,000 + $100–$200, full $6,000–$14,000 + $250–$400. A 5×8 (40 sq ft) bath gives $3,000–$8,000 / $9,000–$18,000 / $16,000–$30,000. Sources: This Old House small-bathroom remodel cost guide (updated June 8, 2026, Homewyse data, value-grade materials, medium-cost labor): 5×8 at $15,900–$20,100, a full-replacement scope that matches our full tier; its scope tiers are basic refresh $3,000–$8,000 and mid-range update $8,000–$18,000 (<a href="https://www.thisoldhouse.com/bathrooms/reviews/small-bathroom-remodel-cost">thisoldhouse.com</a>); JLC/Zonda 2025 Cost vs. Value, Bath Remodel | Midrange: $26,138 national for a 5×7 bath with every fixture replaced, also our full tier (<a href="https://www.jlconline.com/cost-vs-value/2025/national/">jlconline.com</a>); Fixr bathroom remodel cost (updated January 27, 2026): 5×8 $2,800–$16,000, partial $6,000–$25,000, full gut $9,000–$30,000+ (<a href="https://www.fixr.com/costs/bathroom-remodeling">fixr.com</a>); Angi bathroom remodel cost guide (updated July 9, 2026): $70–$250 per sq ft, minor $3,000–$10,000, partial $10,000–$25,000, full $25,000–$80,000 (<a href="https://www.angi.com/articles/how-much-does-bathroom-remodel-cost.htm">angi.com</a>); HomeAdvisor True Cost Guide (updated June 17, 2026): typical $6,651–$17,660, half bath $1,500–$15,000, full bath $3,500–$20,000, primary $7,000–$30,000 (<a href="https://www.homeadvisor.com/cost/bathrooms/remodel-a-bathroom/">homeadvisor.com</a>).</li>
         </ul>
         <p>Full notes also live in <code>SOURCES.md</code> in the public repository.</p>
