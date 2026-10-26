@@ -422,3 +422,692 @@ test('hotshot-load: verdict stays neutral with no minimum set', () => {
   assert.equal(result.values.verdict, '');
   assert.equal(result.values.netToTruck, 468.75);
 });
+
+// ---- Hotshot landing calculators (hand-computed golden values) ----
+
+const CPM_EXAMPLE = {
+  truckPayment: 1200,
+  insurance: 1100,
+  trailerPayment: 450,
+  subscriptions: 250,
+  otherFixed: 200,
+  monthlyMiles: 8000,
+  fuelPrice: 3.65,
+  truckMpg: 10,
+  maintenancePerMile: 0.15,
+  driverPayPerMile: 0.5,
+  deadheadPct: 20,
+  profitPerMile: 0.25,
+};
+
+const FACTORING_EXAMPLE = {
+  invoiceAmount: 1800,
+  factoringPct: 3,
+  invoiceFee: 0,
+  transferFee: 15,
+  advancePct: 90,
+  invoicesPerMonth: 12,
+};
+
+const DEADHEAD_EXAMPLE = {
+  loadedMiles: 420,
+  deadheadMiles: 150,
+  ratePerMile: 2.1,
+  fuelPrice: 3.65,
+  truckMpg: 10,
+  minNetPerMile: 1.3,
+};
+
+test('hotshot-cost-per-mile: worked example splits fixed and variable cost per total mile', () => {
+  const result = compute('hotshot-cost-per-mile', CPM_EXAMPLE);
+  assert.equal(result.ok, true);
+  const v = result.values;
+  // fixed: 1200 + 1100 + 450 + 250 + 200 = 3200 / 8000 mi = 0.400
+  assert.equal(v.fixedMonthly, 3200);
+  assert.equal(v.fixedPerMile, 0.4);
+  // fuel: 3.65 / 10 = 0.365; variable: 0.365 + 0.15 + 0.50 = 1.015
+  assert.equal(v.fuelPerMile, 0.365);
+  assert.equal(v.variablePerMile, 1.015);
+  assert.equal(v.costPerMile, 1.415);
+  assert.equal(v.monthlyCost, 11320);
+  assert.equal(v.loadedMilesPerMonth, 6400);
+  // (1.415 + 0.25) / (1 - 0.20) = 2.08125 -> rounded UP to $2.09
+  assert.equal(v.minRatePerLoadedMileExact, 2.081);
+  assert.equal(v.minRatePerLoadedMile, 2.09);
+  // panel minimum leaves fuel out: 0.40 + 0.15 + 0.50 + 0.25 = 1.30
+  assert.equal(v.panelMinNetPerMileExact, 1.3);
+  assert.equal(v.panelMinNetPerMile, 1.3);
+});
+
+test('hotshot-cost-per-mile: a load at the minimum rate clears the panel minimum it reports', () => {
+  const cpm = compute('hotshot-cost-per-mile', CPM_EXAMPLE).values;
+  // 20% deadhead: 800 loaded + 200 empty
+  const load = compute('hotshot-load', {
+    ratePerMile: cpm.minRatePerLoadedMile,
+    miles: 800,
+    deadheadMiles: 200,
+    fuelPrice: 3.65,
+    truckMpg: 10,
+    minNetPerMile: cpm.panelMinNetPerMile,
+  });
+  assert.equal(load.ok, true);
+  assert.equal(load.values.verdict, 'take');
+  // at the exact (unrounded) minimum rate the panel net equals the panel minimum
+  const exact = compute('hotshot-load', {
+    ratePerMile: (cpm.costPerMile + 0.25) / 0.8,
+    miles: 800,
+    deadheadMiles: 200,
+    fuelPrice: 3.65,
+    truckMpg: 10,
+  });
+  assert.ok(Math.abs(exact.values.netPerTotalMile - cpm.panelMinNetPerMileExact) < 0.01);
+});
+
+test('hotshot-cost-per-mile: the quoted rate clears the quoted panel minimum for any inputs', () => {
+  // Seeded pseudo-random inputs with fractional cents; loads use exactly the deadhead %.
+  let seed = 20261024;
+  const rand = () => {
+    seed = (seed * 1103515245 + 12345) % 2147483648;
+    return seed / 2147483648;
+  };
+  const pick = (lo, hi, places) => Number((lo + rand() * (hi - lo)).toFixed(places));
+  let checked = 0;
+  for (let i = 0; i < 3000; i += 1) {
+    const deadheadPct = Math.floor(rand() * 60);
+    const input = {
+      truckPayment: pick(0, 2500, 2),
+      insurance: pick(200, 2000, 2),
+      trailerPayment: pick(0, 900, 2),
+      subscriptions: pick(0, 400, 2),
+      otherFixed: pick(0, 500, 2),
+      monthlyMiles: Math.round(pick(2000, 14000, 0)),
+      fuelPrice: pick(2.5, 6, 3),
+      truckMpg: pick(6, 16, 1),
+      maintenancePerMile: pick(0, 0.4, 3),
+      driverPayPerMile: pick(0, 0.8, 3),
+      deadheadPct,
+      profitPerMile: pick(0, 0.6, 3),
+    };
+    const cpm = compute('hotshot-cost-per-mile', input);
+    assert.equal(cpm.ok, true);
+    const load = compute('hotshot-load', {
+      ratePerMile: cpm.values.minRatePerLoadedMile,
+      miles: (100 - deadheadPct) * 10,
+      deadheadMiles: deadheadPct * 10,
+      fuelPrice: input.fuelPrice,
+      truckMpg: input.truckMpg,
+      minNetPerMile: cpm.values.panelMinNetPerMile,
+    });
+    assert.equal(load.values.verdict, 'take', JSON.stringify({ input, cpm: cpm.values, net: load.values.netPerTotalMile }));
+    checked += 1;
+  }
+  assert.equal(checked, 3000);
+});
+
+test('hotshot-cost-per-mile: blank fixed costs and no deadhead fall back to variable cost + profit', () => {
+  const result = compute('hotshot-cost-per-mile', {
+    monthlyMiles: 10000,
+    fuelPrice: 4,
+    truckMpg: 8,
+    profitPerMile: 0.3,
+  });
+  assert.equal(result.ok, true);
+  assert.equal(result.values.fixedPerMile, 0);
+  assert.equal(result.values.costPerMile, 0.5);
+  assert.equal(result.values.minRatePerLoadedMile, 0.8);
+  assert.equal(result.values.panelMinNetPerMile, 0.3);
+});
+
+test('hotshot-cost-per-mile: zero monthly miles and impossible deadhead are rejected', () => {
+  const zero = compute('hotshot-cost-per-mile', { ...CPM_EXAMPLE, monthlyMiles: 0 });
+  assert.equal(zero.ok, false);
+  assert.match(zero.error, /monthly miles/i);
+  const missing = compute('hotshot-cost-per-mile', { ...CPM_EXAMPLE, monthlyMiles: '' });
+  assert.equal(missing.ok, false);
+  const huge = compute('hotshot-cost-per-mile', { ...CPM_EXAMPLE, deadheadPct: 95 });
+  assert.equal(huge.ok, false);
+  assert.match(huge.error, /deadhead/i);
+  // at the 90% bound, every paid mile carries ten total miles of cost
+  const max = compute('hotshot-cost-per-mile', { ...CPM_EXAMPLE, deadheadPct: 90 });
+  assert.equal(max.ok, true);
+  assert.equal(max.values.minRatePerLoadedMile, 16.65);
+});
+
+test('hotshot-factoring: worked example with a wire fee, 90% advance and 12 invoices a month', () => {
+  const result = compute('hotshot-factoring', FACTORING_EXAMPLE);
+  assert.equal(result.ok, true);
+  const v = result.values;
+  assert.equal(v.pctFee, 54); // 3% of 1,800
+  assert.equal(v.flatFees, 15);
+  assert.equal(v.totalFee, 69);
+  assert.equal(v.effectivePct, 3.83); // 69 / 1,800
+  assert.equal(v.advance, 1620);
+  assert.equal(v.cashToday, 1551); // 1,620 - 69
+  assert.equal(v.reserveLater, 180);
+  assert.equal(v.netReceived, 1731);
+  assert.equal(v.monthlyRevenue, 21600);
+  assert.equal(v.monthlyFees, 828);
+  assert.equal(v.perPointBasis, 'month');
+  assert.equal(v.perPointCost, 216);
+});
+
+test('hotshot-factoring: 0% with no flat fees costs nothing; full advance leaves no reserve', () => {
+  const result = compute('hotshot-factoring', { invoiceAmount: 2500, factoringPct: 0 });
+  assert.equal(result.ok, true);
+  assert.equal(result.values.totalFee, 0);
+  assert.equal(result.values.effectivePct, 0);
+  assert.equal(result.values.advancePct, 100);
+  assert.equal(result.values.cashToday, 2500);
+  assert.equal(result.values.reserveLater, 0);
+  assert.equal(result.values.monthlyFees, 0);
+  // no invoice count: the 1% line is per invoice
+  assert.equal(result.values.perPointBasis, 'invoice');
+  assert.equal(result.values.perPointCost, 25);
+});
+
+test('hotshot-factoring: flat fees push the effective rate above the quoted percent', () => {
+  const result = compute('hotshot-factoring', { invoiceAmount: 500, factoringPct: 2.5, invoiceFee: 5, transferFee: 20 });
+  assert.equal(result.ok, true);
+  assert.equal(result.values.totalFee, 37.5);
+  assert.equal(result.values.effectivePct, 7.5);
+});
+
+test('hotshot-factoring: rejects fees larger than the advance and a missing invoice', () => {
+  const big = compute('hotshot-factoring', { invoiceAmount: 100, factoringPct: 5, transferFee: 60, advancePct: 50 });
+  assert.equal(big.ok, false);
+  assert.match(big.error, /larger than the advance/i);
+  const none = compute('hotshot-factoring', { factoringPct: 3 });
+  assert.equal(none.ok, false);
+  assert.match(none.error, /invoice/i);
+});
+
+test('hotshot-deadhead: worked example finds the break-even empty miles', () => {
+  const result = compute('hotshot-deadhead', DEADHEAD_EXAMPLE);
+  assert.equal(result.ok, true);
+  const v = result.values;
+  assert.equal(v.grossPay, 882); // 420 x 2.10
+  assert.equal(v.totalMiles, 570);
+  assert.equal(v.deadheadPct, 26.3); // 150 / 570
+  assert.equal(v.deadheadFuelCost, 54.75); // 150 x 0.365
+  assert.equal(v.fuelCost, 208.05);
+  assert.equal(v.ratePerLoadedMile, 2.1);
+  assert.equal(v.ratePerTotalMile, 1.55);
+  assert.equal(v.netAfterFuel, 673.95);
+  assert.equal(v.netPerTotalMile, 1.18);
+  assert.equal(v.meetsMinimum, false);
+  // 882 / (1.30 + 0.365) = 529.73 total mi -> 109 empty miles max
+  assert.equal(v.breakEvenDeadheadMiles, 109);
+  assert.equal(v.failsWithNoDeadhead, false);
+  const atBreakEven = compute('hotshot-deadhead', { ...DEADHEAD_EXAMPLE, deadheadMiles: 109 }).values;
+  assert.equal(atBreakEven.meetsMinimum, true);
+  const oneMore = compute('hotshot-deadhead', { ...DEADHEAD_EXAMPLE, deadheadMiles: 110 }).values;
+  assert.equal(oneMore.meetsMinimum, false);
+});
+
+test('hotshot-deadhead: zero deadhead, flat rate and no minimum', () => {
+  const result = compute('hotshot-deadhead', { loadedMiles: 300, flatRate: 600, fuelPrice: 4, truckMpg: 8 });
+  assert.equal(result.ok, true);
+  assert.equal(result.values.deadheadPct, 0);
+  assert.equal(result.values.deadheadFuelCost, 0);
+  assert.equal(result.values.ratePerLoadedMile, 2);
+  assert.equal(result.values.ratePerTotalMile, 2);
+  // no minimum: break-even is where fuel eats the whole gross. 600 / 0.5 = 1,200 total mi
+  assert.equal(result.values.breakEvenDeadheadMiles, 900);
+});
+
+test('hotshot-deadhead: huge deadhead goes negative and a weak load fails with none at all', () => {
+  const huge = compute('hotshot-deadhead', { loadedMiles: 100, deadheadMiles: 5000, ratePerMile: 2, fuelPrice: 3.65, truckMpg: 10, minNetPerMile: 1 });
+  assert.equal(huge.ok, true);
+  assert.equal(huge.values.deadheadPct, 98);
+  assert.ok(huge.values.netAfterFuel < 0);
+  assert.equal(huge.values.meetsMinimum, false);
+  const weak = compute('hotshot-deadhead', { loadedMiles: 400, deadheadMiles: 0, ratePerMile: 1.5, fuelPrice: 3.65, truckMpg: 10, minNetPerMile: 1.3 });
+  assert.equal(weak.values.breakEvenDeadheadMiles, 0);
+  assert.equal(weak.values.failsWithNoDeadhead, true);
+  const zero = compute('hotshot-deadhead', { ...DEADHEAD_EXAMPLE, loadedMiles: 0 });
+  assert.equal(zero.ok, false);
+  assert.match(zero.error, /loaded miles/i);
+  const over = compute('hotshot-deadhead', { ...DEADHEAD_EXAMPLE, deadheadMiles: 5001 });
+  assert.equal(over.ok, false);
+});
+
+// The worked examples printed on the Hotshot pages must be the engine's numbers.
+const fs = require('node:fs');
+const path = require('node:path');
+
+function usd(n, digits) {
+  const d = digits == null ? 2 : digits;
+  return '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
+}
+
+function hotshotPage(slug) {
+  return fs.readFileSync(path.join(__dirname, '..', 'hotshot', slug, 'index.html'), 'utf8');
+}
+
+// Pages print their examples at one dated diesel price; the engine goldens above stay at $3.65.
+const PAGE_DIESEL = 6.28; // EIA U.S. average on-highway diesel, week of Oct 19, 2026
+
+test('hotshot panel and guide print the engine example at the page diesel price', () => {
+  const v = compute('hotshot-load', { ratePerMile: 2.85, miles: 540, deadheadMiles: 80, fuelPrice: PAGE_DIESEL, truckMpg: 8.4, tolls: 45, factoringPct: 3, minNetPerMile: 1.25 }).values;
+  assert.deepEqual([v.fuelCost, v.factoringFee, v.netToTruck, v.netPerTotalMile, v.verdict], [463.52, 46.17, 984.31, 1.59, 'take']);
+  const panel = fs.readFileSync(path.join(__dirname, '..', 'hotshot', 'index.html'), 'utf8');
+  const guide = fs.readFileSync(path.join(__dirname, '..', 'hotshot', 'guides', 'how-to-start-hotshot-trucking.html'), 'utf8');
+  for (const [name, html] of [['panel', panel], ['guide', guide]]) {
+    ['$6.28', '-$463.52', '-$46.17', '$984.31', '$1.59/mi'].forEach((t) => assert.ok(html.includes(t), name + ' missing ' + t));
+    assert.ok(!html.includes('$3.65') && !html.includes('1,178.43') && !html.includes('$1.90'), name + ' still prints the old $3.65 example');
+  }
+  assert.ok(panel.includes('$1.59/MI NET'), 'panel flag');
+});
+
+test('hotshot pages print the engine worked examples', () => {
+  const c = compute('hotshot-cost-per-mile', { ...CPM_EXAMPLE, fuelPrice: PAGE_DIESEL }).values;
+  const cpm = hotshotPage('cost-per-mile');
+  [usd(c.fixedMonthly), usd(c.fixedPerMile, 3), usd(c.fuelPerMile, 3), usd(c.variablePerMile, 3), usd(c.costPerMile, 3),
+    usd(c.minRatePerLoadedMile), usd(c.panelMinNetPerMile), usd(c.minRatePerLoadedMileExact, 3)]
+    .forEach((s) => assert.ok(cpm.includes(s), 'cost-per-mile missing ' + s));
+
+  const f = compute('hotshot-factoring', FACTORING_EXAMPLE).values;
+  const fac = hotshotPage('factoring-fee');
+  [usd(f.pctFee), usd(f.totalFee), f.effectivePct + '%', usd(f.cashToday), usd(f.reserveLater), usd(f.monthlyFees),
+    usd(f.monthlyRevenue), usd(f.perPointCost)]
+    .forEach((s) => assert.ok(fac.includes(s), 'factoring-fee missing ' + s));
+
+  const d = compute('hotshot-deadhead', { ...DEADHEAD_EXAMPLE, fuelPrice: PAGE_DIESEL }).values;
+  const dh = hotshotPage('deadhead');
+  [d.deadheadPct + '%', usd(d.deadheadFuelCost), usd(d.ratePerLoadedMile), usd(d.ratePerTotalMile), usd(d.netAfterFuel),
+    usd(d.netPerTotalMile), d.breakEvenDeadheadMiles + ' empty miles']
+    .forEach((s) => assert.ok(dh.includes(s), 'deadhead missing ' + s));
+  // The static readout (what shows before tools.js runs) must match the prefilled example.
+  assert.ok(cpm.includes('id="result-main">' + usd(c.minRatePerLoadedMile) + '<'), 'cost-per-mile static readout');
+  assert.ok(dh.includes('id="result-main">' + d.breakEvenDeadheadMiles + ' MI<'), 'deadhead static readout');
+});
+
+// Hotshot weight / CDL line (49 CFR 383.5, 383.91, 390.5). Example rig printed on /hotshot/weight/.
+const WEIGHT_EXAMPLE = {
+  truckGvwr: 14000,
+  truckEmpty: 8000,
+  trailerGvwr: 24000,
+  trailerEmpty: 7500,
+  gcwr: '',
+  cargoWeight: 15000,
+};
+
+function weight(over) {
+  const result = compute('hotshot-weight', { ...WEIGHT_EXAMPLE, ...over });
+  assert.equal(result.ok, true, result.error);
+  return result.values;
+}
+
+test('hotshot-weight: worked example - gooseneck rig is Class A, with payloads and headroom', () => {
+  const v = weight({});
+  assert.equal(v.sumGvwr, 38000);
+  assert.equal(v.gcwr, 38000);
+  assert.equal(v.gcwrBasis, 'sum');
+  assert.equal(v.cdl, 'A');
+  assert.equal(v.isCmv, true);
+  assert.equal(v.truckPayload, 6000); // 14,000 - 8,000
+  assert.equal(v.trailerPayload, 16500); // 24,000 - 7,500
+  assert.equal(v.maxGross, 38000);
+  assert.equal(v.maxCargo, 16500); // trailer payload binds before the combined rating
+  assert.equal(v.loadedTrailer, 22500);
+  assert.equal(v.grossCombined, 30500);
+  assert.equal(v.trailerHeadroom, 1500);
+  assert.equal(v.combinedHeadroom, 7500);
+  assert.equal(v.overRating, false);
+});
+
+test('hotshot-weight: 26,000 vs 26,001 combined rating with a trailer over 10,000', () => {
+  const under = weight({ truckGvwr: 14000, trailerGvwr: 12000, trailerEmpty: 4000, cargoWeight: '' });
+  assert.equal(under.gcwr, 26000);
+  assert.equal(under.cdl, 'none');
+  assert.equal(under.towedOverLine, true);
+  assert.equal(under.poundsUnderCdlLine, 1);
+  const at = weight({ truckGvwr: 14001, trailerGvwr: 12000, trailerEmpty: 4000, cargoWeight: '' });
+  assert.equal(at.gcwr, 26001);
+  assert.equal(at.cdl, 'A');
+  assert.equal(at.poundsUnderCdlLine, 0);
+});
+
+test('hotshot-weight: towed 10,000 vs 10,001 with a 26,001 combined rating', () => {
+  const at10000 = weight({ truckGvwr: 16001, trailerGvwr: 10000, trailerEmpty: 3000, cargoWeight: '' });
+  assert.equal(at10000.gcwr, 26001);
+  assert.equal(at10000.towedOverLine, false);
+  assert.equal(at10000.cdl, 'none'); // Class A needs the towed unit OVER 10,000; truck alone is under 26,001
+  const at10001 = weight({ truckGvwr: 16000, trailerGvwr: 10001, trailerEmpty: 3000, cargoWeight: '' });
+  assert.equal(at10001.gcwr, 26001);
+  assert.equal(at10001.towedOverLine, true);
+  assert.equal(at10001.cdl, 'A');
+});
+
+test('hotshot-weight: GCWR is the greater of the label GCWR and the sum of GVWRs', () => {
+  const labelHigher = weight({ truckGvwr: 14000, trailerGvwr: 12000, trailerEmpty: 4000, gcwr: 30000, cargoWeight: '' });
+  assert.equal(labelHigher.gcwr, 30000);
+  assert.equal(labelHigher.gcwrBasis, 'label');
+  assert.equal(labelHigher.cdl, 'A');
+  assert.equal(labelHigher.maxGross, 26000); // each GVWR still caps the scale weight
+  const labelLower = weight({ truckGvwr: 14000, trailerGvwr: 12000, trailerEmpty: 4000, gcwr: 20000, cargoWeight: '' });
+  assert.equal(labelLower.gcwr, 26000);
+  assert.equal(labelLower.gcwrBasis, 'sum');
+  assert.equal(labelLower.cdl, 'none');
+  assert.equal(labelLower.maxGross, 20000); // the label GCWR is the towing limit
+  assert.equal(labelLower.maxCargo, 8000); // 20,000 - 8,000 truck - 4,000 trailer
+  // the power unit's GCWR is not used when it isn't towing
+  const solo = weight({ truckGvwr: 14000, trailerGvwr: 0, trailerEmpty: '', gcwr: 30000, cargoWeight: '' });
+  assert.equal(solo.gcwr, 14000);
+  assert.equal(solo.gcwrBasis, 'truck');
+  assert.equal(solo.cdl, 'none');
+});
+
+test('hotshot-weight: loaded weight over the ratings counts and is flagged', () => {
+  const v = weight({ truckGvwr: 14000, trailerGvwr: 12000, trailerEmpty: 4000, cargoWeight: 14500 });
+  assert.equal(v.gcwr, 26000);
+  assert.equal(v.loadedTrailer, 18500);
+  assert.equal(v.grossCombined, 26500);
+  assert.equal(v.trailerHeadroom, -6500);
+  assert.equal(v.combinedHeadroom, -500);
+  assert.equal(v.overRating, true);
+  assert.equal(v.cdl, 'A'); // gross combination weight of 26,001+ with a towed unit weighing over 10,000
+  const legal = weight({ truckGvwr: 14000, trailerGvwr: 12000, trailerEmpty: 4000, cargoWeight: 8000 });
+  assert.equal(legal.overRating, false);
+  assert.equal(legal.trailerHeadroom, 0);
+  assert.equal(legal.cdl, 'none');
+});
+
+test('hotshot-weight: Class B is a single vehicle rated 26,001+ towing 10,000 or less', () => {
+  assert.equal(weight({ truckGvwr: 26001, truckEmpty: 12000, trailerGvwr: 10000, trailerEmpty: 3000, cargoWeight: '' }).cdl, 'B');
+  assert.equal(weight({ truckGvwr: 26001, truckEmpty: 12000, trailerGvwr: 0, trailerEmpty: '', cargoWeight: '' }).cdl, 'B');
+  assert.equal(weight({ truckGvwr: 26000, truckEmpty: 12000, trailerGvwr: 0, trailerEmpty: '', cargoWeight: '' }).cdl, 'none');
+  assert.equal(weight({ truckGvwr: 26001, truckEmpty: 12000, trailerGvwr: 10001, trailerEmpty: 3000, cargoWeight: '' }).cdl, 'A');
+});
+
+test('hotshot-weight: 10,001 lb makes it a commercial motor vehicle in interstate commerce', () => {
+  assert.equal(weight({ truckGvwr: 9000, truckEmpty: 6000, trailerGvwr: 1000, trailerEmpty: 500, cargoWeight: '' }).isCmv, false);
+  assert.equal(weight({ truckGvwr: 9000, truckEmpty: 6000, trailerGvwr: 1001, trailerEmpty: 500, cargoWeight: '' }).isCmv, true);
+  assert.equal(weight({ truckGvwr: 9000, truckEmpty: 6000, trailerGvwr: 0, trailerEmpty: '', cargoWeight: '' }).isCmv, false);
+  // loaded weight over the rating counts too
+  assert.equal(weight({ truckGvwr: 9000, truckEmpty: 6000, trailerGvwr: 1000, trailerEmpty: 500, cargoWeight: 3600 }).isCmv, true);
+});
+
+test('hotshot-weight: rejects empty weights over the rating and a missing truck GVWR', () => {
+  const truck = compute('hotshot-weight', { ...WEIGHT_EXAMPLE, truckEmpty: 15000 });
+  assert.equal(truck.ok, false);
+  assert.match(truck.error, /truck empty weight/i);
+  const trailer = compute('hotshot-weight', { ...WEIGHT_EXAMPLE, trailerEmpty: 25000 });
+  assert.equal(trailer.ok, false);
+  assert.match(trailer.error, /trailer empty weight/i);
+  // a trailer rating with no empty weight would overstate the payload
+  const blankTrailer = compute('hotshot-weight', { ...WEIGHT_EXAMPLE, trailerEmpty: '' });
+  assert.equal(blankTrailer.ok, false);
+  assert.match(blankTrailer.error, /trailer empty weight/i);
+  const none = compute('hotshot-weight', { ...WEIGHT_EXAMPLE, truckGvwr: '' });
+  assert.equal(none.ok, false);
+  assert.match(none.error, /truck GVWR/i);
+});
+
+test('weight and 2026 rates pages print the engine numbers', () => {
+  const lbs = (n) => Number(n).toLocaleString('en-US') + ' lb';
+  const w = compute('hotshot-weight', WEIGHT_EXAMPLE).values;
+  const wp = hotshotPage('weight');
+  [lbs(w.sumGvwr), lbs(w.gcwr), lbs(w.truckPayload), lbs(w.trailerPayload), lbs(w.maxCargo), lbs(w.loadedTrailer),
+    lbs(w.grossCombined), lbs(w.trailerHeadroom), lbs(w.combinedHeadroom), 'Class ' + w.cdl]
+    .forEach((s) => assert.ok(wp.includes(s), 'weight missing ' + s));
+  assert.ok(wp.includes('id="result-main">LIKELY CLASS ' + w.cdl + '<'), 'weight readout should start on the example verdict');
+
+  // Rates page examples: EIA U.S. diesel, week of 2026-10-19 ($6.276), at 10 mpg, 3% factoring, $1.30 minimum.
+  const rp = hotshotPage('rates-2026');
+  const LOAD = { fuelPrice: 6.28, truckMpg: 10, tolls: 0, factoringPct: 3, minNetPerMile: 1.3 };
+  [
+    { miles: 500, ratePerMile: 1.75, deadheadMiles: 100, verdict: 'pass' },
+    { miles: 500, ratePerMile: 2.5, deadheadMiles: 100, verdict: 'take' },
+    { miles: 250, flatRate: 900, deadheadMiles: 50, verdict: 'take' },
+  ].forEach((ex) => {
+    const v = compute('hotshot-load', { ...LOAD, ...ex }).values;
+    assert.equal(v.verdict, ex.verdict);
+    [usd(v.grossPay), '-' + usd(v.fuelCost), '-' + usd(v.factoringFee), usd(v.netToTruck), usd(v.netPerTotalMile)]
+      .forEach((s) => assert.ok(rp.includes(s), 'rates-2026 missing ' + s));
+    assert.ok(rp.includes(ex.verdict === 'take' ? 'TAKE IT</span><span>' + usd(v.netPerTotalMile) : 'PASS</span><span>' + usd(v.netPerTotalMile)));
+  });
+
+  const cpm = compute('hotshot-cost-per-mile', { ...CPM_EXAMPLE, fuelPrice: 6.28 }).values;
+  [usd(cpm.fixedPerMile, 3), usd(cpm.fuelPerMile, 3), usd(cpm.costPerMile, 3), usd(cpm.minRatePerLoadedMile)]
+    .forEach((s) => assert.ok(rp.includes(s), 'rates-2026 missing ' + s));
+  // the same operator at $3.65 diesel is the cost per mile page's own example
+  assert.ok(rp.includes(usd(compute('hotshot-cost-per-mile', CPM_EXAMPLE).values.minRatePerLoadedMile)));
+
+  // a week: 2,000 total miles, 20% deadhead, costs without driver pay or profit
+  const owner = compute('hotshot-cost-per-mile', { ...CPM_EXAMPLE, fuelPrice: 6.28, driverPayPerMile: 0, profitPerMile: 0 }).values;
+  const weekMiles = 2000;
+  const loaded = weekMiles * (1 - CPM_EXAMPLE.deadheadPct / 100);
+  const weekCost = Math.round(owner.costPerMile * weekMiles);
+  assert.ok(rp.includes(usd(owner.costPerMile, 3).replace(/0$/, '')), 'rates-2026 missing cost per mile');
+  assert.ok(rp.includes(usd(weekCost, 0) + ' a week'));
+  const years = [1.5, 2, 2.5].map((rate) => {
+    const left = Math.round(rate * loaded - weekCost);
+    assert.ok(rp.includes(usd(left, 0) + ' a week'), 'rates-2026 missing week at ' + rate);
+    return usd(left * 48, 0);
+  });
+  assert.ok(rp.includes(years.join(' / ')), 'rates-2026 missing year line ' + years.join(' / '));
+});
+
+// ---- hotshot-ifta -----------------------------------------------------------
+// Hand-computed. The rates below are TEST values only (round numbers chosen so the
+// arithmetic is checkable); the product never ships a rate.
+
+const IFTA_QUARTER = [
+  { name: 'TN', miles: 3100, gallonsPurchased: 330 },
+  { name: 'GA', miles: 1800, gallonsPurchased: 150 },
+  { name: 'AL', miles: 1000, gallonsPurchased: 210 },
+];
+
+test('hotshot-ifta: three-jurisdiction quarter, fleet MPG and net taxable gallons by hand', () => {
+  const result = compute('hotshot-ifta', { jurisdictions: IFTA_QUARTER });
+  assert.equal(result.ok, true);
+  const v = result.values;
+  // 5,900 mi / 690 gal = 8.5507246... -> 8.55 on the return
+  assert.equal(v.totalMiles, 5900);
+  assert.equal(v.totalGallonsPurchased, 690);
+  assert.equal(v.fleetMpg, 8.55);
+  assert.ok(Math.abs(v.fleetMpgExact - 8.5507) < 1e-4, 'fleet mpg exact ' + v.fleetMpgExact);
+  // taxable = miles x 690 / 5900: TN 2,139,000/5,900 = 362.54; GA 1,242,000/5,900 = 210.51; AL 690,000/5,900 = 116.95
+  assert.equal(v.jurisdictions[0].taxableGallons, 362.54);
+  assert.equal(v.jurisdictions[1].taxableGallons, 210.51);
+  assert.equal(v.jurisdictions[2].taxableGallons, 116.95);
+  // net = taxable - purchased: TN 192,000/5,900 = 32.54; GA 357,000/5,900 = 60.51; AL -549,000/5,900 = -93.05 (a credit)
+  assert.equal(v.jurisdictions[0].netTaxableGallons, 32.54);
+  assert.equal(v.jurisdictions[1].netTaxableGallons, 60.51);
+  assert.equal(v.jurisdictions[2].netTaxableGallons, -93.05);
+  assert.equal(v.totalTaxableGallons, 690);
+  assert.equal(v.netTaxableGallons, 0);
+  assert.equal(v.mpgOverridden, false);
+  // rates left blank: no tax is invented
+  assert.equal(v.jurisdictions[0].tax, null);
+  assert.equal(v.totalTax, null);
+  assert.equal(v.rowsMissingRate, 3);
+  assert.equal(v.taxComplete, false);
+});
+
+test('hotshot-ifta: with test rates, tax due and a credit net out to $7.68', () => {
+  const rates = [0.25, 0.3, 0.2];
+  const result = compute('hotshot-ifta', {
+    jurisdictions: IFTA_QUARTER.map((j, i) => ({ ...j, ratePerGallon: rates[i] })),
+  });
+  assert.equal(result.ok, true);
+  const v = result.values;
+  // TN 192,000/5,900 x 0.25 = 8.1356; GA 357,000/5,900 x 0.30 = 18.1525; AL -549,000/5,900 x 0.20 = -18.6102
+  assert.equal(v.jurisdictions[0].tax, 8.14);
+  assert.equal(v.jurisdictions[1].tax, 18.15);
+  assert.equal(v.jurisdictions[2].tax, -18.61);
+  // exact total (48,000 + 107,100 - 109,800) / 5,900 = 45,300 / 5,900 = 7.6780
+  assert.equal(v.totalTax, 7.68);
+  assert.equal(v.rowsMissingRate, 0);
+  assert.equal(v.taxComplete, true);
+});
+
+test('hotshot-ifta: without an MPG override the net taxable gallons always sum to zero', () => {
+  const shapes = [
+    [[3100, 330], [1800, 150], [1000, 210]],
+    [[1, 0.1], [999999, 71234.5], [17.5, 3], [0, 9]],
+    [[412, 41], [388.5, 0], [75, 19.25], [1200, 130], [0.5, 0]],
+  ];
+  shapes.forEach((shape) => {
+    const jurisdictions = shape.map((s, i) => ({ name: 'J' + i, miles: s[0], gallonsPurchased: s[1] }));
+    const v = compute('hotshot-ifta', { jurisdictions }).values;
+    const gallons = shape.reduce((a, s) => a + s[1], 0);
+    assert.ok(Math.abs(v.netTaxableGallons) < 0.011, 'rounded net ' + v.netTaxableGallons);
+    assert.ok(Math.abs(v.totalTaxableGallons - gallons) < 0.011, 'taxable total ' + v.totalTaxableGallons);
+    // each row is its share of the miles times the total gallons
+    const miles = shape.reduce((a, s) => a + s[0], 0);
+    shape.forEach((s, i) => {
+      const expected = Math.round((s[0] * gallons / miles) * 100) / 100;
+      assert.ok(Math.abs(v.jurisdictions[i].taxableGallons - expected) < 0.011, 'row ' + i);
+    });
+  });
+});
+
+test('hotshot-ifta: a single jurisdiction has nothing to net out', () => {
+  const result = compute('hotshot-ifta', {
+    jurisdictions: [{ name: 'One', miles: 1000, gallonsPurchased: 125, ratePerGallon: 0.5 }],
+  });
+  assert.equal(result.ok, true);
+  const v = result.values;
+  assert.equal(v.fleetMpg, 8);
+  assert.equal(v.jurisdictions[0].taxableGallons, 125);
+  assert.equal(v.jurisdictions[0].netTaxableGallons, 0);
+  assert.equal(v.jurisdictions[0].tax, 0);
+  assert.equal(v.totalTax, 0);
+  assert.equal(v.taxComplete, true);
+});
+
+test('hotshot-ifta: a row with miles but zero gallons owes tax on all its taxable gallons', () => {
+  const result = compute('hotshot-ifta', {
+    jurisdictions: [
+      { name: 'X', miles: 500, gallonsPurchased: 0, ratePerGallon: 0.4 },
+      { name: 'Y', miles: 500, gallonsPurchased: 100, ratePerGallon: 0.1 },
+    ],
+  });
+  assert.equal(result.ok, true);
+  const v = result.values;
+  // 1,000 mi / 100 gal = 10 mpg: each row burned 50 taxable gallons
+  assert.equal(v.fleetMpg, 10);
+  assert.equal(v.jurisdictions[0].netTaxableGallons, 50);
+  assert.equal(v.jurisdictions[0].tax, 20);
+  assert.equal(v.jurisdictions[1].netTaxableGallons, -50);
+  assert.equal(v.jurisdictions[1].tax, -5);
+  assert.equal(v.totalTax, 15);
+});
+
+test('hotshot-ifta: a partly filled-in rate column totals only the rated rows and says so', () => {
+  const result = compute('hotshot-ifta', {
+    jurisdictions: [
+      { name: 'X', miles: 500, gallonsPurchased: 0, ratePerGallon: 0.4 },
+      { name: 'Y', miles: 500, gallonsPurchased: 100 },
+    ],
+  });
+  const v = result.values;
+  assert.equal(v.jurisdictions[1].tax, null);
+  assert.equal(v.rowsMissingRate, 1);
+  assert.equal(v.taxComplete, false);
+  assert.equal(v.totalTax, 20);
+});
+
+test('hotshot-ifta: a typed fleet MPG replaces miles / gallons and nets no longer sum to zero', () => {
+  const result = compute('hotshot-ifta', {
+    fleetMpg: 10,
+    jurisdictions: [
+      { name: 'A', miles: 1000, gallonsPurchased: 80, ratePerGallon: 0.2 },
+      { name: 'B', miles: 500, gallonsPurchased: 50, ratePerGallon: 0.1 },
+    ],
+  });
+  assert.equal(result.ok, true);
+  const v = result.values;
+  assert.equal(v.mpgOverridden, true);
+  assert.equal(v.mpgUsed, 10);
+  // still reports what the purchases imply: 1,500 / 130 = 11.54
+  assert.equal(v.fleetMpg, 11.54);
+  assert.equal(v.jurisdictions[0].taxableGallons, 100);
+  assert.equal(v.jurisdictions[0].netTaxableGallons, 20);
+  assert.equal(v.jurisdictions[1].taxableGallons, 50);
+  assert.equal(v.jurisdictions[1].netTaxableGallons, 0);
+  assert.equal(v.netTaxableGallons, 20);
+  assert.equal(v.totalTax, 4);
+});
+
+test('hotshot-ifta: no gallons at all needs an MPG; with one, every gallon is taxable', () => {
+  const rows = [{ name: 'A', miles: 800, gallonsPurchased: 0 }];
+  const none = compute('hotshot-ifta', { jurisdictions: rows });
+  assert.equal(none.ok, false);
+  assert.match(none.error, /gallons/i);
+  const typed = compute('hotshot-ifta', { jurisdictions: rows, fleetMpg: 16 });
+  assert.equal(typed.ok, true);
+  assert.equal(typed.values.fleetMpg, 0);
+  assert.equal(typed.values.jurisdictions[0].taxableGallons, 50);
+  assert.equal(typed.values.jurisdictions[0].netTaxableGallons, 50);
+});
+
+test('hotshot-ifta: blank rows are skipped, and bad input is named in the error', () => {
+  const blankRows = compute('hotshot-ifta', {
+    jurisdictions: [{ name: '', miles: '', gallonsPurchased: '' }, { name: 'A', miles: '200', gallonsPurchased: '20' }, {}],
+  });
+  assert.equal(blankRows.ok, true);
+  assert.equal(blankRows.values.jurisdictions.length, 1);
+  assert.equal(blankRows.values.fleetMpg, 10);
+
+  assert.equal(compute('hotshot-ifta', { jurisdictions: [] }).ok, false);
+  assert.equal(compute('hotshot-ifta', {}).ok, false);
+  const allBlank = compute('hotshot-ifta', { jurisdictions: [{ miles: '' }, {}] });
+  assert.match(allBlank.error, /miles/i);
+  // fuel bought where no miles were logged is allowed, but a quarter with no miles at all is not
+  const noMiles = compute('hotshot-ifta', { jurisdictions: [{ name: 'AL', gallonsPurchased: 12 }] });
+  assert.match(noMiles.error, /miles for at least one/);
+  const textMiles = compute('hotshot-ifta', { jurisdictions: [{ name: 'AL', miles: 'lots', gallonsPurchased: 12 }] });
+  assert.match(textMiles.error, /miles for AL/);
+  const zeroMiles = compute('hotshot-ifta', { jurisdictions: [{ name: 'AL', miles: 0, gallonsPurchased: 12 }] });
+  assert.equal(zeroMiles.ok, false);
+  const negative = compute('hotshot-ifta', { jurisdictions: [{ name: 'AL', miles: -5, gallonsPurchased: 12 }] });
+  assert.equal(negative.ok, false);
+  const badRate = compute('hotshot-ifta', { jurisdictions: [{ name: 'AL', miles: 5, gallonsPurchased: 1, ratePerGallon: 'abc' }] });
+  assert.match(badRate.error, /tax rate for AL/);
+  const tooLow = compute('hotshot-ifta', { jurisdictions: [{ name: 'AL', miles: 5, gallonsPurchased: 1 }], fleetMpg: 0.5 });
+  assert.equal(tooLow.ok, false);
+});
+
+test('hotshot-ifta: miles in one jurisdiction and purchases in another still net out', () => {
+  const result = compute('hotshot-ifta', {
+    jurisdictions: [
+      { name: 'A', miles: 900, gallonsPurchased: 0 },
+      { name: 'B', miles: 0, gallonsPurchased: 90 },
+    ],
+  });
+  assert.equal(result.ok, true);
+  const v = result.values;
+  assert.equal(v.fleetMpg, 10);
+  assert.equal(v.jurisdictions[0].netTaxableGallons, 90);
+  assert.equal(v.jurisdictions[1].taxableGallons, 0);
+  assert.equal(v.jurisdictions[1].netTaxableGallons, -90);
+});
+
+test('hotshot-ifta page prints the engine worked example for the rows it ships', () => {
+  const html = hotshotPage('ifta');
+  const blocks = html.split('<div class="ifta-row is-example">').slice(1);
+  assert.equal(blocks.length, 3);
+  const jurisdictions = blocks.map((b) => {
+    const get = (f) => b.match(new RegExp('data-field="' + f + '"[^>]*value="([^"]*)"'))[1];
+    return { name: get('name'), miles: get('miles'), gallonsPurchased: get('gallonsPurchased'), ratePerGallon: get('ratePerGallon') };
+  });
+  const signed = (n) => (n < 0 ? '-' : '') + usd(Math.abs(n));
+  const v = compute('hotshot-ifta', { jurisdictions }).values;
+  assert.equal(v.taxComplete, true);
+  const printed = [
+    v.fleetMpg.toFixed(2),
+    String(v.fleetMpgExact),
+    ...v.jurisdictions.map((j) => j.taxableGallons.toFixed(2)),
+    ...v.jurisdictions.map((j) => j.netTaxableGallons.toFixed(2)),
+    ...v.jurisdictions.map((j) => signed(j.tax)),
+    signed(v.totalTax),
+    usd(Math.abs(v.totalTax)),
+    v.totalMiles.toLocaleString('en-US'),
+    v.totalGallonsPurchased.toLocaleString('en-US'),
+  ];
+  printed.forEach((s) => assert.ok(html.includes(s), 'ifta page missing ' + s));
+  assert.equal(v.totalTax, -12.56);
+});

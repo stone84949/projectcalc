@@ -834,8 +834,8 @@ def hand_built_routes() -> list[str]:
         for page in sorted(index.parent.rglob("*.html")):
             if page == index:
                 continue
-            rel = page.relative_to(ROOT).with_suffix("")
-            routes.append("/" + str(rel).replace("\\", "/"))
+            # pretty_path maps nested folder/index.html to /folder/ and page.html to /page
+            routes.append(pretty_path(str(page.relative_to(ROOT)).replace("\\", "/")))
     return routes
 
 

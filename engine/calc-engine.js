@@ -132,6 +132,11 @@
     return round(n, 2);
   }
 
+  // Minimums round UP to the cent so a quoted minimum never lands under the real one.
+  function ceilCents(n) {
+    return Math.ceil(Number(n) * 100 - 1e-9) / 100;
+  }
+
   function wallArea(lengthFt, widthFt, heightFt) {
     return 2 * (lengthFt + widthFt) * heightFt;
   }
@@ -671,6 +676,385 @@
     );
   }
 
+  // Hotshot cost per mile: monthly fixed costs spread over ALL monthly miles
+  // (loaded + empty), plus per-mile variable costs. Deadhead % is empty ÷ total.
+  // Both minimums round up to the cent; the *Exact values keep 3 decimals.
+  // panelMinNetPerMile excludes fuel because hotshot-load already subtracts fuel,
+  // so it is the number for the panel's MIN $/MI NET (both are per total mile).
+  function hotshotCostPerMile(input) {
+    const optMoney = function (raw, label) {
+      return readNumber(raw, label, { min: 0, max: 100000, required: false });
+    };
+    const truckPayment = optMoney(input.truckPayment, 'truck payment');
+    const insurance = optMoney(input.insurance, 'insurance');
+    const trailerPayment = optMoney(input.trailerPayment, 'trailer payment');
+    const subscriptions = optMoney(input.subscriptions, 'phone, ELD and subscriptions');
+    const otherFixed = optMoney(input.otherFixed, 'other monthly costs');
+    const monthlyMiles = readNumber(input.monthlyMiles, 'monthly miles', { min: 1, max: 50000 });
+    const fuelPrice = readNumber(input.fuelPrice, 'fuel price', { min: 0.01, max: 15 });
+    const mpg = readNumber(input.truckMpg, 'truck MPG', { min: 1, max: 30 });
+    const maintenance = readNumber(input.maintenancePerMile, 'maintenance and tires per mile', {
+      min: 0,
+      max: 5,
+      required: false,
+    });
+    const driverPay = readNumber(input.driverPayPerMile, 'driver pay per mile', { min: 0, max: 10, required: false });
+    const deadheadPct = readNumber(input.deadheadPct, 'deadhead percent', { min: 0, max: 90, required: false });
+    const profit = readNumber(input.profitPerMile, 'target profit per mile', { min: 0, max: 10, required: false });
+
+    const fixedMonthly = truckPayment + insurance + trailerPayment + subscriptions + otherFixed;
+    const fixedPerMile = fixedMonthly / monthlyMiles;
+    const fuelPerMile = fuelPrice / mpg;
+    const variablePerMile = fuelPerMile + maintenance + driverPay;
+    const costPerMile = fixedPerMile + variablePerMile;
+    const loadedShare = 1 - deadheadPct / 100;
+    const minRatePerLoadedMile = (costPerMile + profit) / loadedShare;
+    const panelMin = fixedPerMile + maintenance + driverPay + profit;
+    // Quote the rate from the rounded panel minimum, so a load at the quoted rate
+    // (and this deadhead %) always clears the minimum typed into the panel.
+    const quotedPanelMin = ceilCents(panelMin);
+    const quotedMinRate = ceilCents((quotedPanelMin + fuelPerMile) / loadedShare);
+
+    return ok(
+      {
+        fixedMonthly: money(fixedMonthly),
+        monthlyMiles: monthlyMiles,
+        loadedMilesPerMonth: round(monthlyMiles * loadedShare, 0),
+        fixedPerMile: round(fixedPerMile, 3),
+        fuelPerMile: round(fuelPerMile, 3),
+        maintenancePerMile: round(maintenance, 3),
+        driverPayPerMile: round(driverPay, 3),
+        variablePerMile: round(variablePerMile, 3),
+        costPerMile: round(costPerMile, 3),
+        monthlyCost: money(costPerMile * monthlyMiles),
+        deadheadPct: round(deadheadPct, 2),
+        profitPerMile: round(profit, 3),
+        minRatePerLoadedMileExact: round(minRatePerLoadedMile, 3),
+        minRatePerLoadedMile: quotedMinRate,
+        panelMinNetPerMileExact: round(panelMin, 3),
+        panelMinNetPerMile: quotedPanelMin,
+      },
+      [
+        { label: 'Fixed costs per month', value: money(fixedMonthly), unit: 'USD', money: true },
+        { label: 'Fixed cost per mile', value: round(fixedPerMile, 3), unit: 'USD/mi', money: true },
+        { label: 'Variable cost per mile', value: round(variablePerMile, 3), unit: 'USD/mi', money: true },
+        { label: 'All-in cost per mile', value: round(costPerMile, 3), unit: 'USD/mi', money: true },
+        { label: 'Minimum rate per loaded mile', value: quotedMinRate, unit: 'USD/mi', money: true },
+        { label: 'Panel MIN $/MI NET', value: quotedPanelMin, unit: 'USD/mi', money: true },
+      ],
+    );
+  }
+
+  // Factoring cost on one invoice, plus the monthly view. Convention: all fees
+  // come out of the advance; the reserve is the un-advanced part of the invoice.
+  // (If a factor takes fees from the reserve instead, the total is the same.)
+  function hotshotFactoring(input) {
+    const invoice = readNumber(input.invoiceAmount, 'invoice amount', { min: 1, max: 100000 });
+    const pct = readNumber(input.factoringPct, 'factoring percent', { min: 0, max: 15 });
+    const invoiceFee = readNumber(input.invoiceFee, 'per-invoice fee', { min: 0, max: 500, required: false });
+    const transferFee = readNumber(input.transferFee, 'ACH or wire fee', { min: 0, max: 500, required: false });
+    const advancePct = readNumber(input.advancePct, 'advance percent', {
+      min: 50,
+      max: 100,
+      required: false,
+      fallback: 100,
+    });
+    const invoicesPerMonth = readNumber(input.invoicesPerMonth, 'invoices per month', {
+      min: 0,
+      max: 500,
+      required: false,
+    });
+
+    const pctFee = invoice * (pct / 100);
+    const flatFees = invoiceFee + transferFee;
+    const totalFee = pctFee + flatFees;
+    const advance = invoice * (advancePct / 100);
+    if (totalFee > advance) {
+      return fail('Fees are larger than the advance. Check the percent and flat fees.');
+    }
+    const cashToday = advance - totalFee;
+    const reserve = invoice - advance;
+    const monthlyRevenue = invoice * invoicesPerMonth;
+    const monthlyFees = totalFee * invoicesPerMonth;
+    const perPointBase = invoicesPerMonth > 0 ? monthlyRevenue : invoice;
+
+    return ok(
+      {
+        invoiceAmount: money(invoice),
+        factoringPct: round(pct, 2),
+        pctFee: money(pctFee),
+        flatFees: money(flatFees),
+        totalFee: money(totalFee),
+        effectivePct: round((totalFee / invoice) * 100, 2),
+        advancePct: round(advancePct, 2),
+        advance: money(advance),
+        cashToday: money(cashToday),
+        reserveLater: money(reserve),
+        netReceived: money(invoice - totalFee),
+        invoicesPerMonth: invoicesPerMonth,
+        monthlyRevenue: money(monthlyRevenue),
+        monthlyFees: money(monthlyFees),
+        perPointBasis: invoicesPerMonth > 0 ? 'month' : 'invoice',
+        perPointBase: money(perPointBase),
+        perPointCost: money(perPointBase * 0.01),
+      },
+      [
+        { label: 'Percent fee', value: money(pctFee), unit: 'USD', money: true },
+        flatFees > 0 ? { label: 'Flat fees', value: money(flatFees), unit: 'USD', money: true } : null,
+        { label: 'Total fee', value: money(totalFee), unit: 'USD', money: true },
+        { label: 'Effective rate', value: round((totalFee / invoice) * 100, 2), unit: '%' },
+        { label: 'Cash today', value: money(cashToday), unit: 'USD', money: true },
+        reserve > 0 ? { label: 'Reserve later', value: money(reserve), unit: 'USD', money: true } : null,
+        invoicesPerMonth > 0 ? { label: 'Factoring cost per month', value: money(monthlyFees), unit: 'USD', money: true } : null,
+      ].filter(Boolean),
+    );
+  }
+
+  // Deadhead: what the empty miles cost and how many a load can carry.
+  // Net here is after fuel only (no tolls or factoring) and per TOTAL mile, the
+  // same basis as the panel's MIN $/MI NET. Break-even deadhead is the most empty
+  // miles before net per total mile drops below the minimum (0 = net after fuel
+  // stays above zero), floored to whole miles.
+  function hotshotDeadhead(input) {
+    const loaded = readNumber(input.loadedMiles, 'loaded miles', { min: 1, max: 5000 });
+    const deadhead = readNumber(input.deadheadMiles, 'deadhead miles', { min: 0, max: 5000, required: false });
+    const flatRate = readNumber(input.flatRate, 'flat rate', { min: 0, max: 100000, required: false });
+    const rate = flatRate > 0
+      ? flatRate / loaded
+      : readNumber(input.ratePerMile, 'rate per loaded mile', { min: 0.01, max: 30 });
+    const fuelPrice = readNumber(input.fuelPrice, 'fuel price', { min: 0.01, max: 15 });
+    const mpg = readNumber(input.truckMpg, 'truck MPG', { min: 1, max: 30 });
+    const minNet = readNumber(input.minNetPerMile, 'minimum net per mile', { min: 0, max: 10, required: false });
+
+    const gross = rate * loaded;
+    const totalMi = loaded + deadhead;
+    const fuelPerMile = fuelPrice / mpg;
+    const deadheadFuel = deadhead * fuelPerMile;
+    const fuelCost = totalMi * fuelPerMile;
+    const net = gross - fuelCost;
+    const netPerTotal = net / totalMi;
+    const maxTotal = gross / (minNet + fuelPerMile);
+    const rawBreakEven = maxTotal - loaded;
+    const breakEven = rawBreakEven > 0 ? Math.floor(rawBreakEven + 1e-9) : 0;
+
+    return ok(
+      {
+        grossPay: money(gross),
+        loadedMiles: loaded,
+        deadheadMiles: deadhead,
+        totalMiles: totalMi,
+        deadheadPct: round((deadhead / totalMi) * 100, 1),
+        fuelPerMile: round(fuelPerMile, 3),
+        deadheadFuelCost: money(deadheadFuel),
+        fuelCost: money(fuelCost),
+        ratePerLoadedMile: round(rate, 2),
+        ratePerTotalMile: round(gross / totalMi, 2),
+        netAfterFuel: money(net),
+        netPerTotalMile: round(netPerTotal, 2),
+        minNetPerMile: round(minNet, 2),
+        meetsMinimum: netPerTotal >= minNet,
+        breakEvenDeadheadMiles: breakEven,
+        failsWithNoDeadhead: rawBreakEven < 0,
+      },
+      [
+        { label: 'Deadhead share of total miles', value: round((deadhead / totalMi) * 100, 1), unit: '%' },
+        { label: 'Fuel for the empty miles', value: money(deadheadFuel), unit: 'USD', money: true },
+        { label: 'Rate per loaded mile', value: round(rate, 2), unit: 'USD/mi', money: true },
+        { label: 'Rate per total mile', value: round(gross / totalMi, 2), unit: 'USD/mi', money: true },
+        { label: 'Net after fuel per total mile', value: round(netPerTotal, 2), unit: 'USD/mi', money: true },
+        { label: 'Break-even deadhead', value: breakEven, unit: 'mi' },
+      ],
+    );
+  }
+
+  // Hotshot weight / CDL line, from the federal definitions (49 CFR 383.5, 383.91, 390.5):
+  // - GCWR is the GREATER of the power unit's GCWR (only if printed on its FMVSS
+  //   certification label) and the sum of the truck and trailer GVWRs. The label GCWR
+  //   is not used when the truck isn't towing.
+  // - Class A (Group A): GCWR or actual combined weight, whichever is greater, of
+  //   26,001 lb or more AND a towed unit rated or weighing over 10,000 lb.
+  // - Class B (Group B): a single vehicle rated 26,001 lb or more (towing up to 10,000 lb).
+  // - 10,001 lb or more (rating or weight) makes it a CMV in interstate commerce.
+  // Weights are whole pounds. Cargo is assumed to ride on the trailer (on the truck
+  // when there is no trailer); hitch/pin weight on the truck is not modelled.
+  const CDL_LINE = 26001;
+  const TOWED_LINE = 10000; // Class A needs the towed unit OVER this
+  const CMV_LINE = 10001;
+
+  function hotshotWeight(input) {
+    const truckGvwr = readNumber(input.truckGvwr, 'truck GVWR', { min: 1000, max: 80000 });
+    const truckEmpty = readNumber(input.truckEmpty, 'truck empty weight', { min: 500, max: 80000 });
+    const trailerGvwr = readNumber(input.trailerGvwr, 'trailer GVWR', { min: 0, max: 80000, required: false });
+    const trailerEmpty = readNumber(input.trailerEmpty, 'trailer empty weight', { min: 0, max: 80000, required: false });
+    const labelGcwr = readNumber(input.gcwr, 'GCWR', { min: 0, max: 160000, required: false });
+    const hasCargo = !(input.cargoWeight === '' || input.cargoWeight == null);
+    const cargo = readNumber(input.cargoWeight, 'cargo weight', { min: 0, max: 100000, required: false });
+
+    if (truckEmpty > truckGvwr) return fail('Truck empty weight is more than its GVWR. Check the door sticker.');
+    const towing = trailerGvwr > 0;
+    if (towing && (input.trailerEmpty === '' || input.trailerEmpty == null)) return fail('Enter trailer empty weight.');
+    if (towing && trailerEmpty > trailerGvwr) return fail('Trailer empty weight is more than its GVWR. Check the trailer VIN plate.');
+
+    const sumGvwr = truckGvwr + (towing ? trailerGvwr : 0);
+    const gcwr = towing ? Math.max(labelGcwr, sumGvwr) : truckGvwr;
+    const gcwrBasis = !towing ? 'truck' : (labelGcwr > sumGvwr ? 'label' : 'sum');
+    // Heaviest the rig is rated to scale: every rating has to hold, so a label GCWR
+    // below the sum of GVWRs is the real limit.
+    const maxGross = towing && labelGcwr > 0 ? Math.min(labelGcwr, sumGvwr) : sumGvwr;
+    const truckPayload = truckGvwr - truckEmpty;
+    const trailerPayload = towing ? trailerGvwr - trailerEmpty : 0;
+    const emptyWeight = truckEmpty + (towing ? trailerEmpty : 0);
+    const maxCargo = towing
+      ? Math.max(0, Math.min(trailerPayload, maxGross - emptyWeight))
+      : Math.max(0, truckPayload);
+
+    const loadedTrailer = towing ? trailerEmpty + cargo : 0;
+    const grossCombined = emptyWeight + cargo;
+    const trailerHeadroom = towing ? trailerGvwr - loadedTrailer : 0;
+    const combinedHeadroom = maxGross - grossCombined;
+    const overRating = hasCargo && (combinedHeadroom < 0 || (towing && trailerHeadroom < 0));
+
+    // "whichever is greater": a loaded weight over the rating counts too.
+    const combinedForTest = hasCargo ? Math.max(gcwr, grossCombined) : gcwr;
+    const towedForTest = towing ? (hasCargo ? Math.max(trailerGvwr, loadedTrailer) : trailerGvwr) : 0;
+    const truckForTest = !towing && hasCargo ? Math.max(truckGvwr, grossCombined) : truckGvwr;
+    const classA = towing && combinedForTest >= CDL_LINE && towedForTest > TOWED_LINE;
+    const classB = !classA && truckForTest >= CDL_LINE;
+    const cdl = classA ? 'A' : (classB ? 'B' : 'none');
+    const isCmv = Math.max(combinedForTest, truckForTest) >= CMV_LINE;
+
+    return ok(
+      {
+        truckGvwr: truckGvwr,
+        trailerGvwr: towing ? trailerGvwr : 0,
+        labelGcwr: labelGcwr,
+        towing: towing,
+        sumGvwr: round(sumGvwr, 0),
+        gcwr: round(gcwr, 0),
+        gcwrBasis: gcwrBasis,
+        cdl: cdl,
+        classA: classA,
+        classB: classB,
+        towedOverLine: towedForTest > TOWED_LINE,
+        poundsUnderCdlLine: classA || combinedForTest >= CDL_LINE ? 0 : round(CDL_LINE - combinedForTest, 0),
+        isCmv: isCmv,
+        truckPayload: round(truckPayload, 0),
+        trailerPayload: round(trailerPayload, 0),
+        maxGross: round(maxGross, 0),
+        maxCargo: round(maxCargo, 0),
+        hasCargo: hasCargo,
+        cargo: round(cargo, 0),
+        loadedTrailer: round(loadedTrailer, 0),
+        grossCombined: round(grossCombined, 0),
+        trailerHeadroom: round(trailerHeadroom, 0),
+        combinedHeadroom: round(combinedHeadroom, 0),
+        overRating: overRating,
+      },
+      [
+        { label: towing ? 'GCWR for the CDL test' : 'Truck GVWR', value: round(gcwr, 0), unit: 'lb' },
+        { label: 'CDL by the federal weight test', value: cdl === 'none' ? 'NOT REQUIRED' : 'CLASS ' + cdl, unit: '' },
+        towing ? { label: 'Trailer payload', value: round(trailerPayload, 0), unit: 'lb' } : null,
+        { label: 'Truck payload', value: round(truckPayload, 0), unit: 'lb' },
+        hasCargo ? { label: 'Loaded combined weight', value: round(grossCombined, 0), unit: 'lb' } : null,
+      ].filter(Boolean),
+    );
+  }
+
+  // IFTA quarter worksheet: taxable gallons = jurisdiction miles / fleet MPG, where fleet MPG
+  // = total miles / total gallons purchased (unless the caller overrides it); net taxable
+  // gallons = taxable - purchased there; tax = net x rate (negative = credit). Rates are NEVER
+  // built in: the caller types them from the current IFTA rate matrix, and a blank rate leaves
+  // that row's tax null. Math runs on exact values; the filed return rounds fleet MPG to two
+  // decimals and each column to whole gallons (IFTA Procedures Manual P720), so filed pennies
+  // can differ slightly. Sources in SOURCES.md.
+  function hotshotIfta(input) {
+    const list = input.jurisdictions;
+    if (!Array.isArray(list) || list.length === 0) throw new Error('Add at least one jurisdiction.');
+    if (list.length > 60) throw new Error('That is more jurisdictions than IFTA has members.');
+    const blank = function (v) { return v === '' || v == null; };
+    const entries = [];
+    list.forEach(function (raw, i) {
+      const row = raw || {};
+      if (blank(row.miles) && blank(row.gallonsPurchased) && blank(row.ratePerGallon)) return;
+      const name = String(row.name == null ? '' : row.name).trim().slice(0, 40) || 'Row ' + (i + 1);
+      entries.push({
+        name: name,
+        // blank miles = 0: fuel can be bought in a jurisdiction you logged no miles in
+        miles: readNumber(row.miles, 'miles for ' + name, { min: 0, max: 1e6, required: false, fallback: 0 }),
+        gallonsPurchased: readNumber(row.gallonsPurchased, 'gallons purchased for ' + name, {
+          min: 0,
+          max: 1e6,
+          required: false,
+          fallback: 0,
+        }),
+        rate: blank(row.ratePerGallon)
+          ? null
+          : readNumber(row.ratePerGallon, 'tax rate for ' + name, { min: 0, max: 10 }),
+      });
+    });
+    if (entries.length === 0) throw new Error('Enter miles for at least one jurisdiction.');
+
+    const totalMiles = entries.reduce(function (sum, e) { return sum + e.miles; }, 0);
+    const totalGallons = entries.reduce(function (sum, e) { return sum + e.gallonsPurchased; }, 0);
+    if (totalMiles <= 0) throw new Error('Enter miles for at least one jurisdiction.');
+    const override = readNumber(input.fleetMpg, 'fleet MPG', { min: 1, max: 60, required: false, fallback: 0 });
+    const hasOverride = override > 0;
+    if (!hasOverride && totalGallons <= 0) {
+      throw new Error('Enter the gallons you bought, or type a fleet MPG, so taxable gallons can be worked out.');
+    }
+    const fleetMpgExact = totalGallons > 0 ? totalMiles / totalGallons : 0;
+    const mpgUsed = hasOverride ? override : fleetMpgExact;
+
+    let taxableTotal = 0;
+    let netTotal = 0;
+    let taxTotal = 0;
+    let rated = 0;
+    const rows = entries.map(function (e) {
+      const taxable = e.miles / mpgUsed;
+      const net = taxable - e.gallonsPurchased;
+      const tax = e.rate == null ? null : net * e.rate;
+      taxableTotal += taxable;
+      netTotal += net;
+      if (tax != null) {
+        taxTotal += tax;
+        rated += 1;
+      }
+      return {
+        name: e.name,
+        miles: e.miles,
+        gallonsPurchased: e.gallonsPurchased,
+        taxableGallons: round(taxable, 2),
+        netTaxableGallons: round(net, 2) + 0,
+        ratePerGallon: e.rate,
+        tax: tax == null ? null : money(tax) + 0,
+      };
+    });
+    const missing = entries.length - rated;
+
+    return ok(
+      {
+        jurisdictions: rows,
+        totalMiles: round(totalMiles, 2),
+        totalGallonsPurchased: round(totalGallons, 2),
+        fleetMpgExact: round(fleetMpgExact, 4),
+        fleetMpg: round(fleetMpgExact, 2),
+        mpgUsed: round(mpgUsed, 4),
+        mpgOverridden: hasOverride,
+        totalTaxableGallons: round(taxableTotal, 2),
+        netTaxableGallons: round(netTotal, 2) + 0, // + 0 turns -0 into 0
+        rowsMissingRate: missing,
+        taxComplete: missing === 0,
+        totalTax: rated > 0 ? money(taxTotal) + 0 : null,
+      },
+      [
+        { label: 'Fleet MPG', value: round(mpgUsed, 2), unit: 'mpg' },
+        { label: 'Taxable gallons', value: round(taxableTotal, 2), unit: 'gal' },
+        { label: 'Net taxable gallons', value: round(netTotal, 2), unit: 'gal' },
+        rated > 0 ? { label: missing === 0 ? 'Net tax due (credit if negative)' : 'Tax so far (rates missing)', value: money(taxTotal), unit: 'USD', money: true } : null,
+      ].filter(Boolean),
+    );
+  }
+
   const TOOLS = {
     paint: paint,
     'square-footage': squareFootage,
@@ -683,6 +1067,11 @@
     'moving-boxes': movingBoxes,
     'room-cost': roomCost,
     'hotshot-load': hotshotLoad,
+    'hotshot-cost-per-mile': hotshotCostPerMile,
+    'hotshot-factoring': hotshotFactoring,
+    'hotshot-deadhead': hotshotDeadhead,
+    'hotshot-weight': hotshotWeight,
+    'hotshot-ifta': hotshotIfta,
   };
 
   function compute(tool, input) {

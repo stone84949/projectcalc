@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Factoring fee calculator: what factoring really costs - Hotshot Math</title>
+  <meta name="description" content="Free factor rate calculator for hotshot invoices: the factor fee in dollars, the effective rate with flat fees, cash today, the reserve, and the monthly cost of factoring.">
+  <link rel="canonical" href="https://projectcalc-tools.pages.dev/hotshot/factoring-fee/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Hotshot Math">
+  <meta property="og:title" content="Factoring fee calculator: what factoring really costs - Hotshot Math">
+  <meta property="og:description" content="Factor rate, flat fees, cash today and the reserve: the real cost of factoring on one invoice and per month.">
+  <meta property="og:url" content="https://projectcalc-tools.pages.dev/hotshot/factoring-fee/">
+  <meta property="og:image" content="https://projectcalc-tools.pages.dev/hotshot/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Hotshot Math factoring fee calculator: what factoring really costs per invoice and per month">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Factoring fee calculator: what factoring really costs">
+  <meta name="twitter:description" content="The factor fee in dollars, the effective rate with flat fees, and the monthly cost of factoring. Free, no signup.">
+  <meta name="twitter:image" content="https://projectcalc-tools.pages.dev/hotshot/og.png">
+  <link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../hotshot.css">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="panel-bar">
+    <p class="panel-name">HOTSHOT MATH</p>
+    <p class="panel-sub">FACTORING COST</p>
+  </header>
+
+  <main id="main" class="panel tool-page">
+    <h1 class="panel-head">Factoring fee calculator</h1>
+    <p class="panel-lede">The factor rate on your contract is only part of the cost of factoring. Add the flat fees and see the dollars on one invoice, the cash you get today, and what it costs a month. The example numbers are filled in - type over them with yours.</p>
+
+    <form class="tool-form" id="factoring-form" data-hotshot-tool="hotshot-factoring" autocomplete="off" novalidate>
+      <fieldset>
+        <legend>THE INVOICE</legend>
+        <div class="mini">
+          <label for="invoiceAmount">INVOICE $</label>
+          <input id="invoiceAmount" name="invoiceAmount" type="number" inputmode="decimal" step="any" min="1" value="1800" required>
+        </div>
+        <div class="mini">
+          <label for="factoringPct">FACTOR RATE %</label>
+          <input id="factoringPct" name="factoringPct" type="number" inputmode="decimal" step="any" min="0" max="15" value="3" required>
+        </div>
+        <div class="mini">
+          <label for="invoicesPerMonth">INVOICES / MONTH</label>
+          <input id="invoicesPerMonth" name="invoicesPerMonth" type="number" inputmode="numeric" step="any" min="0" value="12" aria-describedby="invoices-hint">
+          <span class="hint" id="invoices-hint">Blank = this invoice only.</span>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>FLAT FEES + ADVANCE</legend>
+        <div class="mini">
+          <label for="invoiceFee">PER-INVOICE FEE $</label>
+          <input id="invoiceFee" name="invoiceFee" type="number" inputmode="decimal" step="any" min="0" value="0">
+        </div>
+        <div class="mini">
+          <label for="transferFee">ACH / WIRE FEE $</label>
+          <input id="transferFee" name="transferFee" type="number" inputmode="decimal" step="any" min="0" value="15">
+        </div>
+        <div class="mini">
+          <label for="advancePct">ADVANCE %</label>
+          <input id="advancePct" name="advancePct" type="number" inputmode="decimal" step="any" min="50" max="100" value="90" aria-describedby="advance-hint">
+          <span class="hint" id="advance-hint">Blank = 100%, no reserve.</span>
+        </div>
+      </fieldset>
+
+      <button class="run-btn" type="submit">CALCULATE</button>
+
+      <section class="readout-card" id="tool-result" aria-label="Result">
+        <p class="visually-hidden" id="result-announce" aria-live="polite"></p>
+        <p class="readout-label" id="result-label">TOTAL FEE ON THIS INVOICE</p>
+        <p class="readout-main" id="result-main">$69.00</p>
+        <p class="readout-status" id="result-status">Every 1% on $21,600.00/month of revenue = $216.00/month</p>
+        <div class="worked" id="result-rows"></div>
+      </section>
+    </form>
+
+    <section class="how">
+      <h2>The math, printed</h2>
+      <p class="example-label">EXAMPLE - $1,800 invoice, 3% factor rate, no per-invoice fee, $15 wire fee, 90% advance, 12 invoices a month:</p>
+      <div class="worked">
+        <p><span>Percent fee - 3% x $1,800</span><span>$54.00</span></p>
+        <p><span>Flat fees - $0 + $15</span><span>$15.00</span></p>
+        <p class="worked-net"><span>Total fee</span><span>$69.00</span></p>
+        <p class="key"><span>Effective rate - $69 / $1,800</span><span>3.83%</span></p>
+        <p><span>Advance - 90% x $1,800</span><span>$1,620.00</span></p>
+        <p class="key"><span>Cash today - $1,620 - $69</span><span>$1,551.00</span></p>
+        <p><span>Reserve later - $1,800 - $1,620</span><span>$180.00</span></p>
+        <p><span>Revenue a month - 12 x $1,800</span><span>$21,600.00</span></p>
+        <p class="key"><span>Cost of factoring a month - 12 x $69</span><span>$828.00</span></p>
+      </div>
+      <p><strong>Every 1% on $21,600.00/month of revenue = $216.00/month.</strong> That's the number to have in mind when you compare factor rates: a half-point difference on this volume is $108 a month.</p>
+      <p>The cost of factoring formula: <code>fee = invoice x factor rate + flat fees</code>, and <code>effective rate = fee / invoice</code>. Flat fees matter most on small invoices - a $25 fee is 1.4% of an $1,800 invoice but 5% of a $500 one.</p>
+      <p class="fine">This calculator takes all fees out of the advance. Some factors take them out of the reserve instead; then cash today is higher and the reserve lower by the same amount, and the total you receive is the same. On the <a href="../index.html">load panel</a>, enter the effective rate (3.83% here) in FACTORING so the flat fees get counted on every load. Flat fees weigh more on small invoices, so use the effective rate for invoices about this size.</p>
+    </section>
+
+    <section class="tool-faq">
+      <h2>Common questions</h2>
+      <details>
+        <summary>What is a factor rate?</summary>
+        <p>The percentage of each invoice the factoring company keeps for paying you early. It's the headline number on the contract. The factor fee is that rate in dollars, plus any flat fees per invoice or per payment.</p>
+      </details>
+      <details>
+        <summary>What is the cost of factoring formula?</summary>
+        <p>Fee = invoice x factor rate + flat fees. Divide the fee by the invoice for the effective rate, and multiply the fee by your invoices per month for the monthly cost. The calculator above does all three.</p>
+      </details>
+      <details>
+        <summary>Why is my effective rate higher than my factor rate?</summary>
+        <p>Flat fees. A per-invoice fee, an ACH fee or a wire fee is the same dollars on every invoice, so it adds more to the effective rate on smaller loads. Read the fee schedule, not just the rate.</p>
+      </details>
+      <details>
+        <summary>What is the reserve?</summary>
+        <p>The part of the invoice not advanced up front. With a 90% advance on $1,800, $180 is held until the broker pays the factor, then released to you, minus any fees still owed.</p>
+      </details>
+    </section>
+
+    <section class="more-tools" aria-labelledby="more-tools-head">
+      <h2 id="more-tools-head">MORE TOOLS</h2>
+      <ul>
+        <li><a href="../index.html">Load panel<span>Take it or pass on a load, with your minimum.</span></a></li>
+        <li><a href="../cost-per-mile/index.html">Cost per mile<span>Your all-in cost per mile and minimum rate.</span></a></li>
+        <li><a href="../deadhead/index.html">Deadhead miles<span>What the empty miles cost and how many a load can carry.</span></a></li>
+        <li><a href="../weight/index.html">Weight / CDL<span>Your ratings against the 26,001 lb CDL line.</span></a></li>
+        <li><a href="../ifta/index.html">IFTA worksheet<span>Quarter math by state, plus a free Excel download.</span></a></li>
+        <li><a href="../rates-2026/index.html">2026 rates<span>Rates per mile from dated sources, and what's left after costs.</span></a></li>
+      </ul>
+    </section>
+
+    <footer class="panel-foot">
+      <p>Hotshot Math is a planning tool, not tax, legal, or financial advice. Read your factoring contract for the actual fees and terms.</p>
+      <nav aria-label="Footer">
+        <ul>
+          <li><a href="../index.html">The panel</a></li>
+          <li><a href="../../about.html">About</a></li>
+          <li><a href="../../disclaimer.html">Disclaimer</a></li>
+          <li><a href="../../privacy.html">Privacy</a></li>
+        </ul>
+      </nav>
+    </footer>
+  </main>
+
+  <script src="../config.js"></script>
+  <script src="../../assets/track.js"></script>
+  <script src="../../engine/calc-engine.js"></script>
+  <script src="../tools.js"></script>
+</body>
+</html>

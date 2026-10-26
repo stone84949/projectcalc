@@ -50,7 +50,7 @@
         <p class="placard">NET <span class="placard-note" id="net-state">SET YOUR NUMBERS</span></p>
         <div class="flag" id="flag" hidden>
           <span class="flag-word" id="flag-word">TAKE IT</span>
-          <span class="flag-sub" id="flag-sub">$1.90/MI NET</span>
+          <span class="flag-sub" id="flag-sub">$1.59/MI NET</span>
         </div>
       </section>
 
@@ -79,7 +79,7 @@
           </svg>
         </div>
         <p class="placard">FUEL <span class="unit">$/GAL</span></p>
-        <input id="fuelPrice" name="fuelPrice" type="number" inputmode="decimal" step="0.01" min="0" placeholder="3.65" required aria-label="Fuel price per gallon">
+        <input id="fuelPrice" name="fuelPrice" type="number" inputmode="decimal" step="0.01" min="0" placeholder="6.28" required aria-label="Fuel price per gallon">
       </section>
 
       <section class="gauge" aria-label="Deadhead gauge">
@@ -159,26 +159,38 @@
 
     <section class="how">
       <h2>The math, on the placard</h2>
-      <p class="example-label">EXAMPLE - 540 mi at $2.85/mi, 80 mi deadhead, $3.65 fuel, 8.4 mpg, $45 tolls, 3% factoring:</p>
+      <p class="example-label">EXAMPLE - 540 mi at $2.85/mi, 80 mi deadhead, $6.28 fuel, 8.4 mpg, $45 tolls, 3% factoring:</p>
       <div class="worked">
         <p><span>Gross linehaul</span><span>$1,539.00</span></p>
-        <p><span>Fuel - 620 mi / 8.4 mpg x $3.65</span><span>-$269.40</span></p>
+        <p><span>Fuel - 620 mi / 8.4 mpg x $6.28</span><span>-$463.52</span></p>
         <p><span>Tolls</span><span>-$45.00</span></p>
         <p><span>Factoring - 3% of gross</span><span>-$46.17</span></p>
-        <p class="worked-net"><span>Net to truck</span><span>$1,178.43</span></p>
-        <p><span>Net per total mile</span><span>$1.90/mi</span></p>
+        <p class="worked-net"><span>Net to truck</span><span>$984.31</span></p>
+        <p><span>Net per total mile</span><span>$1.59/mi</span></p>
       </div>
-      <p class="fine">Fuel, tolls, and factoring are counted - the costs that change with the load. Truck payment, insurance, and maintenance live in your MIN $/MI. Set it once; the needle tells you the rest.</p>
+      <p class="fine">Example fuel is $6.28, the U.S. average diesel price for the week of Oct 19, 2026 (<a href="https://www.eia.gov/petroleum/gasdiesel/">EIA</a>); enter what you pay. Fuel, tolls, and factoring are counted - the costs that change with the load. Truck payment, insurance, and maintenance live in your MIN $/MI. Set it once; the needle tells you the rest.</p>
     </section>
 
     <section class="who">
       <div class="who-front">
-        <h2>Read by an operator, not a content farm</h2>
-        <p>Built from the driver's seat of a running hotshot. The template shops selling trucking spreadsheets have never pulled a rate confirmation.</p>
+        <h2>The math, out in the open</h2>
+        <p>Hotshot Math is a free load calculator for owner-operators. It counts the costs that change with every load, so you see what the truck keeps before you call the broker back.</p>
       </div>
       <div class="who-back">
         <p>Every formula is printed above. No black box, no premium unlock, no selling your email. If the math is wrong, it gets fixed in the open.</p>
       </div>
+    </section>
+
+    <section class="more-tools" aria-labelledby="more-tools-head">
+      <h2 id="more-tools-head">MORE TOOLS</h2>
+      <ul>
+        <li><a href="cost-per-mile/index.html">Cost per mile<span>Work out the MIN $/MI NET to set above.</span></a></li>
+        <li><a href="factoring-fee/index.html">Factoring cost<span>The real fee on an invoice, flat fees included.</span></a></li>
+        <li><a href="deadhead/index.html">Deadhead miles<span>What the empty miles cost and how many a load can carry.</span></a></li>
+        <li><a href="weight/index.html">Weight / CDL<span>Your ratings against the 26,001 lb CDL line.</span></a></li>
+        <li><a href="ifta/index.html">IFTA worksheet<span>Quarter math by state, plus a free Excel download.</span></a></li>
+        <li><a href="rates-2026/index.html">2026 rates<span>Rates per mile from dated sources, and what's left after costs.</span></a></li>
+      </ul>
     </section>
 
     <section class="kit-strip">

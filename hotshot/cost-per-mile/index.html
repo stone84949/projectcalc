@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hotshot cost per mile calculator - free, no app - Hotshot Math</title>
+  <meta name="description" content="Free cost per mile calculator for hotshot trucking - no app, no signup. Monthly fixed costs plus fuel and maintenance per mile give your all-in cost per mile and the minimum rate per loaded mile.">
+  <link rel="canonical" href="https://projectcalc-tools.pages.dev/hotshot/cost-per-mile/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Hotshot Math">
+  <meta property="og:title" content="Hotshot cost per mile calculator - free, no app - Hotshot Math">
+  <meta property="og:description" content="Free cost per mile calculator for hotshot trucking: fixed and variable costs, all-in cost per mile, and the minimum rate per loaded mile.">
+  <meta property="og:url" content="https://projectcalc-tools.pages.dev/hotshot/cost-per-mile/">
+  <meta property="og:image" content="https://projectcalc-tools.pages.dev/hotshot/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Hotshot Math cost per mile calculator: fixed and variable cost per mile and the minimum rate to quote">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Hotshot cost per mile calculator - free, no app">
+  <meta name="twitter:description" content="Your all-in cost per mile and the minimum rate per loaded mile. Free, no app, no signup.">
+  <meta name="twitter:image" content="https://projectcalc-tools.pages.dev/hotshot/og.png">
+  <link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../hotshot.css">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="panel-bar">
+    <p class="panel-name">HOTSHOT MATH</p>
+    <p class="panel-sub">COST PER MILE</p>
+  </header>
+
+  <main id="main" class="panel tool-page">
+    <h1 class="panel-head">Hotshot cost per mile calculator</h1>
+    <p class="panel-lede">What every mile costs you before a load pays a cent, and the lowest rate per loaded mile that covers it. Free, no app, no signup. The example numbers are filled in - type over them with yours.</p>
+
+    <form class="tool-form" id="cpm-form" data-hotshot-tool="hotshot-cost-per-mile" autocomplete="off" novalidate>
+      <fieldset>
+        <legend>MONTHLY FIXED $</legend>
+        <div class="mini">
+          <label for="truckPayment">TRUCK PAYMENT</label>
+          <input id="truckPayment" name="truckPayment" type="number" inputmode="decimal" step="any" min="0" value="1200">
+        </div>
+        <div class="mini">
+          <label for="insurance">INSURANCE</label>
+          <input id="insurance" name="insurance" type="number" inputmode="decimal" step="any" min="0" value="1100">
+        </div>
+        <div class="mini">
+          <label for="trailerPayment">TRAILER PAYMENT</label>
+          <input id="trailerPayment" name="trailerPayment" type="number" inputmode="decimal" step="any" min="0" value="450">
+        </div>
+        <div class="mini">
+          <label for="subscriptions">PHONE / ELD / BOARDS</label>
+          <input id="subscriptions" name="subscriptions" type="number" inputmode="decimal" step="any" min="0" value="250">
+        </div>
+        <div class="mini">
+          <label for="otherFixed">OTHER MONTHLY</label>
+          <input id="otherFixed" name="otherFixed" type="number" inputmode="decimal" step="any" min="0" value="200" aria-describedby="otherFixed-hint">
+          <span class="hint" id="otherFixed-hint">Permits, parking, accounting.</span>
+        </div>
+        <div class="mini">
+          <label for="monthlyMiles">MILES / MONTH</label>
+          <input id="monthlyMiles" name="monthlyMiles" type="number" inputmode="numeric" step="any" min="1" value="8000" required aria-describedby="monthlyMiles-hint">
+          <span class="hint" id="monthlyMiles-hint">Loaded + empty.</span>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>PER MILE</legend>
+        <div class="mini">
+          <label for="fuelPrice">FUEL $/GAL</label>
+          <input id="fuelPrice" name="fuelPrice" type="number" inputmode="decimal" step="any" min="0" value="6.28" required>
+        </div>
+        <div class="mini">
+          <label for="truckMpg">TRUCK MPG</label>
+          <input id="truckMpg" name="truckMpg" type="number" inputmode="decimal" step="any" min="1" value="10" required>
+        </div>
+        <div class="mini">
+          <label for="maintenancePerMile">MAINT + TIRES $/MI</label>
+          <input id="maintenancePerMile" name="maintenancePerMile" type="number" inputmode="decimal" step="any" min="0" value="0.15">
+        </div>
+        <div class="mini">
+          <label for="driverPayPerMile">DRIVER PAY $/MI</label>
+          <input id="driverPayPerMile" name="driverPayPerMile" type="number" inputmode="decimal" step="any" min="0" value="0.50" aria-describedby="driverPay-hint">
+          <span class="hint" id="driverPay-hint">0 if your pay is the profit.</span>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>TARGETS</legend>
+        <div class="mini">
+          <label for="deadheadPct">DEADHEAD %</label>
+          <input id="deadheadPct" name="deadheadPct" type="number" inputmode="decimal" step="any" min="0" max="90" value="20" aria-describedby="deadheadPct-hint">
+          <span class="hint" id="deadheadPct-hint">Empty miles / total miles.</span>
+        </div>
+        <div class="mini">
+          <label for="profitPerMile">PROFIT $/MI</label>
+          <input id="profitPerMile" name="profitPerMile" type="number" inputmode="decimal" step="any" min="0" value="0.25" aria-describedby="profit-hint">
+          <span class="hint" id="profit-hint">Per total mile.</span>
+        </div>
+      </fieldset>
+
+      <button class="run-btn" type="submit">CALCULATE</button>
+
+      <section class="readout-card" id="tool-result" aria-label="Result">
+        <p class="visually-hidden" id="result-announce" aria-live="polite"></p>
+        <p class="readout-label" id="result-label">MINIMUM RATE PER LOADED MILE</p>
+        <p class="readout-main" id="result-main">$2.41</p>
+        <p class="readout-status" id="result-status">Panel MIN $/MI NET: $1.30 (no fuel - the panel subtracts it per load)</p>
+        <div class="worked" id="result-rows"></div>
+      </section>
+    </form>
+
+    <section class="how">
+      <h2>The math, printed</h2>
+      <p class="example-label">EXAMPLE - $1,200 truck, $1,100 insurance, $450 trailer, $250 phone/ELD/boards, $200 other; 8,000 mi a month; $6.28 fuel at 10 mpg; $0.15/mi maintenance and tires; $0.50/mi driver pay; 20% deadhead; $0.25/mi profit:</p>
+      <p class="fine">Example fuel is $6.28 a gallon, the U.S. average on-highway diesel price for the week of Oct 19, 2026 (<a href="https://www.eia.gov/petroleum/gasdiesel/">EIA</a>). Type the price you actually pay.</p>
+      <div class="worked">
+        <p><span>Fixed costs per month</span><span>$3,200.00</span></p>
+        <p><span>Fixed cost per mile - $3,200 / 8,000 mi</span><span>$0.400</span></p>
+        <p><span>Fuel per mile - $6.28 / 10 mpg</span><span>$0.628</span></p>
+        <p><span>Maintenance and tires</span><span>$0.150</span></p>
+        <p><span>Driver pay</span><span>$0.500</span></p>
+        <p><span>Variable cost per mile</span><span>$1.278</span></p>
+        <p class="worked-net"><span>All-in cost per mile</span><span>$1.678</span></p>
+        <p><span>Plus profit - ($1.678 + $0.250) / (1 - 20%)</span><span>$2.410</span></p>
+        <p class="key"><span>Minimum rate per loaded mile, rounded up</span><span>$2.41</span></p>
+        <p class="key"><span>Panel MIN $/MI NET - $0.400 + $0.150 + $0.500 + $0.250</span><span>$1.30</span></p>
+      </div>
+      <p>Fixed costs are spread over every mile you drive, loaded or empty, because the truck payment doesn't care which. Deadhead is the share of total miles that are empty; the minimum rate divides by the loaded share, since only loaded miles get paid.</p>
+      <p><strong>Which number goes in the panel?</strong> Type <code>$1.30</code> into the panel's MIN $/MI NET, not $1.678. The panel already subtracts fuel, tolls and factoring from each load before it compares, so its minimum is your cost per mile without fuel, plus profit: fixed + maintenance + driver pay + profit. Both are per total mile, so they line up. If you factor, quote a little above the minimum rate: the panel also takes your factoring percent off the top, and this calculator doesn't know it.</p>
+      <p class="fine">The minimum rate per loaded mile leaves out tolls and factoring, because they change load to load. The <a href="../index.html">load panel</a> counts them. Minimums round up to the cent, and the rate is worked out from the rounded panel minimum, so a load at the quoted rate and your usual deadhead clears the panel (before tolls and factoring).</p>
+    </section>
+
+    <section class="tool-faq">
+      <h2>Common questions</h2>
+      <details>
+        <summary>What is a good cost per mile for hotshot trucking?</summary>
+        <p>The one that's true for your truck. Insurance, payments and miles vary so much between operators that someone else's average tells you little. Put your own bills in above; the result is the floor your rates have to clear.</p>
+      </details>
+      <details>
+        <summary>Should I count deadhead miles in my monthly miles?</summary>
+        <p>Yes. Enter all the miles the truck runs in a month. Your fixed costs get spread over every one of them, and the deadhead % then works out how much of that driving actually gets paid.</p>
+      </details>
+      <details>
+        <summary>Why is the panel's minimum lower than my cost per mile?</summary>
+        <p>Because the panel takes fuel off each load first, using that load's real miles and your mpg. Putting fuel into MIN $/MI NET as well would count it twice and turn good loads into PASS.</p>
+      </details>
+      <details>
+        <summary>Do I pay myself as driver pay or as profit?</summary>
+        <p>Either works, just don't count it twice. If you pay yourself per mile, enter it as driver pay and set profit to what the business keeps. If you take whatever's left, leave driver pay at 0 and set profit to what you need to earn.</p>
+      </details>
+    </section>
+
+    <section class="more-tools" aria-labelledby="more-tools-head">
+      <h2 id="more-tools-head">MORE TOOLS</h2>
+      <ul>
+        <li><a href="../index.html">Load panel<span>Take it or pass on a load, with your minimum.</span></a></li>
+        <li><a href="../factoring-fee/index.html">Factoring cost<span>The real fee on an invoice, flat fees included.</span></a></li>
+        <li><a href="../deadhead/index.html">Deadhead miles<span>What the empty miles cost and how many a load can carry.</span></a></li>
+        <li><a href="../weight/index.html">Weight / CDL<span>Your ratings against the 26,001 lb CDL line.</span></a></li>
+        <li><a href="../ifta/index.html">IFTA worksheet<span>Quarter math by state, plus a free Excel download.</span></a></li>
+        <li><a href="../rates-2026/index.html">2026 rates<span>Rates per mile from dated sources, and what's left after costs.</span></a></li>
+      </ul>
+    </section>
+
+    <footer class="panel-foot">
+      <p>Hotshot Math is a planning tool, not tax, legal, or financial advice. Numbers are estimates; check them against your own bills and rate confirmations.</p>
+      <nav aria-label="Footer">
+        <ul>
+          <li><a href="../index.html">The panel</a></li>
+          <li><a href="../../about.html">About</a></li>
+          <li><a href="../../disclaimer.html">Disclaimer</a></li>
+          <li><a href="../../privacy.html">Privacy</a></li>
+        </ul>
+      </nav>
+    </footer>
+  </main>
+
+  <script src="../config.js"></script>
+  <script src="../../assets/track.js"></script>
+  <script src="../../engine/calc-engine.js"></script>
+  <script src="../tools.js"></script>
+</body>
+</html>

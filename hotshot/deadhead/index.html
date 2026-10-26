@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Deadhead miles calculator for hotshot loads - Hotshot Math</title>
+  <meta name="description" content="Free deadhead miles calculator: deadhead % of total miles, the fuel cost of the empty miles, rate per total mile vs per loaded mile, and the break-even deadhead for your minimum.">
+  <link rel="canonical" href="https://projectcalc-tools.pages.dev/hotshot/deadhead/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Hotshot Math">
+  <meta property="og:title" content="Deadhead miles calculator for hotshot loads - Hotshot Math">
+  <meta property="og:description" content="What the empty miles cost, your rate per total mile, and how many deadhead miles a load can carry before it drops under your minimum.">
+  <meta property="og:url" content="https://projectcalc-tools.pages.dev/hotshot/deadhead/">
+  <meta property="og:image" content="https://projectcalc-tools.pages.dev/hotshot/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Hotshot Math deadhead miles calculator: deadhead percent, empty-mile fuel and break-even empty miles">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Deadhead miles calculator for hotshot loads">
+  <meta name="twitter:description" content="The fuel cost of empty miles and the break-even deadhead for your minimum. Free, no signup.">
+  <meta name="twitter:image" content="https://projectcalc-tools.pages.dev/hotshot/og.png">
+  <link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../hotshot.css">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="panel-bar">
+    <p class="panel-name">HOTSHOT MATH</p>
+    <p class="panel-sub">DEADHEAD MILES</p>
+  </header>
+
+  <main id="main" class="panel tool-page">
+    <h1 class="panel-head">Deadhead miles calculator</h1>
+    <p class="panel-lede">Empty miles burn the same fuel as loaded ones and pay nothing. See what they cost, what the rate is really worth per mile driven, and how far you can run empty before a load drops under your minimum. The example numbers are filled in - type over them with yours.</p>
+
+    <form class="tool-form" id="deadhead-form" data-hotshot-tool="hotshot-deadhead" autocomplete="off" novalidate>
+      <fieldset>
+        <legend>THE LOAD</legend>
+        <div class="mini">
+          <label for="loadedMiles">LOADED MI</label>
+          <input id="loadedMiles" name="loadedMiles" type="number" inputmode="numeric" step="any" min="1" value="420" required>
+        </div>
+        <div class="mini">
+          <label for="deadheadMiles">DEADHEAD MI</label>
+          <input id="deadheadMiles" name="deadheadMiles" type="number" inputmode="numeric" step="any" min="0" value="150">
+        </div>
+        <div class="mini">
+          <label for="ratePerMile">RATE $/LOADED MI</label>
+          <input id="ratePerMile" name="ratePerMile" type="number" inputmode="decimal" step="any" min="0" value="2.10">
+        </div>
+        <div class="mini">
+          <label for="flatRate">FLAT $ <span class="unit">(0 = $/mi)</span></label>
+          <input id="flatRate" name="flatRate" type="number" inputmode="decimal" step="any" min="0" value="0">
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>TRUCK + MINIMUM</legend>
+        <div class="mini">
+          <label for="fuelPrice">FUEL $/GAL</label>
+          <input id="fuelPrice" name="fuelPrice" type="number" inputmode="decimal" step="any" min="0" value="6.28" required>
+        </div>
+        <div class="mini">
+          <label for="truckMpg">TRUCK MPG</label>
+          <input id="truckMpg" name="truckMpg" type="number" inputmode="decimal" step="any" min="1" value="10" required>
+        </div>
+        <div class="mini">
+          <label for="minNetPerMile">MIN $/MI NET</label>
+          <input id="minNetPerMile" name="minNetPerMile" type="number" inputmode="decimal" step="any" min="0" value="1.30" aria-describedby="min-hint">
+          <span class="hint" id="min-hint">Same number as the panel's.</span>
+        </div>
+      </fieldset>
+
+      <button class="run-btn" type="submit">CALCULATE</button>
+
+      <section class="readout-card" id="tool-result" aria-label="Result">
+        <p class="visually-hidden" id="result-announce" aria-live="polite"></p>
+        <p class="readout-label" id="result-label">MOST EMPTY MILES THIS LOAD CAN CARRY</p>
+        <p class="readout-main" id="result-main">37 MI</p>
+        <p class="readout-status warn" id="result-status">Under your $1.30/mi minimum at 150 empty miles</p>
+        <div class="worked" id="result-rows"></div>
+      </section>
+    </form>
+
+    <section class="how">
+      <h2>The math, printed</h2>
+      <p class="example-label">EXAMPLE - 420 loaded mi at $2.10/loaded mi, 150 deadhead mi, $6.28 fuel at 10 mpg, $1.30/mi minimum:</p>
+      <p class="fine">Example fuel is $6.28 a gallon, the U.S. average on-highway diesel price for the week of Oct 19, 2026 (<a href="https://www.eia.gov/petroleum/gasdiesel/">EIA</a>). Type the price you actually pay.</p>
+      <div class="worked">
+        <p><span>Gross - 420 x $2.10</span><span>$882.00</span></p>
+        <p><span>Deadhead share - 150 / 570 total mi</span><span>26.3%</span></p>
+        <p><span>Fuel for the empty miles - 150 x $6.28 / 10 mpg</span><span>$94.20</span></p>
+        <p><span>Fuel for the whole trip - 570 x $0.628</span><span>$357.96</span></p>
+        <p><span>Rate per loaded mile</span><span>$2.10</span></p>
+        <p><span>Rate per total mile - $882 / 570</span><span>$1.55</span></p>
+        <p><span>Net after fuel - $882 - $357.96</span><span>$524.04</span></p>
+        <p class="worked-net"><span>Net after fuel per total mile</span><span>$0.92</span></p>
+        <p class="key"><span>Break-even - $882 / ($1.30 + $0.628) - 420</span><span>37 empty miles</span></p>
+      </div>
+      <p>At 150 empty miles this load nets $0.92 per mile driven, well under the $1.30 minimum. At $6.28 diesel it carries only 37 empty miles before it drops below. The break-even is the most total miles the gross can cover at your minimum plus fuel, minus the loaded miles, rounded down to a whole mile.</p>
+      <p>Deadhead % here is empty miles divided by total miles (loaded + empty). Some people divide by loaded miles instead, which gives a bigger number for the same trip - 150 / 420 is 35.7%.</p>
+      <p class="fine">Net here is after fuel only, per total mile - the same basis as the panel's MIN $/MI NET. Tolls and factoring are left out; run the load through the <a href="../index.html">load panel</a> for the full take-it-or-pass with those counted.</p>
+    </section>
+
+    <section class="tool-faq">
+      <h2>Common questions</h2>
+      <details>
+        <summary>When to deadhead?</summary>
+        <p>When the load at the other end still clears your minimum with the empty miles counted. Put the deadhead to pickup in above: if the break-even is more than the miles you'd run empty, the trip works; if it's less, counter the rate or keep looking. Deadheading toward a lane you know pays can make sense too - put those miles on the first load out and run the same check.</p>
+      </details>
+      <details>
+        <summary>What counts as deadhead miles?</summary>
+        <p>Any miles the truck runs without paid freight: to the first pickup, between drops and the next pickup, and home empty. If nobody is paying for the mile, it's deadhead.</p>
+      </details>
+      <details>
+        <summary>Why compare per total mile instead of per loaded mile?</summary>
+        <p>Because the truck costs money on every mile, paid or not. Rate per loaded mile is what the broker quotes; rate per total mile is what the trip is actually worth to the truck.</p>
+      </details>
+      <details>
+        <summary>Where does my minimum come from?</summary>
+        <p>From your own costs. The <a href="../cost-per-mile/index.html">cost per mile calculator</a> works it out from your truck payment, insurance and other bills - it's the same number the panel uses.</p>
+      </details>
+    </section>
+
+    <section class="more-tools" aria-labelledby="more-tools-head">
+      <h2 id="more-tools-head">MORE TOOLS</h2>
+      <ul>
+        <li><a href="../index.html">Load panel<span>Take it or pass on a load, with your minimum.</span></a></li>
+        <li><a href="../cost-per-mile/index.html">Cost per mile<span>Your all-in cost per mile and minimum rate.</span></a></li>
+        <li><a href="../factoring-fee/index.html">Factoring cost<span>The real fee on an invoice, flat fees included.</span></a></li>
+        <li><a href="../weight/index.html">Weight / CDL<span>Your ratings against the 26,001 lb CDL line.</span></a></li>
+        <li><a href="../ifta/index.html">IFTA worksheet<span>Quarter math by state, plus a free Excel download.</span></a></li>
+        <li><a href="../rates-2026/index.html">2026 rates<span>Rates per mile from dated sources, and what's left after costs.</span></a></li>
+      </ul>
+    </section>
+
+    <footer class="panel-foot">
+      <p>Hotshot Math is a planning tool, not tax, legal, or financial advice. Numbers are estimates; check them against your own rate confirmations.</p>
+      <nav aria-label="Footer">
+        <ul>
+          <li><a href="../index.html">The panel</a></li>
+          <li><a href="../../about.html">About</a></li>
+          <li><a href="../../disclaimer.html">Disclaimer</a></li>
+          <li><a href="../../privacy.html">Privacy</a></li>
+        </ul>
+      </nav>
+    </footer>
+  </main>
+
+  <script src="../config.js"></script>
+  <script src="../../assets/track.js"></script>
+  <script src="../../engine/calc-engine.js"></script>
+  <script src="../tools.js"></script>
+</body>
+</html>
