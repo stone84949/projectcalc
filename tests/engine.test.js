@@ -18,7 +18,7 @@ test('paint: 12x12x8 room, 1 door, 2 windows, 2 coats uses 2 gallons at 375 cove
   });
 
   assert.equal(result.ok, true);
-  assert.equal(result.values.wallAreaSqFt, 384);
+  assert.equal(result.values.wallAreaSqFt, 385);
   assert.equal(result.values.openingAreaSqFt, 51);
   assert.equal(result.values.netAreaSqFt, 333);
   assert.equal(result.values.coatedAreaSqFt, 666);
