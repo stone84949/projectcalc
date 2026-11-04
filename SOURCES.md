@@ -66,9 +66,9 @@ Coverage and waste figures used by `engine/calc-engine.js`. The site restates th
 
 # Hotshot Math sources
 
-Figures and rules used on `/hotshot/`. These are cited inline on the pages themselves (Hotshot Math doesn't use `/sources.html`).
+Figures and rules used on gethotshotmath.com. These are cited inline on the pages themselves (Hotshot Math doesn't use `/sources.html`).
 
-## Weight / CDL (`/hotshot/weight/`, engine tool `hotshot-weight`)
+## Weight / CDL (`/weight/`, engine tool `hotshot-weight`)
 
 Read 2026-10-25 from the eCFR (versioner API, text as of 2026-10-01; fmcsa.dot.gov and ecfr.gov page views block automated reads).
 
@@ -81,7 +81,7 @@ Read 2026-10-25 from the eCFR (versioner API, text as of 2026-10-01; fmcsa.dot.g
 - State rules can be stricter than the federal CDL rules: NATM, "Shedding Light on Foggy CDL Requirements", 2021-07-27. https://www.natm.com/news/shedding-light-on-foggy-cdl-requirements
 - Engine modelling choices: cargo is assumed to ride on the trailer; hitch/pin weight on the truck is not modelled (the page says so). "Most cargo the ratings allow" = min(trailer GVWR − trailer empty, min(label GCWR, sum of GVWRs) − both empty weights).
 
-## 2026 rates (`/hotshot/rates-2026/`)
+## 2026 rates (`/rates-2026/`)
 
 All read 2026-10-25. Ranges are shown as published; no single figure is treated as the market rate.
 
@@ -94,7 +94,7 @@ All read 2026-10-25. Ranges are shown as published; no single figure is treated 
 - Not used (could not be read 2026-10-25): otrucking.com rates guide and ZipRecruiter salary pages (both block automated reads); DataTruck's hotshot guide (no publication date).
 - Worked examples on the page are engine output (`hotshot-load`, `hotshot-cost-per-mile`) with labelled example inputs; `tests/engine.test.js` checks the printed numbers.
 
-## Hotshot Math: IFTA worksheet and calculator (`hotshot-ifta`, `/hotshot/ifta/`, `hotshot/downloads/hotshot-math-ifta-worksheet.xlsx`)
+## Hotshot Math: IFTA worksheet and calculator (`hotshot-ifta`, `/ifta/`, `hotshot/downloads/hotshot-math-ifta-worksheet.xlsx`)
 
 All read 2026-10-25. No tax rate is stored anywhere: the visitor types rates from the official matrix. The three example rates on the page ($0.20, $0.30, $0.40) are made-up round numbers, labelled as examples.
 

@@ -32,6 +32,8 @@ def copy(source: Path, target: Path) -> None:
 
 
 def build(out: Path) -> None:
+    if out == ROOT or ROOT in out.parents:
+        raise SystemExit(f"build_dist: {out} is inside the repo; pick a folder outside it")
     if out.exists() and any(out.iterdir()):
         raise SystemExit(f"build_dist: {out} is not empty; pick a new folder")
     for name in PROJECTCALC_FILES:

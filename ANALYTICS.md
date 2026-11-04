@@ -48,7 +48,7 @@ Events carry only the tool or guide name. Typed numbers, money and email address
 
 Page views come from the provider itself.
 
-The free IFTA worksheet download on `/ifta/` is a direct link to an `.xlsx` file and sends **no** event: `track.js` has no download event, and adding one is a separate change. Until then the only IFTA-page signals are page views and `tool_run` with `hotshot-ifta`; downloads show up only as hits on `/hotshot/downloads/hotshot-math-ifta-worksheet.xlsx` in the host's own request logs, if any.
+The free IFTA worksheet download on `/ifta/` is a direct link to an `.xlsx` file and sends **no** event: `track.js` has no download event, and adding one is a separate change. Until then the only IFTA-page signals are page views and `tool_run` with `hotshot-ifta`; downloads show up only as hits on `/downloads/hotshot-math-ifta-worksheet.xlsx` in the host's own request logs, if any.
 
 ## UTM links
 

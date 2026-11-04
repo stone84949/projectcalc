@@ -1,6 +1,6 @@
 # Hotshot Math kit sign-up: 5-minute setup
 
-The "OPERATOR KIT" form on `/hotshot/` sends sign-ups to a small Google Apps Script.
+The "OPERATOR KIT" form on the gethotshotmath.com home page sends sign-ups to a small Google Apps Script.
 Each sign-up adds one row to a Google Sheet: time, email, consent, and the page it came from.
 It's free and uses your own Google account. No form service, nothing to pay for.
 
@@ -28,7 +28,7 @@ Until you paste the web app URL into `hotshot/config.js`, the form stays greyed 
 
    Commit that on a task branch and send it through the usual review and release. The form turns on only when the value is a real `script.google.com/macros/s/.../exec` URL.
 
-To check it's live: open `/hotshot/` on the site, enter your email, tick the box, and press **LIGHT ME UP**. The note should say "You're on the list," and a new row should appear in the sheet.
+To check it's live: open gethotshotmath.com, enter your email, tick the box, and press **LIGHT ME UP**. The note should say "You're on the list," and a new row should appear in the sheet.
 
 If **Anyone** isn't offered in step 4 (Workspace accounts only), the admin console is blocking sharing outside your domain: **Apps > Google Workspace > Drive and Docs > Sharing settings**, allow sharing outside the organization.
 
@@ -39,7 +39,7 @@ If **Anyone** isn't offered in step 4 (Workspace accounts only), the admin conso
 | Received | Date and time of the sign-up |
 | Email | Lowercased email address |
 | Consent | `yes` (the form can't be sent without ticking the box) |
-| Source page | Site path it came from, such as `/hotshot/` |
+| Source page | Site path it came from, such as `/`. Rows from before the Nov 2026 domain move say `/hotshot/` |
 | Status | `New`; use it for your own notes |
 
 The privacy page says what's collected and why. Keep it accurate if this changes.

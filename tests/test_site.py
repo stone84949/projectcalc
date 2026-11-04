@@ -344,7 +344,7 @@ class SiteContract(unittest.TestCase):
         # nested pages publish as /<slug>/, never /<slug>/index
         for slug in HOTSHOT_TOOLS:
             self.assertIn(f"https://gethotshotmath.com/{slug}/", hotshot)
-        self.assertFalse(any(loc.endswith("/index") for loc in hotshot), "sitemap lists an /index route")
+        self.assertFalse(any(loc.endswith("/index") for loc in after | hotshot), "sitemap lists an /index route")
         self.assertIn("https://gethotshotmath.com/ifta/", hotshot)
         self.assertFalse(any("/downloads" in loc or "/404" in loc for loc in hotshot), "sitemap lists a non-page")
         self.assertIn("Sitemap: https://gethotshotmath.com/sitemap.xml", hotshot_robots)
@@ -718,6 +718,14 @@ class DeployFolders(unittest.TestCase):
         path = site / unquote(url_path).lstrip("/")
         return path.is_file() or (path / "index.html").is_file() or path.with_name(path.name + ".html").is_file()
 
+    @staticmethod
+    def final(site: Path, url_path: str) -> bool:
+        """True only for the URL Pages answers without a redirect: folder/ or page, never .html or /index."""
+        path = site / unquote(url_path).lstrip("/")
+        if url_path.endswith("/"):
+            return (path / "index.html").is_file()
+        return not url_path.endswith((".html", "/index")) and path.with_name(path.name + ".html").is_file()
+
     def test_every_relative_link_resolves_inside_its_own_site(self) -> None:
         for site in self.sites.values():
             for page in site.rglob("*.html"):
@@ -726,9 +734,11 @@ class DeployFolders(unittest.TestCase):
                 for link in re.findall(r'(?:href|src)="([^"]+)"', html):
                     # Join like a browser, which stops at the domain root.
                     target = urlparse(urljoin(f"https://site.test/{rel}", link))
-                    if target.scheme != "https" or target.hostname != "site.test":
-                        continue
-                    self.assertTrue(self.served(site, target.path), f"{site.name}/{rel} links missing {link}")
+                    if target.hostname == "site.test":
+                        self.assertTrue(self.served(site, target.path), f"{site.name}/{rel} links missing {link}")
+                    elif f"https://{target.hostname}" in self.sites:
+                        other = self.sites[f"https://{target.hostname}"]
+                        self.assertTrue(self.served(other, target.path), f"{site.name}/{rel} links missing {link}")
 
     def test_each_site_stands_alone(self) -> None:
         for base, site in self.sites.items():
@@ -741,7 +751,7 @@ class DeployFolders(unittest.TestCase):
             self.assertGreater(len(locs), 10, site.name)
             for loc in locs:
                 self.assertTrue(loc.startswith(base + "/"), loc)
-                self.assertTrue(self.served(site, urlparse(loc).path), loc)
+                self.assertTrue(self.final(site, urlparse(loc).path), loc)
 
     def test_hotshot_pages_point_at_the_hotshot_domain(self) -> None:
         site = self.sites["https://gethotshotmath.com"]
@@ -752,7 +762,16 @@ class DeployFolders(unittest.TestCase):
             canonical = re.search(r'rel="canonical" href="([^"]+)"', html)
             self.assertIsNotNone(canonical, page.name)
             self.assertTrue(canonical.group(1).startswith("https://gethotshotmath.com/"), page.name)
+            self.assertTrue(self.final(site, urlparse(canonical.group(1)).path), canonical.group(1))
             self.assertNotIn("gethotshotmath.com/hotshot", html, page.name)
+
+    def test_build_refuses_a_folder_inside_the_repo(self) -> None:
+        result = subprocess.run(
+            [sys.executable, str(ROOT / "scripts" / "build_dist.py"), str(ROOT / "dist")], capture_output=True, text=True
+        )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("inside the repo", result.stderr)
+        self.assertFalse((ROOT / "dist").exists())
 
     def test_projectcalc_redirects_old_hotshot_links(self) -> None:
         site = self.sites["https://getprojectcalc.com"]
