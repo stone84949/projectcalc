@@ -1,0 +1,4 @@
+# Hotshot Math moved to its own domain. Host-level redirects (pages.dev, www) can't
+# live here; they are a Cloudflare Bulk Redirect list. See README.md, Deploy.
+/hotshot https://gethotshotmath.com/ 301
+/hotshot/* https://gethotshotmath.com/:splat 301

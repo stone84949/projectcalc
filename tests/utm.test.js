@@ -8,7 +8,7 @@ const { buildUtmUrl } = require('../scripts/utm.js');
 
 test('builds a tagged link and keeps existing query and hash', () => {
   const url = buildUtmUrl({
-    url: 'https://projectcalc-tools.pages.dev/hotshot/?x=1#gauges',
+    url: 'https://gethotshotmath.com/?x=1#gauges',
     source: 'youtube',
     medium: 'social',
     campaign: 'w04-teardown',
@@ -16,15 +16,15 @@ test('builds a tagged link and keeps existing query and hash', () => {
   });
   assert.equal(
     url,
-    'https://projectcalc-tools.pages.dev/hotshot/?x=1&utm_source=youtube&utm_medium=social&utm_campaign=w04-teardown&utm_content=short-deadhead#gauges',
+    'https://gethotshotmath.com/?x=1&utm_source=youtube&utm_medium=social&utm_campaign=w04-teardown&utm_content=short-deadhead#gauges',
   );
 });
 
 test('rejects anything off the convention', () => {
-  const base = { url: 'https://projectcalc-tools.pages.dev/', source: 'pinterest', medium: 'social', campaign: 'w02-paint' };
+  const base = { url: 'https://getprojectcalc.com/', source: 'pinterest', medium: 'social', campaign: 'w02-paint' };
   assert.doesNotThrow(() => buildUtmUrl(base));
-  assert.throws(() => buildUtmUrl({ ...base, url: 'http://projectcalc-tools.pages.dev/' }), /https/);
-  assert.throws(() => buildUtmUrl({ ...base, url: 'projectcalc-tools.pages.dev' }), /https/);
+  assert.throws(() => buildUtmUrl({ ...base, url: 'http://getprojectcalc.com/' }), /https/);
+  assert.throws(() => buildUtmUrl({ ...base, url: 'getprojectcalc.com' }), /https/);
   assert.throws(() => buildUtmUrl({ ...base, source: 'Facebook' }), /source/);
   assert.throws(() => buildUtmUrl({ ...base, medium: 'organic' }), /medium/);
   assert.throws(() => buildUtmUrl({ ...base, campaign: 'paint' }), /campaign/);
@@ -34,7 +34,7 @@ test('rejects anything off the convention', () => {
 
 test('command line prints the link and fails loudly on bad input', () => {
   const script = path.join(__dirname, '..', 'scripts', 'utm.js');
-  const out = execFileSync(process.execPath, [script, '--url', 'https://projectcalc-tools.pages.dev/', '--source', 'substack', '--medium', 'email', '--campaign', 'w03-one-load'], { encoding: 'utf8' });
-  assert.equal(out.trim(), 'https://projectcalc-tools.pages.dev/?utm_source=substack&utm_medium=email&utm_campaign=w03-one-load');
+  const out = execFileSync(process.execPath, [script, '--url', 'https://getprojectcalc.com/', '--source', 'substack', '--medium', 'email', '--campaign', 'w03-one-load'], { encoding: 'utf8' });
+  assert.equal(out.trim(), 'https://getprojectcalc.com/?utm_source=substack&utm_medium=email&utm_campaign=w03-one-load');
   assert.throws(() => execFileSync(process.execPath, [script, '--url', 'https://x.example/', '--source', 'myspace', '--medium', 'social', '--campaign', 'w01-a'], { stdio: 'pipe' }));
 });
