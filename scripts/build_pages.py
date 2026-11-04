@@ -9,7 +9,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SITE_NAME = "ProjectCalc"
-BASE = "https://projectcalc-tools.pages.dev"
+BASE = "https://getprojectcalc.com"
+HOTSHOT_BASE = "https://gethotshotmath.com"
 
 TOOLS = [
     ("paint", "Paint calculator", "How much paint for a room — gallons, coats, and a shopping number."),
@@ -1191,6 +1192,7 @@ def static_pages() -> None:
         "What ProjectCalc stores. No accounts. Inputs stay in your browser.",
         "Privacy",
         """
+        <p>This policy covers getprojectcalc.com and gethotshotmath.com (Hotshot Math).</p>
         <p>There is no account and no server-side form. Calculator inputs are saved in your browser’s localStorage so a refresh does not wipe the room. Clear site data to delete them.</p>
         <p>If a PayPal payment link is added later, PayPal’s privacy policy applies to that checkout. This static site does not see your payment details.</p>
         <p>If you join the Hotshot Math operator-kit list, your email address, your consent, the page you signed up on and the time are saved in a private Google Sheet. They are used only to email you about the kit, and you can ask to be removed at any time.</p>
@@ -1252,11 +1254,12 @@ def static_pages() -> None:
 
 
 # Top-level folders that are not public pages.
-NON_PAGE_DIRS = {"assets", "engine", "scripts", "tests", "node_modules", "calculators", "guides", "pack"}
+# hotshot/ deploys as its own site (scripts/build_dist.py), so it keeps its own sitemap.
+NON_PAGE_DIRS = {"assets", "engine", "scripts", "tests", "node_modules", "calculators", "guides", "pack", "hotshot"}
 
 
 def hand_built_routes() -> list[str]:
-    """Public routes this script does not generate (e.g. /hotshot/), found on disk.
+    """Public routes this script does not generate, found on disk.
 
     Any top-level folder with an index.html that this build does not own is a
     hand-built page and stays in the sitemap across rebuilds.
@@ -1267,13 +1270,37 @@ def hand_built_routes() -> list[str]:
         if folder.startswith((".", "_")) or folder in NON_PAGE_DIRS:
             continue
         routes.append(f"/{folder}/")
-        # deeper hand-built pages inside a hand-built folder (e.g. /hotshot/guides/...)
+        # deeper hand-built pages inside a hand-built folder
         for page in sorted(index.parent.rglob("*.html")):
             if page == index:
                 continue
             # pretty_path maps nested folder/index.html to /folder/ and page.html to /page
             routes.append(pretty_path(str(page.relative_to(ROOT)).replace("\\", "/")))
     return routes
+
+
+def hotshot_routes() -> list[str]:
+    """Hotshot Math's public routes, as served from the root of its own domain."""
+    folder = ROOT / "hotshot"
+    pages = (p.relative_to(folder).as_posix() for p in sorted(folder.rglob("*.html")))
+    return [pretty_path(page) for page in pages if page != "404.html"]
+
+
+def write_robots_and_sitemap(folder: Path, base: str, urls: list[str]) -> None:
+    locs = "\n".join(f"  <url><loc>{base}{path}</loc></url>" for path in urls)
+    (folder / "sitemap.xml").write_text(
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+        f"{locs}\n"
+        "</urlset>\n",
+        encoding="utf-8",
+        newline="\n",
+    )
+    (folder / "robots.txt").write_text(
+        f"User-agent: *\nAllow: /\nSitemap: {base}/sitemap.xml\n",
+        encoding="utf-8",
+        newline="\n",
+    )
 
 
 def robots_and_sitemap() -> None:
@@ -1283,20 +1310,8 @@ def robots_and_sitemap() -> None:
     files += [f"guides/{g['slug']}.html" for g in GUIDE_PAGES]
     urls = [pretty_path(f) for f in files]
     urls += [r for r in hand_built_routes() if r not in urls]
-    locs = "\n".join(f"  <url><loc>{BASE}{path}</loc></url>" for path in urls)
-    (ROOT / "sitemap.xml").write_text(
-        '<?xml version="1.0" encoding="UTF-8"?>\n'
-        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
-        f"{locs}\n"
-        "</urlset>\n",
-        encoding="utf-8",
-        newline="\n",
-    )
-    (ROOT / "robots.txt").write_text(
-        f"User-agent: *\nAllow: /\nSitemap: {BASE}/sitemap.xml\n",
-        encoding="utf-8",
-        newline="\n",
-    )
+    write_robots_and_sitemap(ROOT, BASE, urls)
+    write_robots_and_sitemap(ROOT / "hotshot", HOTSHOT_BASE, hotshot_routes())
 
 
 def main() -> None:

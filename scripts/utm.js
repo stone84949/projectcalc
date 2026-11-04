@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 'use strict';
 /* Build a UTM-tagged link so every visitor shows where they came from.
-   node scripts/utm.js --url https://projectcalc-tools.pages.dev/hotshot/ --source youtube --medium social --campaign w04-teardown
+   node scripts/utm.js --url https://gethotshotmath.com/ --source youtube --medium social --campaign w04-teardown
    Optional: --content short-label (which post or ad). Convention lives in ANALYTICS.md. */
 
 const SOURCES = ['youtube', 'instagram', 'tiktok', 'facebook', 'reddit', 'substack', 'pinterest', 'meta_ads', 'youtube_ads'];

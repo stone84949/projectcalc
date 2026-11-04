@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 import re
+import subprocess
+import sys
+import tempfile
 import unittest
 import xml.etree.ElementTree as ET
 from html.parser import HTMLParser
 from pathlib import Path
-from urllib.parse import unquote, urlparse
+from urllib.parse import unquote, urljoin, urlparse
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -175,6 +178,10 @@ def html_files() -> list[Path]:
     return sorted(ROOT.rglob("*.html"))
 
 
+# Links from the domain root, so it can answer at any depth. DeployFolders checks them.
+HOTSHOT_404 = ROOT / "hotshot" / "404.html"
+
+
 class SiteContract(unittest.TestCase):
     def test_required_files_exist(self) -> None:
         missing = [str(path.relative_to(ROOT)) for path in REQUIRED if not path.exists()]
@@ -209,6 +216,8 @@ class SiteContract(unittest.TestCase):
     def test_internal_links_resolve(self) -> None:
         broken: list[str] = []
         for path in html_files():
+            if path == HOTSHOT_404:
+                continue
             html = path.read_text(encoding="utf-8")
             for href in re.findall(r'href="([^"]+)"', html):
                 if href.startswith(("http://", "https://", "mailto:", "tel:")):
@@ -223,6 +232,8 @@ class SiteContract(unittest.TestCase):
     def test_asset_script_paths_exist(self) -> None:
         missing: list[str] = []
         for path in html_files():
+            if path == HOTSHOT_404:
+                continue
             html = path.read_text(encoding="utf-8")
             for src in re.findall(r'src="([^"]+)"', html) + re.findall(r'href="([^"]+\.css)"', html):
                 if src.startswith(("http://", "https://")):
@@ -307,7 +318,7 @@ class SiteContract(unittest.TestCase):
         self.assertIn("../guides/mulch-by-square-feet.html", mulch)
         self.assertNotIn("../guides/how-much-paint-for-a-12x12-room.html", mulch)
     def test_rebuild_keeps_every_sitemap_route_and_hand_built_pages(self) -> None:
-        """Rebuilding must not drop routes, including hand-built folders like /hotshot/."""
+        """Rebuilding must not drop routes, and Hotshot's routes live in its own sitemap."""
         import shutil
         import subprocess
         import sys
@@ -325,14 +336,18 @@ class SiteContract(unittest.TestCase):
             (copy / "hotshot" / "index.html").write_text("<!doctype html><title>t</title>", encoding="utf-8")
             subprocess.run([sys.executable, str(copy / "scripts" / "build_pages.py")], check=True, capture_output=True)
             after = locs(copy / "sitemap.xml")
+            hotshot = locs(copy / "hotshot" / "sitemap.xml")
+            hotshot_robots = (copy / "hotshot" / "robots.txt").read_text(encoding="utf-8")
         self.assertEqual(sorted(before - after), [], "rebuild dropped sitemap routes")
-        self.assertIn("https://projectcalc-tools.pages.dev/hotshot/", after)
-        # nested hand-built folders publish as /hotshot/<slug>/, never /hotshot/<slug>/index
+        self.assertFalse(any("hotshot" in loc for loc in after), "ProjectCalc sitemap lists Hotshot pages")
+        self.assertIn("https://gethotshotmath.com/", hotshot)
+        # nested pages publish as /<slug>/, never /<slug>/index
         for slug in HOTSHOT_TOOLS:
-            self.assertIn(f"https://projectcalc-tools.pages.dev/hotshot/{slug}/", after)
-        self.assertFalse(any(loc.endswith("/index") for loc in after), "sitemap lists an /index route")
-        self.assertIn("https://projectcalc-tools.pages.dev/hotshot/ifta/", after)
-        self.assertFalse(any("/hotshot/downloads" in loc for loc in after), "sitemap lists the downloads folder")
+            self.assertIn(f"https://gethotshotmath.com/{slug}/", hotshot)
+        self.assertFalse(any(loc.endswith("/index") for loc in hotshot), "sitemap lists an /index route")
+        self.assertIn("https://gethotshotmath.com/ifta/", hotshot)
+        self.assertFalse(any("/downloads" in loc or "/404" in loc for loc in hotshot), "sitemap lists a non-page")
+        self.assertIn("Sitemap: https://gethotshotmath.com/sitemap.xml", hotshot_robots)
         for folder in ("assets", "engine", "scripts", "tests"):
             self.assertFalse(any(f"/{folder}/" in loc for loc in after), folder)
 
@@ -344,7 +359,7 @@ class SiteContract(unittest.TestCase):
             path = ROOT / "hotshot" / slug / "index.html"
             html = path.read_text(encoding="utf-8")
             doc = parse(path)
-            url = f"https://projectcalc-tools.pages.dev/hotshot/{slug}/"
+            url = f"https://gethotshotmath.com/{slug}/"
             self.assertIn(f'<link rel="canonical" href="{url}">', html, slug)
             self.assertIn(f'<meta property="og:url" content="{url}">', html, slug)
             self.assertIn('<meta property="og:site_name" content="Hotshot Math">', html, slug)
@@ -376,7 +391,7 @@ class SiteContract(unittest.TestCase):
         path = ROOT / "hotshot" / "rates-2026" / "index.html"
         html = path.read_text(encoding="utf-8")
         doc = parse(path)
-        url = "https://projectcalc-tools.pages.dev/hotshot/rates-2026/"
+        url = "https://gethotshotmath.com/rates-2026/"
         self.assertIn(f'<link rel="canonical" href="{url}">', html)
         self.assertIn(f'<meta property="og:url" content="{url}">', html)
         self.assertIn('data-guide="rates-2026"', html)
@@ -421,12 +436,12 @@ class SiteContract(unittest.TestCase):
         path = ROOT / "hotshot" / "ifta" / "index.html"
         html = path.read_text(encoding="utf-8")
         doc = parse(path)
-        url = "https://projectcalc-tools.pages.dev/hotshot/ifta/"
+        url = "https://gethotshotmath.com/ifta/"
         self.assertIn(f'<link rel="canonical" href="{url}">', html)
         self.assertIn(f'<meta property="og:url" content="{url}">', html)
         self.assertIn('<meta property="og:site_name" content="Hotshot Math">', html)
         self.assertIn('property="og:image:alt"', html)
-        self.assertIn("hotshot/og.png", html)
+        self.assertIn("gethotshotmath.com/og.png", html)
         self.assertIn('data-hotshot-tool="hotshot-ifta"', html)
         self.assertIn("'hotshot-ifta': hotshotIfta", (ROOT / "engine" / "calc-engine.js").read_text(encoding="utf-8"))
         self.assertTrue(doc.attrs.get("h1"), "ifta missing h1")
@@ -527,7 +542,7 @@ class SiteContract(unittest.TestCase):
             cell_b8 = re.search(r'<c r="B8"[^>]*?(?:/>|>(.*?)</c>)', quarter, flags=re.S)
             self.assertNotIn("<v>", cell_b8.group(0))
             strings = book.read("xl/sharedStrings.xml").decode("utf-8")
-            self.assertIn("https://projectcalc-tools.pages.dev/hotshot/", strings + quarter)
+            self.assertIn("https://gethotshotmath.com/", strings + quarter)
             self.assertIn("Planning worksheet, not tax advice", strings)
 
     def test_robots_allows_indexing(self) -> None:
@@ -583,8 +598,8 @@ class SiteContract(unittest.TestCase):
 
     def test_404_uses_absolute_urls(self) -> None:
         html = (ROOT / "404.html").read_text(encoding="utf-8")
-        self.assertIn("https://projectcalc-tools.pages.dev/assets/site.css", html)
-        self.assertIn("https://projectcalc-tools.pages.dev/", html)
+        self.assertIn("https://getprojectcalc.com/assets/site.css", html)
+        self.assertIn("https://getprojectcalc.com/", html)
         self.assertNotIn('href="index.html"', html)
 
     def test_paypal_markup_starts_hidden(self) -> None:
@@ -622,9 +637,11 @@ class SiteContract(unittest.TestCase):
             html = path.read_text(encoding="utf-8")
             for tag in ('property="og:title"', 'property="og:description"', 'property="og:url"', 'name="twitter:card" content="summary_large_image"'):
                 self.assertIn(tag, html, f"{path.relative_to(ROOT)} missing {tag}")
-            image = re.search(r'property="og:image" content="https://projectcalc-tools\.pages\.dev/([^"]+)"', html)
+            hotshot_page = path.relative_to(ROOT).parts[0] == "hotshot"
+            site, folder = ("gethotshotmath", ROOT / "hotshot") if hotshot_page else ("getprojectcalc", ROOT)
+            image = re.search(rf'property="og:image" content="https://{site}\.com/([^"]+)"', html)
             self.assertIsNotNone(image, f"{path.relative_to(ROOT)} missing og:image")
-            png = ROOT / image.group(1)
+            png = folder / image.group(1)
             self.assertTrue(png.exists(), f"{path.relative_to(ROOT)} -> {image.group(1)}")
             head = png.read_bytes()[:24]
             self.assertEqual(head[:8], b"\x89PNG\r\n\x1a\n", png.name)
@@ -634,10 +651,10 @@ class SiteContract(unittest.TestCase):
         guide = (ROOT / "guides" / "mulch-by-square-feet.html").read_text(encoding="utf-8")
         self.assertIn("assets/og/mulch.png", guide)
         hotshot = (ROOT / "hotshot" / "index.html").read_text(encoding="utf-8")
-        self.assertIn("hotshot/og.png", hotshot)
+        self.assertIn("gethotshotmath.com/og.png", hotshot)
         self.assertEqual(hotshot.count('property="og:image"'), 1, "one share image on the Hotshot panel")
         hotshot_guide = (ROOT / "hotshot" / "guides" / "how-to-start-hotshot-trucking.html").read_text(encoding="utf-8")
-        self.assertIn("hotshot/og.png", hotshot_guide)
+        self.assertIn("gethotshotmath.com/og.png", hotshot_guide)
         self.assertIn('data-guide="how-to-start-hotshot-trucking"', hotshot_guide)
 
     def test_analytics_loads_on_every_page_with_each_sites_ga4_property(self) -> None:
@@ -655,13 +672,13 @@ class SiteContract(unittest.TestCase):
                     self.assertLess(track, html.find(later), f"{path.relative_to(ROOT)} loads {later} before track.js")
         # Each site reports to its own GA4 property, only from the live host.
         expected = {
-            ROOT / "assets" / "config.js": "G-1W8VKWBBXY",
-            ROOT / "hotshot" / "config.js": "G-NLRYCRRB2H",
+            ROOT / "assets" / "config.js": ("G-1W8VKWBBXY", "getprojectcalc.com"),
+            ROOT / "hotshot" / "config.js": ("G-NLRYCRRB2H", "gethotshotmath.com"),
         }
-        for config, measurement_id in expected.items():
+        for config, (measurement_id, host) in expected.items():
             text = config.read_text(encoding="utf-8")
             self.assertIn(f"provider: 'ga4', measurementId: '{measurement_id}'", text, config.name)
-            self.assertIn("hosts: ['projectcalc-tools.pages.dev']", text, config.name)
+            self.assertIn(f"hosts: ['{host}']", text, config.name)
         # Each page loads exactly one site's config, so the IDs can't cross over.
         for path in html_files():
             if ".git" in path.parts:
@@ -683,6 +700,66 @@ class SiteContract(unittest.TestCase):
         for slug in GUIDES:
             html = (ROOT / "guides" / f"{slug}.html").read_text(encoding="utf-8")
             self.assertIn(f'data-guide="{slug}"', html, slug)
+
+
+class DeployFolders(unittest.TestCase):
+    """The two folders Cloudflare Pages actually serves, each from its own domain root."""
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.tmp = tempfile.TemporaryDirectory()
+        cls.addClassCleanup(cls.tmp.cleanup)
+        out = Path(cls.tmp.name) / "out"
+        subprocess.run([sys.executable, str(ROOT / "scripts" / "build_dist.py"), str(out)], check=True, capture_output=True)
+        cls.sites = {"https://getprojectcalc.com": out / "projectcalc", "https://gethotshotmath.com": out / "hotshot"}
+
+    @staticmethod
+    def served(site: Path, url_path: str) -> bool:
+        path = site / unquote(url_path).lstrip("/")
+        return path.is_file() or (path / "index.html").is_file() or path.with_name(path.name + ".html").is_file()
+
+    def test_every_relative_link_resolves_inside_its_own_site(self) -> None:
+        for site in self.sites.values():
+            for page in site.rglob("*.html"):
+                rel = page.relative_to(site).as_posix()
+                html = page.read_text(encoding="utf-8")
+                for link in re.findall(r'(?:href|src)="([^"]+)"', html):
+                    # Join like a browser, which stops at the domain root.
+                    target = urlparse(urljoin(f"https://site.test/{rel}", link))
+                    if target.scheme != "https" or target.hostname != "site.test":
+                        continue
+                    self.assertTrue(self.served(site, target.path), f"{site.name}/{rel} links missing {link}")
+
+    def test_each_site_stands_alone(self) -> None:
+        for base, site in self.sites.items():
+            for page in site.rglob("*"):
+                if page.suffix in {".html", ".js", ".css", ".xml", ".txt"}:
+                    self.assertNotIn("pages.dev", page.read_text(encoding="utf-8"), page.relative_to(site))
+            for name in ("404.html", "robots.txt", "sitemap.xml", "favicon.svg"):
+                self.assertTrue((site / name).is_file(), f"{site.name} missing {name}")
+            locs = re.findall(r"<loc>([^<]+)</loc>", (site / "sitemap.xml").read_text(encoding="utf-8"))
+            self.assertGreater(len(locs), 10, site.name)
+            for loc in locs:
+                self.assertTrue(loc.startswith(base + "/"), loc)
+                self.assertTrue(self.served(site, urlparse(loc).path), loc)
+
+    def test_hotshot_pages_point_at_the_hotshot_domain(self) -> None:
+        site = self.sites["https://gethotshotmath.com"]
+        pages = [page for page in site.rglob("*.html") if page.name != "404.html"]
+        self.assertGreater(len(pages), 10)
+        for page in pages:
+            html = page.read_text(encoding="utf-8")
+            canonical = re.search(r'rel="canonical" href="([^"]+)"', html)
+            self.assertIsNotNone(canonical, page.name)
+            self.assertTrue(canonical.group(1).startswith("https://gethotshotmath.com/"), page.name)
+            self.assertNotIn("gethotshotmath.com/hotshot", html, page.name)
+
+    def test_projectcalc_redirects_old_hotshot_links(self) -> None:
+        site = self.sites["https://getprojectcalc.com"]
+        self.assertFalse((site / "hotshot").exists())
+        redirects = (site / "_redirects").read_text(encoding="utf-8")
+        self.assertIn("/hotshot https://gethotshotmath.com/ 301", redirects)
+        self.assertIn("/hotshot/* https://gethotshotmath.com/:splat 301", redirects)
 
 
 if __name__ == "__main__":

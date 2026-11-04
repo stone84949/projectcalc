@@ -1,6 +1,6 @@
 # Analytics, UTM links and share images
 
-**Current setup (2026-10-23):** GA4, one property per site, counting only on `projectcalc-tools.pages.dev`.
+**Current setup (2026-11-03):** GA4, one property per site, counting only on each site's own domain: `getprojectcalc.com` and `gethotshotmath.com`.
 
 | Site | GA4 property | Measurement ID | Config |
 | --- | --- | --- | --- |
@@ -42,20 +42,20 @@ Events carry only the tool or guide name. Typed numbers, money and email address
 | `verdict_take` / `verdict_pass` | Hotshot verdict after a run with a minimum set | `tool` |
 | `copy_results` | Copy results succeeded | `tool` |
 | `print_sheet` | Print job sheet pressed | `tool` |
-| `guide_view` | A guide page loaded (Hotshot: the startup guide and `/hotshot/rates-2026/`, as `rates-2026`) | `guide` |
+| `guide_view` | A guide page loaded (Hotshot: the startup guide and `/rates-2026/`, as `rates-2026`) | `guide` |
 | `signup` | Operator kit sign-up accepted | `list` |
 | `outbound_affiliate` | Click on any `<a rel="sponsored">` link. Mark every affiliate link that way. | `host` |
 
 Page views come from the provider itself.
 
-The free IFTA worksheet download on `/hotshot/ifta/` is a direct link to an `.xlsx` file and sends **no** event: `track.js` has no download event, and adding one is a separate change. Until then the only IFTA-page signals are page views and `tool_run` with `hotshot-ifta`; downloads show up only as hits on `/hotshot/downloads/hotshot-math-ifta-worksheet.xlsx` in the host's own request logs, if any.
+The free IFTA worksheet download on `/ifta/` is a direct link to an `.xlsx` file and sends **no** event: `track.js` has no download event, and adding one is a separate change. Until then the only IFTA-page signals are page views and `tool_run` with `hotshot-ifta`; downloads show up only as hits on `/hotshot/downloads/hotshot-math-ifta-worksheet.xlsx` in the host's own request logs, if any.
 
 ## UTM links
 
 Every link we post gets tagged so visitors show where they came from. The providers read `utm_*` from the landing URL on their own.
 
 ```bash
-node scripts/utm.js --url https://projectcalc-tools.pages.dev/hotshot/ --source youtube --medium social --campaign w04-teardown --content short-deadhead
+node scripts/utm.js --url https://gethotshotmath.com/ --source youtube --medium social --campaign w04-teardown --content short-deadhead
 ```
 
 - `source`: youtube, instagram, tiktok, facebook, reddit, substack, pinterest, meta_ads, youtube_ads
@@ -73,4 +73,4 @@ To redraw them after changing a tool name, blurb or worked example (needs Chrome
 node scripts/run-python.js scripts/render_share_images.py
 ```
 
-When the sites move to their own domains, change `BASE` in `scripts/build_pages.py` and the URLs in `hotshot/index.html` and `hotshot/guides/*.html`, then rebuild, so the share tags point at the new domain.
+If a domain changes again, change `BASE` or `HOTSHOT_BASE` in `scripts/build_pages.py` and the URLs in `hotshot/*`, then rebuild, so the share tags point at the new domain.

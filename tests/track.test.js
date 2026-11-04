@@ -160,15 +160,15 @@ test('the shipped configs turn GA4 on only on the live host', () => {
     return ctx.window[name].analytics;
   };
   const sites = [
-    [load('assets/config.js', 'PROJECTCALC_CONFIG'), 'G-1W8VKWBBXY'],
-    [load('hotshot/config.js', 'HotshotConfig'), 'G-NLRYCRRB2H'],
+    [load('assets/config.js', 'PROJECTCALC_CONFIG'), 'G-1W8VKWBBXY', 'getprojectcalc.com'],
+    [load('hotshot/config.js', 'HotshotConfig'), 'G-NLRYCRRB2H', 'gethotshotmath.com'],
   ];
   const saved = globalThis.location;
-  sites.forEach(([config, id]) => {
+  sites.forEach(([config, id, host]) => {
     assert.equal(config.measurementId, id);
-    globalThis.location = { hostname: 'projectcalc-tools.pages.dev' };
+    globalThis.location = { hostname: host };
     assert.equal(track.create(config, fakeDoc()).enabled, true, id + ' on the live host');
-    ['localhost', '127.0.0.1', 'abc123.projectcalc-tools.pages.dev'].forEach((hostname) => {
+    ['localhost', '127.0.0.1', 'projectcalc-tools.pages.dev', 'abc123.projectcalc-tools.pages.dev'].forEach((hostname) => {
       globalThis.location = { hostname };
       assert.equal(track.create(config, fakeDoc()).enabled, false, id + ' off on ' + hostname);
     });
