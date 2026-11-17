@@ -1,0 +1,64 @@
+{
+  "url": "https://projectcalc-tools.pages.dev/calculators/mulch",
+  "endcard": {
+    "kicker": "Free mulch calculator",
+    "headline": "Your measurements, <span>your answer</span>",
+    "footer": "Check the coverage on your materials"
+  },
+  "beats": [
+    {
+      "id": "b1",
+      "say": "Mulch for a 15 by 20 bed?",
+      "shots": [
+        {
+          "caption": "Mulch for a 15 by 20 bed?",
+          "pos": "bottom"
+        }
+      ]
+    },
+    {
+      "id": "b2",
+      "say": "Fifteen by twenty feet, three inches deep. Buy thirty eight bags at two cubic feet each.",
+      "shots": [
+        {
+          "set": {
+            "lengthFt": "15",
+            "widthFt": "20",
+            "depthIn": "3",
+            "bagCuFt": "2"
+          },
+          "scroll": ".results",
+          "offset": 300,
+          "hl": ".results",
+          "expect": "38 bags",
+          "caption": "38 bags"
+        }
+      ]
+    },
+    {
+      "id": "b3",
+      "say": "At two inches deep, that becomes twenty five bags.",
+      "shots": [
+        {
+          "set": {
+            "depthIn": "2"
+          },
+          "scroll": ".results",
+          "offset": 300,
+          "hl": ".results",
+          "expect": "25 bags",
+          "caption": "25 bags"
+        }
+      ]
+    },
+    {
+      "id": "b4",
+      "say": "Check your own measurements with the free Project Calc calculator. Link in the description.",
+      "shots": [
+        {
+          "endcard": true
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,86 @@
+[
+  {
+    "id": "pin-22-paint-14x16-two-coats",
+    "kicker": "PAINT",
+    "q": "Paint for a 14 by 16 room?",
+    "a": "3 gallons",
+    "lines": [
+      "8 ft walls, one door, two windows",
+      "Walls only; two coats",
+      "375 sq ft coverage per gallon"
+    ],
+    "link": "https://projectcalc-tools.pages.dev/calculators/paint"
+  },
+  {
+    "id": "pin-23-paint-14x16-refresh",
+    "kicker": "PAINT",
+    "q": "One refresh coat in a 14 by 16 room?",
+    "a": "2 gallons",
+    "lines": [
+      "8 ft walls, one door, two windows",
+      "Walls only; one coat",
+      "375 sq ft coverage per gallon"
+    ],
+    "link": "https://projectcalc-tools.pages.dev/calculators/paint"
+  },
+  {
+    "id": "pin-24-mulch-15x20-3in",
+    "kicker": "MULCH",
+    "q": "Mulch for a 15 by 20 bed?",
+    "a": "38 bags",
+    "lines": [
+      "3 inches deep; 2 cubic feet per bag",
+      "300 sq ft; 75 cubic feet of mulch",
+      "Measure depth and check bag volume"
+    ],
+    "link": "https://projectcalc-tools.pages.dev/calculators/mulch"
+  },
+  {
+    "id": "pin-25-mulch-15x20-2in",
+    "kicker": "MULCH",
+    "q": "The same bed, 2 inches deep?",
+    "a": "25 bags",
+    "lines": [
+      "15 by 20 ft; 2 cubic feet per bag",
+      "300 sq ft; 50 cubic feet of mulch",
+      "Choose depth for your planting needs"
+    ],
+    "link": "https://projectcalc-tools.pages.dev/calculators/mulch"
+  },
+  {
+    "id": "pin-26-flooring-10x14-straight",
+    "kicker": "FLOORING",
+    "q": "Flooring for a 10 by 14 room?",
+    "a": "8 boxes",
+    "lines": [
+      "Straight layout; 10 percent waste",
+      "20 sq ft per box",
+      "140 sq ft plus waste = 154 sq ft"
+    ],
+    "link": "https://projectcalc-tools.pages.dev/calculators/flooring"
+  },
+  {
+    "id": "pin-27-flooring-10x14-diagonal",
+    "kicker": "FLOORING",
+    "q": "Diagonal flooring in a 10 by 14 room?",
+    "a": "9 boxes",
+    "lines": [
+      "Diagonal layout; 15 percent waste",
+      "20 sq ft per box",
+      "140 sq ft plus waste = 161 sq ft"
+    ],
+    "link": "https://projectcalc-tools.pages.dev/calculators/flooring"
+  },
+  {
+    "id": "pin-28-tile-6x8",
+    "kicker": "TILE",
+    "q": "Tile for a 6 by 8 floor?",
+    "a": "6 boxes",
+    "lines": [
+      "Straight layout; 10 percent waste",
+      "48 sq ft plus waste = 52.8 sq ft",
+      "10 sq ft coverage per box"
+    ],
+    "link": "https://projectcalc-tools.pages.dev/calculators/tile"
+  }
+]

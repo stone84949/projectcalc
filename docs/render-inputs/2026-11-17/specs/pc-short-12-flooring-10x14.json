@@ -1,0 +1,64 @@
+{
+  "url": "https://projectcalc-tools.pages.dev/calculators/flooring",
+  "endcard": {
+    "kicker": "Free flooring calculator",
+    "headline": "Your measurements, <span>your answer</span>",
+    "footer": "Check the coverage on your materials"
+  },
+  "beats": [
+    {
+      "id": "b1",
+      "say": "Flooring for a 10 by 14 room?",
+      "shots": [
+        {
+          "caption": "Flooring for a 10 by 14 room?",
+          "pos": "bottom"
+        }
+      ]
+    },
+    {
+      "id": "b2",
+      "say": "Ten by fourteen feet, twenty square feet per box. Straight lay includes ten percent waste and needs eight boxes.",
+      "shots": [
+        {
+          "set": {
+            "lengthFt": "10",
+            "widthFt": "14",
+            "pattern": "straight",
+            "boxCoverageSqFt": "20"
+          },
+          "scroll": ".results",
+          "offset": 300,
+          "hl": ".results",
+          "expect": "Boxes to buy: 8 boxes",
+          "caption": "Boxes to buy: 8 boxes"
+        }
+      ]
+    },
+    {
+      "id": "b3",
+      "say": "Diagonal lay includes fifteen percent waste and needs nine boxes.",
+      "shots": [
+        {
+          "set": {
+            "pattern": "diagonal"
+          },
+          "scroll": ".results",
+          "offset": 300,
+          "hl": ".results",
+          "expect": "Boxes to buy: 9 boxes",
+          "caption": "Boxes to buy: 9 boxes"
+        }
+      ]
+    },
+    {
+      "id": "b4",
+      "say": "Check your own measurements with the free Project Calc calculator. Link in the description.",
+      "shots": [
+        {
+          "endcard": true
+        }
+      ]
+    }
+  ]
+}

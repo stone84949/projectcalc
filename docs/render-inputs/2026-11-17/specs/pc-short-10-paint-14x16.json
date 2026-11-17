@@ -1,0 +1,68 @@
+{
+  "url": "https://projectcalc-tools.pages.dev/calculators/paint",
+  "endcard": {
+    "kicker": "Free paint calculator",
+    "headline": "Your measurements, <span>your answer</span>",
+    "footer": "Check the coverage on your materials"
+  },
+  "beats": [
+    {
+      "id": "b1",
+      "say": "Paint for a 14 by 16 room?",
+      "shots": [
+        {
+          "caption": "Paint for a 14 by 16 room?",
+          "pos": "bottom"
+        }
+      ]
+    },
+    {
+      "id": "b2",
+      "say": "Fourteen by sixteen, eight foot walls, one door and two windows. Walls only, at three hundred seventy five square feet per gallon. Two coats need three gallons.",
+      "shots": [
+        {
+          "set": {
+            "lengthFt": "14",
+            "widthFt": "16",
+            "heightFt": "8",
+            "doors": "1",
+            "windows": "2",
+            "coats": "2",
+            "coverageSqFtPerGal": "375",
+            "includeCeiling": false
+          },
+          "scroll": ".results",
+          "offset": 300,
+          "hl": ".results",
+          "expect": "Paint to buy: 3 gallons",
+          "caption": "Paint to buy: 3 gallons"
+        }
+      ]
+    },
+    {
+      "id": "b3",
+      "say": "One coat needs two gallons.",
+      "shots": [
+        {
+          "set": {
+            "coats": "1"
+          },
+          "scroll": ".results",
+          "offset": 300,
+          "hl": ".results",
+          "expect": "Paint to buy: 2 gallons",
+          "caption": "Paint to buy: 2 gallons"
+        }
+      ]
+    },
+    {
+      "id": "b4",
+      "say": "Check your own measurements with the free Project Calc calculator. Link in the description.",
+      "shots": [
+        {
+          "endcard": true
+        }
+      ]
+    }
+  ]
+}
